@@ -52,6 +52,7 @@ c initialize soil temperature
         tsoil(i,j,k) = -999.99
       enddo
 c
+c jp- spinup ________________________________________
 c only for land grid points
       if (int(lsmk(i,j)).ne.0) then
       t0 = 0.     !initialization

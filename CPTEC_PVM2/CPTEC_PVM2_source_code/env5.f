@@ -83,7 +83,7 @@ c
          do j=1,ny
 c photosynthetically active radiation reaching canopy
 c (ipar ; Ein/m2/s) [Eq. 7] observed data from ISLSCP2
-      par(i,j,k) = ipar(i,j,k)/(2.18e5) !converting to Ein/m2/s
+      par(i,j,k) = ipar(i,j,k)/(2.18e5) !converting to Ein/m2/s  jp -> (micromoles m-2 s-1)
 c
       temp(i,j,k) = t(i,j,k) !+ant(i,j,k) !uncomment to use future anomalies
       prec(i,j,k) = pr(i,j,k)!+anpr(i,j,k) !+pr(i,j,k)*0.2 !uncomment to use future anomalies
@@ -94,7 +94,7 @@ c 1 Pa CO2 = 9.901 ppmv CO2 (Adams et al. 2004)
 !      ca= 18.18 !Pa (=180 ppmv; Last Glacial Maximum)
 !      ca= 28.28 !Pa (=280 ppmv; Pre-Industrial Rev.)
 !      ca= 35.35 !Pa (=350 ppmv; 1961-1990)
-      ca= 350/9.901 !Pa (=350 ppmv; 1961-1990)
+      ca= 400/9.901 !Pa (=350 ppmv; 1961-1990)
 !      ca= 54.03 !Pa (=535 ppmv; SRES-B1 2080's)
 !      ca= 73.73 !Pa (=730 ppmv; SRES-A2 2080's)
 !      ca= ((73.73-35.35)*0.5)+35.35 !Pa half effect!!!
