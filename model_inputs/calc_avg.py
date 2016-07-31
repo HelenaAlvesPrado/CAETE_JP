@@ -10,12 +10,16 @@ import os
 import numpy as np
 import time
 import ada_love as al
+from ada_love import mont as mont ### testar
+#import al.mont as mont <--- isso nao funciona
+# 
 
 # GLOBALS
-month_index = al.month_index(30) # indices para 30 anos
 
 mont = ['jan','feb','mar','apr','may','jun', 
         'jul','aug','sep','okt','nov','dec']
+
+month_index = al.month_index(30) # indices para 30 anos
         
 NO_DATA = 9999.0
 
@@ -168,7 +172,7 @@ def extr_data(files_list, var_name, var_arr1):
 def do():
     _ = time.time()
     
-    files, names = al.list_files(os.getcwd() + '\\jp')
+    files, names = al.list_files(os.getcwd() + '\\jp') # diretório .nc4 fls
     
     print('Criando np_arrays')
     press = al.var_array(360, 360, 720)
@@ -213,6 +217,7 @@ def do():
 def prec_conversion():
     
     """conversion factor: 1e4 * 1e-6 * 2.592e8 """
+    # from kg/m^2/s to mm
     index = 0
     for arr in means_data['pr']:
         means_data['pr'][index] = arr * 2592000

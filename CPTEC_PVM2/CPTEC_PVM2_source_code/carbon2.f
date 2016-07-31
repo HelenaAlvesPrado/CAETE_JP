@@ -44,10 +44,32 @@ c Photosynthesis =======================================================
 c
 c Rubisco maximum carboxylaton rate
 c (vm ; molCO2/m^2s) [Eq. 12]
+
 c
       vm = (0.00004*2.0**(0.1*(temp-25.0)))/
      &           (1.0+exp(0.3*(temp-36.0)))
 c
+
+
+c new CO2 uptake leaf level model
+
+c 3456
+      ! old:
+      
+      !Jc
+      
+      ! Jc[vm(T,Ca)] <- Vm(T) * (ci(T,Ca) - mgama(T))/
+      !                     (ci(T,Ca) +  f2(T) * (1 +(k3/f3(T)))
+      
+      ! N Limitation goes here
+      ! new variables  Vm(Vmax)
+      
+      ! Vm(T) = is * vs * Na 
+      ! 
+      ! vm = 
+      
+
+
 c Photo-respiration compensation point
 c (mgama ; Pa) [Eq. 8]
 c
@@ -169,13 +191,13 @@ c
 c Scaling-up to canopy level (dimensionless)
 c [f4 ; Eq. 18]
 c
-      f4 = (1.0-(exp(-0.5*laia)))/0.5	!sun 90° in the whole canopy, to be used for respiration
+      f4 = (1.0-(exp(-0.5*laia)))/0.5	!sun 90ï¿½ in the whole canopy, to be used for respiration
 c
 c Sun/Shade approach to canopy scaling (based in de Pury & Farquhar 1997) 
 c [f4sun, f4shade ; Eqs. 19, 20]
 c
-      f4sun = (1.0-(exp(-0.5*sunlai)))/0.5	!sun 90°
-      f4shade = (1.0-(exp(-1.5*shadelai)))/1.5	!sun ~20°
+      f4sun = (1.0-(exp(-0.5*sunlai)))/0.5	!sun 90ï¿½
+      f4shade = (1.0-(exp(-1.5*shadelai)))/1.5	!sun ~20ï¿½
 c
 c Canopy gross photosynthesis (kgC/m^2/yr)
 c [ph ; Eq. 1]

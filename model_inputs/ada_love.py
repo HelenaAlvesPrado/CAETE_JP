@@ -9,6 +9,8 @@ import numpy as np
 import os
 from numpy import float32  as f32
 
+mont = ['jan','feb','mar','apr','may','jun', 
+        'jul','aug','sep','okt','nov','dec']
 
 class var_array(np.ndarray):
     
@@ -37,9 +39,7 @@ def list_files(cwd = os.getcwd()):
 def month_index(years):
 
     ind = list(range(int(years * 12)))
-    mont = ['jan','feb','mar','apr','may','jun',
-            'jul','aug','sep','okt','nov','dec']
-
+    
     mont1 = mont * years
 
     x =  list(zip(mont1, ind))
