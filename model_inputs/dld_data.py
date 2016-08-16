@@ -6,7 +6,7 @@ print('------------------')
 
 comm_pre = 'rsync -auvL --password-file=psw.txt --progress --bwlimit=1000 isimip_pik@rsync.pik-'\
             + 'potsdam.de::isimip/rsync_external/input_data/hist_obs/WATCH+WFDEI/monthly/'
-comm_suf = ' ./dlds_2' # rsynk cria o dir para vc =)
+comm_suf = ' ./dlds' # rsynk cria o dir para vc =)
 
 data_files = ['*watch+wfdei_monthly_1981_1990.nc4', 
            '*watch+wfdei_monthly_1991_2000.nc4',

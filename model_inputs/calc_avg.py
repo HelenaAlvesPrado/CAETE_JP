@@ -172,7 +172,7 @@ def extr_data(files_list, var_name, var_arr1):
 def do():
     _ = time.time()
     
-    files, names = al.list_files(os.getcwd() + '\\jp') # diretório .nc4 fls
+    files, names = al.list_files(os.getcwd() + '/jp') # diretório .nc4 fls
     
     print('Criando np_arrays')
     press = al.var_array(360, 360, 720)
@@ -240,13 +240,13 @@ def caetê_inputs(data):
     variables = list(data.keys())
     for var_name in variables:
         counter = 1
-        output_file_path = os.getcwd() + '\\' + var_name + '.txt'
+        output_file_path = os.getcwd() + '/' + var_name + '.txt'
         print(output_file_path)
         
         with open(output_file_path, mode='a') as final_file:        
             try:        
                 for arr in data[var_name]:
-                    output_file_path_mes = os.getcwd() + '\\' + var_name +\
+                    output_file_path_mes = os.getcwd() + '/' + var_name +\
                                            str(counter) + '.asc'
                     save_ascii_grid(arr, output_file_path_mes)
                     txt_file = 'np_array_calc_avg_py.txt'
