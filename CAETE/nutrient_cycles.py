@@ -3,7 +3,7 @@
 class WBM(object):
     pass
 class Ccycle(object):
-    import carb
+    import carb1
     pass
 class Ncycle(object):
     self.Ntotal = 0
