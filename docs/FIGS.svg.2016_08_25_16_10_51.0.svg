@@ -7,7 +7,10 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
+<<<<<<< HEAD
    xmlns:xlink="http://www.w3.org/1999/xlink"
+=======
+>>>>>>> 7d12e85dcf12773b9b980336b4e668924786e599
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="1052.3622"
@@ -15,6 +18,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.5 r10040"
+<<<<<<< HEAD
    sodipodi:docname="FIGS.svg.2016_08_25_16_10_51.0.png"
    inkscape:export-filename="/home/jp/caete_jp/dev/CAETE_JP/docs/FIGS.svg.2016_08_25_16_10_51.0.png"
    inkscape:export-xdpi="310"
@@ -197,11 +201,17 @@
          transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
     </marker>
   </defs>
+=======
+   sodipodi:docname="FIGS.svg">
+  <defs
+     id="defs4" />
+>>>>>>> 7d12e85dcf12773b9b980336b4e668924786e599
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1.0"
+<<<<<<< HEAD
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.75904978"
@@ -210,10 +220,21 @@
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
+=======
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35"
+     inkscape:cx="355.71429"
+     inkscape:cy="514.28571"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+>>>>>>> 7d12e85dcf12773b9b980336b4e668924786e599
      inkscape:window-width="1440"
      inkscape:window-height="834"
      inkscape:window-x="0"
      inkscape:window-y="27"
+<<<<<<< HEAD
      inkscape:window-maximized="1"
      showguides="false"
      inkscape:snap-global="false"
@@ -227,6 +248,9 @@
        enabled="true"
        snapvisiblegridlinesonly="true" />
   </sodipodi:namedview>
+=======
+     inkscape:window-maximized="1" />
+>>>>>>> 7d12e85dcf12773b9b980336b4e668924786e599
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -235,7 +259,11 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+<<<<<<< HEAD
         <dc:title></dc:title>
+=======
+        <dc:title />
+>>>>>>> 7d12e85dcf12773b9b980336b4e668924786e599
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -245,6 +273,7 @@
      id="layer1"
      transform="translate(0,-308.2677)">
     <rect
+<<<<<<< HEAD
        style="fill:#008000;fill-rule:evenodd;stroke:url(#radialGradient3893);stroke-width:0.3516371;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="rect2989-7"
        width="182.63451"
@@ -639,5 +668,13 @@
          x="754.49463"
          y="616.24249"
          style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Sans;-inkscape-font-specification:Sans">Biomassa microbiana</tspan></text>
+=======
+       style="fill:#0000ff;fill-rule:evenodd;stroke:#000000;stroke-width:0.43449068px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect2989"
+       width="285.71429"
+       height="60.41029"
+       x="17.142859"
+       y="338.07648" />
+>>>>>>> 7d12e85dcf12773b9b980336b4e668924786e599
   </g>
 </svg>
