@@ -27,15 +27,6 @@ def save_txt(filename, input_data):
     return None
 
 
-def no_d(arr, nd=NO_DATA):
-    aux_arr = arr
-    return np.place(aux_arr, mask_array, nd)
-
-
-def apply_mask(arr, mask_=mask_array):
-    return np.ma.masked_array(arr, mask=mask_, fill_value=NO_DATA)
-
-
 def prec_conversion(array):
     """conversion factor: 1e4 * 1e-6 * 2.592e8 """
     # from kg/m^2/s to mm
@@ -44,11 +35,13 @@ def prec_conversion(array):
         array[index] = arr * 2592000
         index += 1
 
+
 def temp_conversion(array):
     index = 0
     for arr in array:
         array[index] = arr - 273.15
         index += 1
+
 
 def check_arr(arr, name):
     if len(arr.shape) == 3:
@@ -274,49 +267,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-#
-#
-# def caetê_inputs(data):
-#
-#     """
-#     main function: saves asc files per month;
-#     saves txt files for .bin conversion
-#     """
-#     variables = list(data.keys())
-#     out_dir = 'inputs2'
-#     os.system('mkdir %s'%out_dir)
-#     for var_name in variables:
-#         counter = 1
-#         output_file_path = os.getcwd()+ '/' + out_dir + '/' + var_name + '.txt'
-#         print(output_file_path)
-#
-#         with open(output_file_path, mode='a') as final_file:
-#             try:
-#                 for arr in data[var_name]:
-#                     output_file_path_mes = os.getcwd()  + '/' +  out_dir\
-#                       + '/' +  var_name + str(counter) + '.asc'
-#                     save_ascii_grid(arr, output_file_path_mes)
-#                     txt_file = 'np_array_calc_avg_py.txt'
-#                     save_txt(txt_file, arr)# catch np.array data in txt format
-#
-#                     with open(txt_file, newline='\r\n') as fh:
-#                         reader = fh.readlines()
-#                     # erase aux_file
-#                     os.remove(txt_file)
-#                     for line in reader:
-#                         final_file.write(line)
-#                     counter += 1
-#             except:
-#                 print('ERROR')
-
-
-# GLOBAL ------------------------
-#tidy_data, means_data = do()
-#--------------------------------
-
-
-# if check_data(tidy_data):
-# #    prec_conversion()
-#     temp_conversion()
-#     print('Salvando Resultados')
-#     caetê_inputs(means_data)
