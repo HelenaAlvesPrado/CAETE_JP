@@ -61,9 +61,8 @@ def calc_avg(arr_var, month):
     mean_arr = np.zeros(shape = (360,720), dtype=al.f32)
     arr_month =  arr_var[month_index[month]]
     for arr in arr_month:
-        mean_arr += arr/len(month_index[month])       # substituir 30 por arr_month.shape[0]
-    #save_ascii_grid(mean_arr, os.getcwd + '\\teste1.asc')
-    #mean_arr = apply_mask(mean_arr)
+        mean_arr += arr/len(month_index[month])
+
     return mean_arr
 
 
