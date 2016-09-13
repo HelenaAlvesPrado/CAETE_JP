@@ -11,6 +11,53 @@ from numpy import float32  as f32
 
 mont = ['jan','feb','mar','apr','may','jun', 
         'jul','aug','sep','okt','nov','dec']
+        
+def save_ascii_grid(arr, outfilepath):
+    """ save an array as an ascii-grid file --- AAI-GRID"""
+
+    if type(arr) == type(np.zeros(shape=(10,10),
+                                dtype=np.float32)) \
+                                and len(arr.shape) == 2:
+
+        if arr.shape[0] < arr.shape[1]:
+            nrows, ncols = arr.shape
+        else:
+            ncols, nrows = arr.shape
+
+        cellsize = 360/ncols
+        NO_DATAaux = arr[0][0]
+
+        header = ['ncols %d\r\n'%ncols, 'nrows %d\r\n'%nrows,
+                  'xllcorner -180\r\n', 'yllcorner -90\r\n',
+                  'cellsize %f\r\n'%cellsize, 'NODATA_value %f\r\n'%NO_DATAaux]
+
+    else: print('arr não é array')
+
+    # save arr as txt.delimited file
+    try:
+        #save
+        txt_file = 'np_array_calc_avg_py.txt'
+        np.savetxt(txt_file, arr, fmt='%.10f', newline='\n')
+        # catch np.array data in txt format
+        with open(txt_file, newline='\r\n') as fh:
+            reader = fh.readlines()
+        # erase aux_file
+        os.remove(txt_file)
+
+    except:
+        print('f1')
+
+#    # write asc file:
+    try:
+        with open(outfilepath, mode='w') as fh34:
+            fh34.writelines(header)
+
+        with open(outfilepath, mode='a') as fh35:
+            for line in reader:
+                fh35.write(line)
+    except:
+        print('f2')
+
 
 class var_array(np.ndarray):
     

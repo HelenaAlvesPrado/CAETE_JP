@@ -13,15 +13,18 @@ import ada_love as al
 from ada_love import mont as mont
 # GLOBALS
 
+dir_sep = os.path.sep
+
 month_index = al.month_index(30) # indices para 30 anos
 
 NO_DATA = -9999
 
 mask_array = np.load('mask.npy') # True for no_data
 #mask_array = mask_array == False
+
+
 #-----------------------------------
 
- ###UTIL FUNCTIONS
 def save_txt(filename, input_data):
     np.savetxt(filename, input_data, fmt='%.10f')
     return None
@@ -78,80 +81,10 @@ def vars_avg(var):
         arr_m_list.append(mn)
     return arr_m_list   ## OLHA AQUI - MESES ORDENADOS
 
-def write_flt_header(file_conn, input_data, xllcorner=-180, yllcorner=-90,
-                 byteOrder='LSBFIRST'):
-     """ Cria um cabeçalho.hdr nos padrões dos arquivos.flt """
-     noDataValue = input_data[0][0]
-     if input_data.shape[0] > input_data.shape[1]:
-         xdim, ydim = input_data.shape
-     else:
-         ydim, xdim = input_data.shape
-     cellsize = 360/xdim
-     write = ['NCOLS %d\r\n'%xdim,
-              'NROWS %d\r\n'%ydim,
-              'XLLCORNER %d\r\n'%xllcorner,
-              'YLLCORNER %d\r\n'%yllcorner,
-              'CELLSIZE %f\r\n'%cellsize,
-              'NODATA_VALUE %f\r\n'%noDataValue,
-              'BYTEORDER %s\r\n'%byteOrder
-              ]
-     with open(file_conn, 'w') as fh:
-         for line in write:
-             fh.write(line)
-
-
-def save_ascii_grid(arr, outfilepath):
-    """ save an array as an ascii-grid file --- AAI-GRID"""
-
-    if type(arr) == type(np.zeros(shape=(10,10),
-                                dtype=np.float32)) \
-                                and len(arr.shape) == 2:
-
-        if arr.shape[0] < arr.shape[1]:
-            nrows, ncols = arr.shape
-        else:
-            ncols, nrows = arr.shape
-
-        cellsize = 360/ncols
-        NO_DATAaux = arr[0][0]
-
-        header = ['ncols %d\r\n'%ncols, 'nrows %d\r\n'%nrows,
-                  'xllcorner -180\r\n', 'yllcorner -90\r\n',
-                  'cellsize %f\r\n'%cellsize, 'NODATA_value %f\r\n'%NO_DATAaux]
-
-    else: print('arr não é array')
-
-    # save arr as txt.delimited file
-    try:
-        #save
-        txt_file = 'np_array_calc_avg_py.txt'
-        np.savetxt(txt_file, arr, fmt='%.10f', newline='\n')
-        # catch np.array data in txt format
-        with open(txt_file, newline='\r\n') as fh:
-            reader = fh.readlines()
-        # erase aux_file
-        os.remove(txt_file)
-
-    except:
-        print('f1')
-
-#    # write asc file:
-    try:
-        with open(outfilepath, mode='w') as fh34:
-            fh34.writelines(header)
-
-        with open(outfilepath, mode='a') as fh35:
-            for line in reader:
-                fh35.write(line)
-    except:
-        print('f2')
-
 
 def extr_data(files_list, var_name, var_arr1):
-    """
 
-    """
-
+    """    """
     INDEX_COUNTER = 0
     #iterating over files
     for file_ in files_list:
@@ -187,8 +120,9 @@ def extr_data(files_list, var_name, var_arr1):
 
 def main():
     _ = time.time()
+    dlds_files = os.getcwd() + dir_sep + 'dlds'
 
-    files, names = al.list_files(os.getcwd() + '/dlds') # diretório .nc4 fls
+    files, names = al.list_files(dlds_files) # diretório .nc4 fls
     #print(names)
 
     shapeaux = (360, 360, 720)
@@ -208,8 +142,7 @@ def main():
     for el in vr_set:
         if el in ['rhs', 'huss', 'tasmax', 'tasmin', 'wind', 'rlds', 'hurs']:
             continue
-        fls= [el1 for el1 in fl_set if el == el1.split('/')[-1].split('_')[0]]
-
+        fls=[el1 for el1 in fl_set if el==el1.split(dir_sep)[-1].split('_')[0]]
         #criando aux_array
         aux_array = np.zeros(shape = shapeaux, dtype=al.f32)
         # extraindo dados dos arquivos nc4
@@ -235,7 +168,7 @@ def main():
     # a saga continua... salvar inputs pro caete
     out_dir = 'inputs_caete'
     out_path = os.getcwd() + os.path.sep + out_dir
-    if os.path.exists(os.getcwd() + os.path.sep + out_dir):
+    if os.path.exists(out_path):
         pass
     else:
         os.system('mkdir %s'%out_dir)
@@ -260,6 +193,12 @@ def main():
     os.chdir(out_path)
     for tf in txt_files:
         os.system('./ascii2bin.exe %s %s'%(tf, tf.split('.')[0]+'.bin'))
+        while True:
+            try:
+                os.remove(tf)
+                break
+            except:
+                pass
     os.system ("python3 bin2flt-asc_v3.py")
     #END PROGRAM
 
