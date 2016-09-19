@@ -1,0 +1,3 @@
+<?xml version="1.0"?>
+<!--<!DOCTYPE metadata SYSTEM "http://www.esri.com/metadata/esriprof80.dtd">-->
+<metadata xml:lang="pt"><Esri><MetaID>{575BC2D2-9CC0-4C2B-B572-BAA1C1F0CBC9}</MetaID><CreaDate>20160917</CreaDate><CreaTime>14060900</CreaTime><SyncOnce>TRUE</SyncOnce><DataProperties><lineage><Process ToolSource="C:\Program Files\ArcGIS\ArcToolbox\Toolboxes\Conversion Tools.tbx\FloatToRaster" Date="20160917" Time="140609">FloatToRaster C:\Users\dr\Desktop\CAETE_JP\CAETE\inputs\lmsk\lmsk_LAYER1.flt C:\Users\dr\Desktop\CAETE_JP\CAETE\inputs\lmsk\FloatTo_lmsk1</Process></lineage></DataProperties></Esri></metadata>

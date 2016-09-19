@@ -1,0 +1,3 @@
+<?xml version="1.0"?>
+<!--<!DOCTYPE metadata SYSTEM "http://www.esri.com/metadata/esriprof80.dtd">-->
+<metadata xml:lang="pt"><Esri><MetaID>{A73C93CF-57CB-4E09-8B5F-73D1C1451B24}</MetaID><CreaDate>20160917</CreaDate><CreaTime>17121800</CreaTime><SyncOnce>TRUE</SyncOnce><DataProperties><lineage><Process ToolSource="C:\Program Files\ArcGIS\ArcToolbox\Toolboxes\Conversion Tools.tbx\FloatToRaster" Date="20160917" Time="171218">FloatToRaster C:\Users\dr\Desktop\CAETE_JP\CAETE\outputs\bpot4on\bpot4on_LAYER4.flt C:\Users\dr\Desktop\CAETE_JP\CAETE\outputs\bpot4on\Rh</Process></lineage></DataProperties></Esri></metadata>
