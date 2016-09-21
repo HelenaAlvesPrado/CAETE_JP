@@ -8,7 +8,6 @@ Created on Thu Mar 17 16:09:36 2016
 import h5py
 import os
 import numpy as np
-import time
 import ada_love as al
 from ada_love import mont as mont
 # GLOBALS
@@ -87,6 +86,7 @@ def extr_data(files_list, var_name, var_arr1):
     """    """
     INDEX_COUNTER = 0
     #iterating over files
+    files_list.sort()
     for file_ in files_list:
         print(file_)
 
@@ -119,11 +119,12 @@ def extr_data(files_list, var_name, var_arr1):
 
 
 def main():
-    _ = time.time()
+    
     dlds_files = os.getcwd() + dir_sep + 'dlds'
 
     files, names = al.list_files(dlds_files) # diretório .nc4 fls
     #print(names)
+    files = sorted(files, reverse=True)
 
     shapeaux = (360, 360, 720)
     fl_list = []
@@ -166,7 +167,7 @@ def main():
 
     ### Arquivos npy salvos...
     # a saga continua... salvar inputs pro caete
-    out_dir = 'inputs_caete'
+    out_dir = 'inputs_caete2'
     out_path = os.getcwd() + os.path.sep + out_dir
     if os.path.exists(out_path):
         pass
@@ -190,16 +191,18 @@ def main():
                 for line in reader:
                     fh.write(line)
                 month += 1
+#==============================================================================
     os.chdir(out_path)
     for tf in txt_files:
-        os.system('./ascii2bin.exe %s %s'%(tf, tf.split('.')[0]+'.bin'))
-        while True:
-            try:
-                os.remove(tf)
-                break
-            except:
-                pass
+         os.system('./ascii2bin %s %s'%(tf, tf.split('.')[0]+'.bin'))
+         while True:
+             try:
+                 os.remove(tf)
+                 break
+             except:
+                 pass
     os.system ("python3 bin2flt-asc_v3.py")
+#==============================================================================
     #END PROGRAM
 
 if __name__ == '__main__':
