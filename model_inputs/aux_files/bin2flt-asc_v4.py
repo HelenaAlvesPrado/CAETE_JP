@@ -1,31 +1,64 @@
-
 import numpy as np
 import os
 
-nx = 720   # numero de colunas em cada imagem
-ny = 360      #  /////////linhas em cada imagem
+#GLOBAL
+nx = 720   # ncol
+ny = 360   # nrow
 
-pixel_depht = 32  # bits
+pixel_depht = 32  # float 32 bits
 
 NO_DATA = -9999.0
 
 
 def catch_nt(input_file, nx, ny, pixel_depht):
+
+
+    """Get the number of layers in input_file
+
+    input_file = flat binary filename (.bin extension mandatory)
+
+    nx = (int) number of columns
+
+    ny = (int) number of rows
+
+    pixel_depth = (int) stride length in bits
+
+    returns nt = number of layers stored in input_file"""
+
     image_size = (nx * ny * (pixel_depht / 8)) / 1024 # in bytes
-    file_size = os.path.getsize(input_file)
-    num_lay = file_size / 1024 / image_size
-    nt = int(num_lay)
-    return nt
+
+    num_lay = (os.path.getsize(input_file)) / 1024 / image_size
+
+    return int(num_lay)
 
 
 def catch_data(input_file, layers, nx, ny):
+
+
+    """Loads the input_file as a np.array once you know
+    the number of layers in input_file
+
+    input_file = flat binary filename (.bin extension mandatory)
+
+    nx = (int) number of columns
+
+    ny = (int) number of rows
+
+    layers = (int) number of layers in input_file * ease with catch_nt()
+
+    returns np.array shape(layers,nx,ny)"""
+    
     Bcount = nx * ny * layers
+
     return np.fromfile(input_file, count=Bcount,
                        dtype=np.float32).reshape((layers,nx,ny))
 
 
 def save_ascii_grid(arr, outfilepath):
-    """ save an array as an ascii-grid file --- AAI-GRID"""
+
+    
+    """ save an array(input = arr) as an ascii-grid file --- AAI-GRID"""
+
 
     if type(arr) == type(np.zeros(shape=(10,10),
                                 dtype=np.float32)) \
@@ -37,7 +70,6 @@ def save_ascii_grid(arr, outfilepath):
             ncols, nrows = arr.shape
 
         cellsize = 360/ncols
-        #NO_DATA = arr[0][0]
 
         header = ['ncols %d%s'%(ncols, os.linesep),
                   'nrows %d%s'%(nrows, os.linesep),
@@ -46,7 +78,7 @@ def save_ascii_grid(arr, outfilepath):
                   'cellsize %f%s'%(cellsize,os.linesep),
                   'NODATA_value %f%s'%(NO_DATA,os.linesep)]
 
-    else: print('arr não é array')
+    else: print('WARNING - invalid input_array')
 
     # save arr as txt.delimited file
     try:
