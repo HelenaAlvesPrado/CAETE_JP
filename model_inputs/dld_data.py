@@ -1,6 +1,7 @@
 import os
 
-
+os.system('chmod -o=+rwxXst psw.txt')
+os.system('chmod -u=+rwxXst psw.txt')
 print('iniciando download')
 print('------------------')
 

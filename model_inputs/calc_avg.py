@@ -179,15 +179,15 @@ def main():
 
     ### Arquivos npy salvos...
     # a saga continua... salvar inputs pro caete
-    out_dir = 'inputs_caete3'
+    out_dir = 'inputs_caete4'
     out_path = os.getcwd() + os.path.sep + out_dir
     if os.path.exists(out_path):
         pass
     else:
         os.system('mkdir %s'%out_dir)
-        os.system('cp ./fortran/ascii2bin.f90 ./%s'%out_dir)
-        os.system('cp ./fortran/flip_image.f90 ./%s'%out_dir)
-        os.system('cp ./bin2flt-asc_v4.py ./%s'%out_dir)
+        os.system('cp ./aux_files/ascii2bin.f90 ./%s'%out_dir)
+        os.system('cp ./aux_files/flip_image.f90 ./%s'%out_dir)
+        os.system('cp ./aux_files/bin2flt-asc_v4.py ./%s'%out_dir)
     txt_files = []
     for npy in npy_files:
         txt_files.append(npy.split('.')[0] + '.txt')
@@ -212,9 +212,9 @@ def main():
     # flip_image
     curdir= os.getcwd()
     os.chdir(out_path)
+    print('compilando ascii2bin.f90')
+    os.system('gfortran ascii2bin.f90 -o ascii2bin')
     for tf in txt_files:
-         print('compilando ferramentas')
-         os.system('gfortran ascii2bin.f90 -o ascii2bin')
          print('convertendo ascii - bin: ARQUIVO ---> %s '%tf)
          os.system('./ascii2bin %s %s'%(tf, tf.split('.')[0]+'.bin'))
          while True:
@@ -229,9 +229,18 @@ def main():
             break
         except:
             pass
+
+    os.system('rm ascii2bin.f90')    
+
     print('criando arquivos flt')
+
     os.system ("python3 bin2flt-asc_v4.py")
+    
+    os.system('rm bin2flt-asc_v4.py')
+    os.system('rm flip_image.f90')
+
     os.chdir(curdir)
+
     print('FINALIZADO')
     
 #==============================================================================
