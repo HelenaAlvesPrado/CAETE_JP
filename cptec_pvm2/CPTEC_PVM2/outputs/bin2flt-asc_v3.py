@@ -7,7 +7,7 @@ ny = 96      #  /////////linhas em cada imagem
 
 pixel_depht = 32  # bits
 
-NO_DATA = -999.99
+NO_DATA = -9999.0
 
 
 def catch_nt(input_file, nx, ny, pixel_depht):
@@ -117,7 +117,7 @@ def write_flt(data_array, layers, filename):
         fh.writelines(to_compile)
 
     # compiling flip_image
-    os.system('gfortran flip_image.f90 -o flip_image.exe')
+    os.system('gfortran flip_image.f90 -o flip_image')
 
     # para cada uma das camadas do arquivo binario
     for image in range(layers):
@@ -133,7 +133,7 @@ def write_flt(data_array, layers, filename):
         if filename == 'COW2006.BIN':
             write_header(outfile_hd,data_array[image])
         else:
-            os.system('./flip_image.exe %s'%outfile_name)
+            #os.system('./flip_image %s'%outfile_name)
             write_header(outfile_hd,data_array[image])
 
         # salve em formato ascii grid : bom pra arquivar os seus dados!
@@ -143,7 +143,7 @@ def write_flt(data_array, layers, filename):
     # finaliza
     while True:
         try:
-            os.remove('flip_image.exe')
+            os.remove('flip_image')
             break
         except:
             pass

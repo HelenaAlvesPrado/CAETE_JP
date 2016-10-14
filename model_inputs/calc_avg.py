@@ -10,16 +10,16 @@ import os
 import numpy as np
 import ada_love as al
 from ada_love import mont as mont
-# GLOBALS
 
+# GLOBALS
 dir_sep = os.path.sep
 
 month_index = al.month_index(30) # indices para 30 anos
 
-NO_DATA = -9999
+NO_DATA = np.float32(-9999)
 
 mask_array = np.load('mask.npy') # True for no_data
-#mask_array = mask_array == False
+#mask_array = not mask_array
 
 
 #-----------------------------------
@@ -31,7 +31,7 @@ def save_txt(filename, input_data):
 
 def prec_conversion(array):
     """conversion factor: 1e4 * 1e-6 * 2.592e8 """
-    # from kg/m^2/s to mm
+    # from kg/m²/s to mm*month⁻¹
     index = 0
     for arr in array:
         array[index] = arr * 2592000
@@ -79,6 +79,18 @@ def vars_avg(var):
         mn = calc_avg(var, m)
         arr_m_list.append(mn)
     return arr_m_list   ## OLHA AQUI - MESES ORDENADOS
+
+def catch_metadata(cdf_str_path):
+
+    fh  = h5py.File(cdf_str_path, 'r')
+    fileHandler_active = True
+
+    for name in fh:
+        print(name, '->>>', fh[name])
+    try:
+        fh.close()
+    except:
+        print('nf')
 
 
 def extr_data(files_list, var_name, var_arr1):
@@ -167,12 +179,15 @@ def main():
 
     ### Arquivos npy salvos...
     # a saga continua... salvar inputs pro caete
-    out_dir = 'inputs_caete2'
+    out_dir = 'inputs_caete3'
     out_path = os.getcwd() + os.path.sep + out_dir
     if os.path.exists(out_path):
         pass
     else:
         os.system('mkdir %s'%out_dir)
+        os.system('cp ./fortran/ascii2bin.f90 ./%s'%out_dir)
+        os.system('cp ./fortran/flip_image.f90 ./%s'%out_dir)
+        os.system('cp ./bin2flt-asc_v4.py ./%s'%out_dir)
     txt_files = []
     for npy in npy_files:
         txt_files.append(npy.split('.')[0] + '.txt')
@@ -181,7 +196,7 @@ def main():
         bin_filename = out_path + os.path.sep + npy.split('.')[0] + '.txt'
         with open(bin_filename, mode='a') as fh:
             for arr in month_arr:
-                np.place(arr, mask_array, -9999)
+                np.place(arr, mask_array, NO_DATA)
                 #salvando arquivo binario p modelo
                 txt_file = 'np_array_calc_avg_py.txt'
                 np.savetxt(txt_file, arr, fmt='%.10f')
@@ -192,8 +207,15 @@ def main():
                     fh.write(line)
                 month += 1
 #==============================================================================
+    # ascii2bin
+    # bin2flt
+    # flip_image
+    curdir= os.getcwd()
     os.chdir(out_path)
     for tf in txt_files:
+         print('compilando ferramentas')
+         os.system('gfortran ascii2bin.f90 -o ascii2bin')
+         print('convertendo ascii - bin: ARQUIVO ---> %s '%tf)
          os.system('./ascii2bin %s %s'%(tf, tf.split('.')[0]+'.bin'))
          while True:
              try:
@@ -201,7 +223,17 @@ def main():
                  break
              except:
                  pass
-    os.system ("python3 bin2flt-asc_v3.py")
+    while True:
+        try:
+            os.remove('ascii2bin')
+            break
+        except:
+            pass
+    print('criando arquivos flt')
+    os.system ("python3 bin2flt-asc_v4.py")
+    os.chdir(curdir)
+    print('FINALIZADO')
+    
 #==============================================================================
     #END PROGRAM
 
