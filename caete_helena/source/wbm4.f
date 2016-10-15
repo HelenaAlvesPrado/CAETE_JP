@@ -23,8 +23,9 @@ c23456789
 ! Input/Output Variables
 ! ----------------------
 !
-      parameter(nx=192,ny=96)
+      integer, parameter :: nx=192, ny=96
       integer counter
+      real, parameter :: NO_DATA = -9999.0
       real prec(nx,ny,12),temp(nx,ny,12),lsmk(nx,ny),p0(nx,ny)
       real tmin(nx,ny),seanpp(nx,ny),meanpp(nx,ny),meanhr(nx,ny),
      &     meancs(nx,ny),mphoto(nx,ny),maresp(nx,ny),ave_wsoil(nx,ny),
@@ -76,7 +77,7 @@ c23456789
 ! ---------------------------
 !
       do k=1,12
-         tsoil(i,j,k) = -999.99                                                                   !Undefined
+         tsoil(i,j,k) = NO_DATA                                                                   !Undefined
       enddo
 !
 ! Only for land grid points
@@ -115,48 +116,48 @@ c23456789
 ! Initialize variables
 ! --------------------
 !
-      tmin(i,j)   = -999.99                                                          !Minimal temperature
-      seanpp(i,j) = -999.99                                                                                   !???????????
-      meanpp(i,j) = -999.99                                                          !NPP
-      meanpp1(i,j) = -999.99                                                          !NPP_PFT1
-      meanpp2(i,j) = -999.99                                                          !NPP_PFT2
-      meanpp3(i,j) = -999.99                                                          !NPP_PFT3
-      mphoto(i,j) = -999.99                                                          !Photosynthesis
-      maresp(i,j) = -999.99                                                          !Autotrophic Respiration
-      meanhr(i,j) = -999.99                                                          !Heterotrophic Respiration
-      meancs(i,j) = -999.99                                                          !Carbon Soil
-      ave_wsoil(i,j) = -999.99                                                          !Water Soil
-      ave_evap(i,j) = -999.99                                                          !Evapotranspiration
-      ave_cres(i,j) = -999.99                                                          !Canopy Resistance
-      ave_cres1(i,j) = -999.99                                                          !Canopy Resistance_PFT1
-      ave_cres2(i,j) = -999.99                                                          !Canopy Resistance_PFT2
-      ave_cres3(i,j) = -999.99                                                          !Canopy Resistance_PFT3
+      tmin(i,j)   =  NO_DATA   !Minimal temperature
+      seanpp(i,j) =  NO_DATA   
+      meanpp(i,j) =  NO_DATA   !NPP
+      meanpp1(i,j) = NO_DATA   !NPP_PFT1
+      meanpp2(i,j) = NO_DATA   !NPP_PFT2
+      meanpp3(i,j) = NO_DATA   !NPP_PFT3
+      mphoto(i,j) =  NO_DATA   !Photosynthesis
+      maresp(i,j) =  NO_DATA    !Autotrophic Respiration
+      meanhr(i,j) =  NO_DATA    !Heterotrophic Respiration
+      meancs(i,j) =  NO_DATA    !Carbon Soil
+      ave_wsoil(i,j) = NO_DATA !Water Soil
+      ave_evap(i,j) =  NO_DATA  !Evapotranspiration
+      ave_cres(i,j) =  NO_DATA  !Canopy Resistance
+      ave_cres1(i,j) = NO_DATA !Canopy Resistance_PFT1
+      ave_cres2(i,j) = NO_DATA !Canopy Resistance_PFT2
+      ave_cres3(i,j) = NO_DATA !Canopy Resistance_PFT3
 !
       do k=1,12
 !
-        wsoil(i,j,k)   =        -999.99                                                          !Soil Moisture(mm)
-        gsoil(i,j,k)   =        -999.99                                                          !Soil Ice(mm)
-        ssoil(i,j,k)   =        -999.99                                                          !Soil Snow(mm)
-        snowm(i,j,k)   =        -999.99                                                          !Snowmelt(mm/day)
-        runom(i,j,k)   =        -999.99                                                          !Runoff(mm/day)
-        evapm(i,j,k)   =        -999.99                                                          !Actual Evapotranspiration(mm/day)
-        emaxm(i,j,k)   =        -999.99                                                          !Maximum Evapotranspiration(mm/day)
-          wg0(i,j,k)   =        -999.99                                                          !Moisture of the previous year (mm)
-        wsoil2(i,j,k)  =        -999.99                                                          !For testing purpose
-         cres(i,j,k)   =        -999.99                                                          !Canopy Resistance (s/m)
-        cres1(i,j,k)   =        -999.99                                                          !Canopy Resistance_PFT1 (s/m)
-        cres2(i,j,k)   =        -999.99                                                          !Canopy Resistance_PFT2 (s/m)
-        cres3(i,j,k)   =        -999.99                                                          !Canopy Resistance_PFT3 (s/m)
-        lai(i,j,k)     =        -999.99                                                          !Leaf Area Index
-        photo(i,j,k)   =        -999.99                                                          !Photosynthesis
-        aresp(i,j,k)   =        -999.99                                                          !Autotrophic Respiration
-        npp(i,j,k)     =        -999.99                                                          !NPP
-        npp1(i,j,k)    =        -999.99                                                          !NPP_PFT1
-        npp2(i,j,k)    =        -999.99                                                          !NPP_PFT2
-        npp3(i,j,k)    =        -999.99                                                          !NPP_PFT3
-        clit(i,j,k)    =        -999.99                                                          !Carbon Litter
-        csoil(i,j,k)   =        -999.99                                                          !Carbon Soil
-        hresp(i,j,k)   =        -999.99                                                          !Heterotrophic Respiration
+        wsoil(i,j,k)   =       NO_DATA                                                          !Soil Moisture(mm)
+        gsoil(i,j,k)   =       NO_DATA                                                          !Soil Ice(mm)
+        ssoil(i,j,k)   =       NO_DATA                                                          !Soil Snow(mm)
+        snowm(i,j,k)   =       NO_DATA                                                          !Snowmelt(mm/day)
+        runom(i,j,k)   =       NO_DATA                                                          !Runoff(mm/day)
+        evapm(i,j,k)   =       NO_DATA                                                          !Actual Evapotranspiration(mm/day)
+        emaxm(i,j,k)   =       NO_DATA                                                          !Maximum Evapotranspiration(mm/day)
+          wg0(i,j,k)   =       NO_DATA                                                          !Moisture of the previous year (mm)
+        wsoil2(i,j,k)  =       NO_DATA                                                          !For testing purpose
+         cres(i,j,k)   =       NO_DATA                                                          !Canopy Resistance (s/m)
+        cres1(i,j,k)   =       NO_DATA                                                          !Canopy Resistance_PFT1 (s/m)
+        cres2(i,j,k)   =        NO_DATA                                                         !Canopy Resistance_PFT2 (s/m)
+        cres3(i,j,k)   =        NO_DATA                                                          !Canopy Resistance_PFT3 (s/m)
+        lai(i,j,k)     =         NO_DATA                                                          !Leaf Area Index
+        photo(i,j,k)   =         NO_DATA                                                       !Photosynthesis
+        aresp(i,j,k)   =         NO_DATA                                                         !Autotrophic Respiration
+        npp(i,j,k)     =         NO_DATA                                                         !NPP
+        npp1(i,j,k)    =         NO_DATA                                                         !NPP_PFT1
+        npp2(i,j,k)    =         NO_DATA                                                          !NPP_PFT2
+        npp3(i,j,k)    =         NO_DATA                                                          !NPP_PFT3
+        clit(i,j,k)    =         NO_DATA                                                !Carbon Litter
+        csoil(i,j,k)   =         NO_DATA                                                          !Carbon Soil
+        hresp(i,j,k)   =         NO_DATA                                                         !Heterotrophic Respiration
 !
       enddo
 !

@@ -42,7 +42,7 @@ def save_ascii_grid(arr, outfilepath):
         header = ['ncols %d%s'%(ncols, os.linesep),
                   'nrows %d%s'%(nrows, os.linesep),
                   'xllcorner -180%s'%os.linesep,
-                  'yllcorner -90%s',%os.linesep,
+                  'yllcorner -90%s'%os.linesep,
                   'cellsize %f%s'%(cellsize,os.linesep),
                   'NODATA_value %f%s'%(NO_DATA,os.linesep)]
 
@@ -52,7 +52,7 @@ def save_ascii_grid(arr, outfilepath):
     try:
         #save
         txt_file = 'np_array_calc_avg_py.txt'
-        np.savetxt(txt_file, arr, fmt='%.10f')
+        np.savetxt(txt_file, arr, fmt='%.12f')
         # catch np.array data in txt format
         with open(txt_file, newline=os.linesep) as fh:
             reader = fh.readlines()
@@ -74,8 +74,9 @@ def save_ascii_grid(arr, outfilepath):
         print('f2')
 
 
-def write_header(file_conn, input_data, xllcorner=-180, yllcorner=-90,
-                 byteOrder='LSBFIRST'):
+def write_header(file_conn, input_data, xllcorner=-180,
+                 yllcorner=-90,byteOrder='LSBFIRST'):
+
      """ Cria um cabeçalho.hdr nos padrões dos arquivos.flt """
      noDataValue = NO_DATA #!input_data[0][0]
      xdim, ydim = input_data.shape
@@ -127,18 +128,14 @@ def write_flt(data_array, layers, filename):
         print(outfile_name.split('.')[0] )
         # Salve a parte binaria (.flt)
         with open(outfile_name, 'wb') as fh:
-            data_array[image].tofile(fh, format = "%.10f")
+            data_array[image].tofile(fh, format = "%.12f")
 
-        # flip na imagem + header
-        if filename == 'COW2006.BIN':
-            write_header(outfile_hd,data_array[image])
-        else:
-            #os.system('./flip_image %s'%outfile_name)
-            write_header(outfile_hd,data_array[image])
+        os.system('./flip_image %s'%outfile_name)
+        write_header(outfile_hd,data_array[image])
 
         # salve em formato ascii grid : bom pra arquivar os seus dados!
-        dt1 = np.fromfile(outfile_name, count=nx*ny, dtype=np.float32).reshape((nx,ny))
-        save_ascii_grid(dt1,outfile_name.split('.')[0] + '.asc' )
+        #dt1 = np.fromfile(outfile_name, count=nx*ny, dtype=np.float32).reshape((nx,ny))
+        #save_ascii_grid(dt1,outfile_name.split('.')[0] + '.asc' )
 
     # finaliza
     while True:

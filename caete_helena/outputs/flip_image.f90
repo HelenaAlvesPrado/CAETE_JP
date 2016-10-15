@@ -6,8 +6,8 @@ implicit none
 character *100 BUFFER  !HOLDS ALL CMD ARGS AS A STRING
 character *100 file_in
 
-integer,parameter :: nx = 720
-integer,parameter :: ny = 360
+integer,parameter :: nx = 192
+integer,parameter :: ny = 96
 integer,parameter :: strd = int(4*nx*ny)
 real*4 :: input_data(nx,ny), out_data(nx,ny)
 

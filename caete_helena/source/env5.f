@@ -23,6 +23,7 @@ c23456789
       integer nx,ny,a,b,i,j,k
       integer cell_id(6003),var_id,ni
       parameter(nx=192,ny=96,a=360,b=180)
+      real, parameter :: NO_DATA = -9999.0
       real cellx,celly
       real lsmk(nx,ny),p0(nx,ny)
       real pr(nx,ny,12),t(nx,ny,12)
@@ -286,7 +287,7 @@ c23456789
 ! Write wsoil2
 ! ------------
 !
-      open(17,file='../outputs/soilm.flt',                                                     !open(17,file='../ipcc_env_vars2/'//& 'soilm_HADCM3_A2_onlyclimate.bin',
+      open(17,file='../outputs/soilm.bin',                                                     !open(17,file='../ipcc_env_vars2/'//& 'soilm_HADCM3_A2_onlyclimate.bin',
 !      open(17,file='../ipcc_env_vars2/'//
 !     & 'soilm_HADCM3_A2_onlyclimate.bin',
      &        status='unknown',form='unformatted',
@@ -304,7 +305,7 @@ c23456789
 ! Write evapotranspiration
 ! ------------------------
 !
-      open(18,file='../outputs/evaptr.flt',                                                    !open(18,file='../ipcc_env_vars2/'//& 'evaptr_HADCM3_A2_onlyclimate.bin',
+      open(18,file='../outputs/evaptr.bin',                                                    !open(18,file='../ipcc_env_vars2/'//& 'evaptr_HADCM3_A2_onlyclimate.bin',
 !      open(18,file='../ipcc_env_vars2/'//
 !     & 'evaptr_HADCM3_A2_onlyclimate.bin',
      &        status='unknown',form='unformatted',
@@ -322,7 +323,7 @@ c23456789
 ! Write monthly NPP
 ! -----------------
 !
-      open(19,file='../outputs/mon_npp.flt',                                                   !open(19,file='../ipcc_env_vars2/'//& 'mon_npp_HADCM3_A2_onlyclimate.bin',
+      open(19,file='../outputs/mon_npp.bin',                                                   !open(19,file='../ipcc_env_vars2/'//& 'mon_npp_HADCM3_A2_onlyclimate.bin',
 !      open(19,file='../ipcc_env_vars2/'//
 !     & 'mon_npp_HADCM3_A2_onlyclimate.bin',
      &        status='unknown',form='unformatted',
@@ -340,7 +341,7 @@ c23456789
 ! Write monthly photosynthesis
 ! ----------------------------
 !
-      open(20,file='../outputs/mon_photo.flt',                                                 !open(20,file='../ipcc_env_vars2/'//& 'mon_photo_HADCM3_A2_onlyclimate.bin',
+      open(20,file='../outputs/mon_photo.bin',                                                 !open(20,file='../ipcc_env_vars2/'//& 'mon_photo_HADCM3_A2_onlyclimate.bin',
 !      open(20,file='../ipcc_env_vars2/'//
 !     & 'mon_photo_HADCM3_A2_onlyclimate.bin',
      &        status='unknown',form='unformatted',
@@ -358,7 +359,7 @@ c23456789
 ! Write monthly plant respiration
 ! -------------------------------
 !
-      open(21,file='../outputs/mon_ar.flt',                                                    !open(21,file='../ipcc_env_vars2/'//& 'mon_ar_HADCM3_A2_onlyclimate.bin',
+      open(21,file='../outputs/mon_ar.bin',                                                    !open(21,file='../ipcc_env_vars2/'//& 'mon_ar_HADCM3_A2_onlyclimate.bin',
 !      open(21,file='../ipcc_env_vars2/'//
 !     & 'mon_ar_HADCM3_A2_onlyclimate.bin',
      &        status='unknown',form='unformatted',
@@ -376,7 +377,7 @@ c23456789
 ! Write monthly canopy resistance
 ! -------------------------------
 !
-      open(22,file='../outputs/cres.flt',                                                      !open(22,file='../ipcc_env_vars2/'//& 'rc_HADCM3_A2_onlyclimate.bin',
+      open(22,file='../outputs/cres.bin',                                                      !open(22,file='../ipcc_env_vars2/'//& 'rc_HADCM3_A2_onlyclimate.bin',
 !      open(22,file='../ipcc_env_vars2/'//
 !     & 'rc_HADCM3_A2_onlyclimate.bin',
      &        status='unknown',form='unformatted',
@@ -394,7 +395,7 @@ c23456789
 ! Write annual canopy resistence
 ! ------------------------------
 !
-      open(23,file='../outputs/ave_cres.flt',
+      open(23,file='../outputs/ave_cres.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
          write(23,rec=1) ave_cres
@@ -403,7 +404,7 @@ c23456789
 ! Write monthly canopy resistance_pft1
 ! ------------------------------------
 !
-      open(24,file='../outputs/cres1.flt',
+      open(24,file='../outputs/cres1.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
@@ -419,7 +420,7 @@ c23456789
 ! Write monthly canopy resistance_pft2
 ! ------------------------------------
 !
-      open(25,file='../outputs/cres2.flt',
+      open(25,file='../outputs/cres2.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
@@ -435,7 +436,7 @@ c23456789
 ! Write monthly canopy resistance_pft3
 ! ------------------------------------
 !
-      open(26,file='../outputs/cres3.flt',
+      open(26,file='../outputs/cres3.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
@@ -451,7 +452,7 @@ c23456789
 ! Write annual photosynthesis
 ! ---------------------------
 !
-      open(27,file='../outputs/mphoto.flt',
+      open(27,file='../outputs/mphoto.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
          write(27,rec=1) mphoto
@@ -460,7 +461,7 @@ c23456789
 ! Write anual NPP
 ! ---------------
 !
-      open(28,file='../outputs/meanpp.flt',
+      open(28,file='../outputs/meanpp.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
          write(28,rec=1) meanpp
@@ -469,7 +470,7 @@ c23456789
 ! Write anual canopy resistence_pft1
 ! ----------------------------------
 !
-      open(29,file='../outputs/ave_cres1.flt',
+      open(29,file='../outputs/ave_cres1.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
          write(29,rec=1) ave_cres1
@@ -478,7 +479,7 @@ c23456789
 ! Write anual canopy resistence_pft2
 ! ----------------------------------
 !
-      open(30,file='../outputs/ave_cres2.flt',
+      open(30,file='../outputs/ave_cres2.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
          write(30,rec=1) ave_cres2
@@ -487,13 +488,13 @@ c23456789
 ! Write anual canopy resistence_pft3
 ! ----------------------------------
 !
-      open(31,file='../outputs/ave_cres3.flt',
+      open(31,file='../outputs/ave_cres3.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
          write(31,rec=1) ave_cres3
       close(31)
 !
-      open(32,file='../outputs/npp1.flt',
+      open(32,file='../outputs/npp1.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
@@ -506,7 +507,7 @@ c23456789
       enddo
       close(32)
 !
-      open(33,file='../outputs/npp2.flt',
+      open(33,file='../outputs/npp2.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
@@ -519,7 +520,7 @@ c23456789
       enddo
       close(33)
 !
-      open(34,file='../outputs/npp3.flt',
+      open(34,file='../outputs/npp3.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
@@ -532,31 +533,31 @@ c23456789
       enddo
       close(34)
 !
-      open(35,file='../outputs/meanpp1.flt',
+      open(35,file='../outputs/meanpp1.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
          write(35,rec=1) meanpp1
       close(35)
 !
-      open(36,file='../outputs/meanpp2.flt',
+      open(36,file='../outputs/meanpp2.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
          write(36,rec=1) meanpp2
       close(36)
 !
-      open(37,file='../outputs/meanpp3.flt',
+      open(37,file='../outputs/meanpp3.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
          write(37,rec=1) meanpp3
       close(37)
 !
-      open(38,file='../outputs/maresp_caete.flt',
+      open(38,file='../outputs/maresp_caete.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
          write(38,rec=1) maresp
       close(38)
 !
-      open(39,file='../outputs/wsoil.flt',
+      open(39,file='../outputs/wsoil.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
@@ -569,7 +570,7 @@ c23456789
       enddo
       close(39)
 !
-      open(40,file='../outputs/runom.flt',
+      open(40,file='../outputs/runom.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
@@ -582,19 +583,19 @@ c23456789
       enddo
       close(40)
 !
-      open(41,file='../outputs/mnpp1_pon.flt',
+      open(41,file='../outputs/mnpp1_pon.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
         write(41,rec=1) mnpp1_pon
       close(41)
 !
-      open(42,file='../outputs/mnpp2_pon.flt',
+      open(42,file='../outputs/mnpp2_pon.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
         write(42,rec=1) mnpp2_pon
       close(42)
 !
-       open(43,file='../outputs/mnpp3_pon.flt',
+       open(43,file='../outputs/mnpp3_pon.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
          write(43,rec=1) mnpp3_pon
