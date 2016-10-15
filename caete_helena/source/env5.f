@@ -420,7 +420,7 @@ c23456789
 ! Write monthly canopy resistance_pft2
 ! ------------------------------------
 !
-      open(25,file='../outputs/cres2.bin',
+      open(25,file='../outputs/cres2.flt',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
