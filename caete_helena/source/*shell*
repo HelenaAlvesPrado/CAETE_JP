@@ -1,0 +1,174 @@
+jpdarela@eco-debian:~/caete_jp/dev/CAETE_JP$ cd caete_helena
+jpdarela@eco-debian:~/caete_jp/dev/CAETE_JP/caete_helena$ ls
+inputs  outputs  source
+jpdarela@eco-debian:~/caete_jp/dev/CAETE_JP/caete_helena$ cd source
+jpdarela@eco-debian:~/caete_jp/dev/CAETE_JP/caete_helena/source$ ls
+a.out  env5.f  productivity1.f  #wbm4.f#  wbm4.f
+jpdarela@eco-debian:~/caete_jp/dev/CAETE_JP/caete_helena/source$ gfortran env5.f wbm4.f productivity1.f -o b.out
+wbm4.f:96.72:
+
+      real mnpp2_pon(nx,ny),                                            
+                                                                        1
+Error: Invalid character in name at (1)
+wbm4.f:385.6:
+
+      mnpp2_pon(i,j) = (mnpp2_f(i,j) * meanpp2(i,j))                    
+      1
+Error: Unclassifiable statement at (1)
+jpdarela@eco-debian:~/caete_jp/dev/CAETE_JP/caete_helena/source$ gfortran env5.f wbm4.f productivity1.f -o b.out
+wbm4.f:138.9:
+
+      endif                                                             
+         1
+Error: Expecting END DO statement at (1)
+wbm4.f:140.72:
+
+      enddo                                                             
+                                                                        1
+Error: Statement label in ENDDO at (1) doesn't match DO label
+wbm4.f:141.9:
+
+      enddo                                                             
+         1
+Error: Expecting END IF statement at (1)
+wbm4.f:150.72:
+
+      do i=1,nx                                                         
+                                                                        1
+wbm4.f:116.72:
+
+      do i=1,nx                                                         
+                                                                        2
+Error: Variable 'i' at (1) cannot be redefined inside loop beginning at (2)
+wbm4.f:151.72:
+
+      do j=1,ny                                                         
+                                                                        1
+wbm4.f:117.72:
+
+      do j=1,ny                                                         
+                                                                        2
+Error: Variable 'j' at (1) cannot be redefined inside loop beginning at (2)
+wbm4.f:136.5:
+
+   100 continue        t0 = t1                                          
+     1
+wbm4.f:231.5:
+
+   10 continue                                                          
+     2
+Error: Duplicate statement label 10 at (1) and (2)
+wbm4.f:454.72:
+
+      do i=1,nx                                                         
+                                                                        1
+wbm4.f:116.72:
+
+      do i=1,nx                                                         
+                                                                        2
+Error: Variable 'i' at (1) cannot be redefined inside loop beginning at (2)
+wbm4.f:455.72:
+
+      do j=1,ny                                                         
+                                                                        1
+wbm4.f:117.72:
+
+      do j=1,ny                                                         
+                                                                        2
+Error: Variable 'j' at (1) cannot be redefined inside loop beginning at (2)
+wbm4.f:463.9:
+
+      end                                                               
+         1
+Error: END IF statement expected at (1)
+wbm4.f:468.6:
+
+      subroutine budget (month,w1,g1,s1,tsoil,temp,prec,p0,ae,ca,       
+      1
+Error: Unclassifiable statement at (1)
+wbm4.f:516.72:
+
+      integer npft                                                      
+                                                                        1
+Error: Unexpected data declaration statement at (1)
+wbm4.f:517.72:
+
+      integer month                                                     
+                                                                        1
+Error: Unexpected data declaration statement at (1)
+wbm4.f:518.25:
+
+      real w1,g1,s1,tsoil,temp,prec,p0,ae,ca,ipar,                      
+                         1
+Error: Symbol 'tsoil' at (1) already has basic type of REAL
+wbm4.f:522.72:
+
+      real cresavg1,cresavg2,cresavg3                                   
+                                                                        1
+Error: Unexpected data declaration statement at (1)
+wbm4.f:523.72:
+
+      real cres_pft1,cres_pft2,cres_pft3                                
+                                                                        1
+Error: Unexpected data declaration statement at (1)
+wbm4.f:524.72:
+
+      real nppavg1,nppavg2,nppavg3                                      
+                                                                        1
+Error: Unexpected data declaration statement at (1)
+wbm4.f:525.72:
+
+      real nppa_pft1,nppa_pft2,nppa_pft3                                
+                                                                        1
+Error: Unexpected data declaration statement at (1)
+wbm4.f:530.72:
+
+      real rh,wmax,tsnow,tice                                           
+                                                                        1
+Error: Unexpected data declaration statement at (1)
+wbm4.f:531.72:
+
+      real psnow,prain                                                  
+                                                                        1
+Error: Unexpected data declaration statement at (1)
+wbm4.f:532.72:
+
+      real w,g,s                                                        
+                                                                        1
+Error: Unexpected data declaration statement at (1)
+wbm4.f:533.72:
+
+      real rimelt,smelt,roff,evap,emax                                  
+                                                                        1
+Error: Unexpected data declaration statement at (1)
+wbm4.f:534.72:
+
+      integer ndmonth(12)                                               
+                                                                        1
+Error: Unexpected data declaration statement at (1)
+wbm4.f:540.72:
+
+      real ph,ar,nppa,nppb,laia,cl,cs,hr                                
+                                                                        1
+Error: Unexpected data declaration statement at (1)
+wbm4.f:557.33:
+
+        psnow = prec/real(ndmonth(month))                               
+                                 1
+Error: Syntax error in argument list at (1)
+wbm4.f:559.33:
+
+        prain = prec/real(ndmonth(month))                               
+                                 1
+Error: Syntax error in argument list at (1)
+Fatal Error: Error count reached limit of 25.
+jpdarela@eco-debian:~/caete_jp/dev/CAETE_JP/caete_helena/source$ 
+jpdarela@eco-debian:~/caete_jp/dev/CAETE_JP/caete_helena/source$ gfortran env5.f wbm4.f productivity1.f -o b.out
+wbm4.f:137.72:
+
+      enddo                                                             
+                                                                        1
+Error: Statement label in ENDDO at (1) doesn't match DO label
+jpdarela@eco-debian:~/caete_jp/dev/CAETE_JP/caete_helena/source$ gfortran env5.f wbm4.f productivity1.f -o b.out
+jpdarela@eco-debian:~/caete_jp/dev/CAETE_JP/caete_helena/source$ gfortran env5.f wbm4.f productivity1.f -o b.out
+jpdarela@eco-debian:~/caete_jp/dev/CAETE_JP/caete_helena/source$ 

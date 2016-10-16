@@ -24,79 +24,121 @@ c23456789
 ! ----------------------
 !
       integer, parameter :: nx=192, ny=96
-      integer counter
-      real, parameter :: NO_DATA = -9999.0
-      real prec(nx,ny,12),temp(nx,ny,12),lsmk(nx,ny),p0(nx,ny)
-      real tmin(nx,ny),seanpp(nx,ny),meanpp(nx,ny),meanhr(nx,ny),
-     &     meancs(nx,ny),mphoto(nx,ny),maresp(nx,ny),ave_wsoil(nx,ny),
-     &     ave_evap(nx,ny),ave_cres(nx,ny)
-      real wsoil2(nx,ny,12),par(nx,ny,12)
-      real photo(nx,ny,12),aresp(nx,ny,12),npp(nx,ny,12),
-     &     lai(nx,ny,12),clit(nx,ny,12),csoil(nx,ny,12),hresp(nx,ny,12)
-      real cres1(nx,ny,12),cres2(nx,ny,12),cres3(nx,ny,12)
-      real ave_cres1(nx,ny),ave_cres2(nx,ny),ave_cres3(nx,ny)
-      real npp1(nx,ny,12),npp2(nx,ny,12),npp3(nx,ny,12)
-      real meanpp1(nx,ny),meanpp2(nx,ny),meanpp3(nx,ny)
-      real npptotal(nx,ny)
+      real, parameter    :: NO_DATA = -9999.0
+      integer counter, i, j, k, n
+
+      !inputs
+      real prec(nx,ny,12)
+      real temp(nx,ny,12)
+      
+      real lsmk(nx,ny)
+      real   p0(nx,ny)
+
+      real wsoil2(nx,ny,12)
+      real    par(nx,ny,12)
+      real  photo(nx,ny,12)
+      real  aresp(nx,ny,12)
+      real    npp(nx,ny,12)
+      real    lai(nx,ny,12)
+      real   clit(nx,ny,12)
+      real  csoil(nx,ny,12)
+      real  hresp(nx,ny,12)
+      real  cres1(nx,ny,12)
+      real  cres2(nx,ny,12)
+      real  cres3(nx,ny,12)
+      real   npp1(nx,ny,12)
+      real   npp2(nx,ny,12)
+      real   npp3(nx,ny,12)
+      
+      real      tmin(nx,ny)
+      real    seanpp(nx,ny)
+      real    meanpp(nx,ny)
+      real    meanhr(nx,ny)
+      real    meancs(nx,ny)
+      real    mphoto(nx,ny)
+      real    maresp(nx,ny)
+      real ave_wsoil(nx,ny)
+      real  ave_evap(nx,ny)
+      real  ave_cres(nx,ny)
+      real ave_cres1(nx,ny)
+      real ave_cres2(nx,ny)
+      real ave_cres3(nx,ny)
+      real   meanpp1(nx,ny)
+      real   meanpp2(nx,ny)
+      real   meanpp3(nx,ny)
+      real  npptotal(nx,ny)
 !
 ! Internal Variables
 ! ------------------
 !
-      real H,diffu,tau,tsoil(nx,ny,12),t0,t1
-      real wsoil(nx,ny,12),gsoil(nx,ny,12),ssoil(nx,ny,12),
-     &     snowm(nx,ny,12),runom(nx,ny,12),evapm(nx,ny,12),
-     &     emaxm(nx,ny,12),cres(nx,ny,12)
-      real wg0(nx,ny,12)
-      real nppmes,laimes,ipar
-      real nppmin(nx,ny),nppmax(nx,ny),meant(nx,ny),seat(nx,ny)
-      real nppmes1,nppmes2,nppmes3
-      real mnpp1_f(nx,ny),mnpp2_f(nx,ny),mnpp3_f(nx,ny)
-      real mnpp1_pon(nx,ny),mnpp2_pon(nx,ny),mnpp3_pon(nx,ny)
-      real one
-!
+      real H,diffu,tau,t0,t1,nppmes,laimes,ipar
+      real nppmes1,nppmes2,nppmes3, one, t1aux
+      real wsaux1, wsaux2, wsaux3
+
+      real tsoil(nx,ny,12)
+      real wsoil(nx,ny,12)
+      real gsoil(nx,ny,12)
+      real ssoil(nx,ny,12)
+      real snowm(nx,ny,12)
+      real runom(nx,ny,12)
+      real evapm(nx,ny,12)
+      real emaxm(nx,ny,12)
+      real  cres(nx,ny,12)
+      real   wg0(nx,ny,12)
+      
+      real nppmin(nx,ny)
+      real nppmax(nx,ny)
+      real  meant(nx,ny)
+      real   seat(nx,ny)
+      real mnpp2_f(nx,ny)
+      real mnpp3_f(nx,ny)
+      real mnpp1_f(nx,ny)
+      real mnpp1_pon(nx,ny)
+      real mnpp2_pon(nx,ny)
+      real mnpp3_pon(nx,ny)
+
 ! Counting
 ! --------
 
       counter = 0
-!
+
 ! Soil temperature
 ! ================
-!
-      H    = 1.0                                                                              !Soil layer(m)
-      diffu = 4.e-7*(30.*86400.0)                                                              !Soil thermal diffusivity(m2/month)
-      tau = (H**2)/(2.0*diffu)                                                               !E-folding time(months)
-      auxs=-100.0                                                                           !Auxiliar for calculation of Snpp
+
+      H     = 1.0                !Soil layer(m)
+      diffu = 10.368             !4.e-7*(30.*86400.0)  !Soil thermal diffusivity(m2/month)
+      tau   = 1.0 / (2.0*diffu)  !left hand(H²) --- E-folding time(months)
+      auxs  = -100.0             !Auxiliar for calculation of Snpp
 !
 ! For all grid points
 ! -------------------
-!
+!234567
       do i=1,nx
-      do j=1,ny
+         do j=1,ny
 !
 ! Initialize soil temperature
 ! ---------------------------
-!
-      do k=1,12
-         tsoil(i,j,k) = NO_DATA                                                                   !Undefined
-      enddo
+!     
+            do k=1,12
+               tsoil(i,j,k) = NO_DATA !Undefined
+            enddo
 !
 ! Only for land grid points
 ! -------------------------
 !
-      if (int(lsmk(i,j)).ne.0) then
-      t0 = 0.                                                                                  !Initialization
-      do n=1,1200                                                                           !1200 months run to attain equilibrium
-        k = mod(n,12)
-        if (k.eq.0) k = 12
-        t1 = t0*exp(-1.0/tau) + (1.0 - exp(-1.0/tau))*temp(i,j,k)
-        tsoil(i,j,k) = (t0 + t1)/2.0
-        t0 = t1
+            if (nint(lsmk(i,j)) .ne. 0) then
+               t0 = 0.          !Initialization
+               do  n=1,1200
+                  k = mod(n,12); if (k.eq.0) k = 12
+                  t1aux = (1.0 - exp(-1.0/tau))*temp(i,j,k)
+                  t1 = t0*exp(-1.0/tau) + t1aux
+                  tsoil(i,j,k) = (t0 + t1)/2.0
+                  t0 = t1
+               enddo
+            endif
+         enddo
       enddo
-      endif
-!
-      enddo
-      enddo
-!
+c234567
 ! ============
 ! Water budget
 ! ============
@@ -105,208 +147,212 @@ c23456789
 ! -------------------
 !
       do i=1,nx
-      do j=1,ny
+         do j=1,ny
 !
 ! Write to track program execution
 ! --------------------------------
 !
-      if ((mod(j,ny).eq.0).and.(mod(i,10).eq.0))
-     &  write(*,*) 'working:',i
+            if ((mod(j,ny).eq.0).and.(mod(i,10).eq.0))
+     &           write(*,*) 'working:',i
 !
-! Initialize variables
-! --------------------
+!     Initialize variables
+            
+                tmin(i,j) = NO_DATA !Minimal temperature
+              seanpp(i,j) = NO_DATA   
+              meanpp(i,j) = NO_DATA !NPP
+             meanpp1(i,j) = NO_DATA !NPP_PFT1
+             meanpp2(i,j) = NO_DATA !NPP_PFT2
+             meanpp3(i,j) = NO_DATA !NPP_PFT3
+              mphoto(i,j) = NO_DATA !Photosynthesis
+              maresp(i,j) = NO_DATA !Autotrophic Respiration
+              meanhr(i,j) = NO_DATA !Heterotrophic Respiration
+              meancs(i,j) = NO_DATA !Carbon Soil
+           ave_wsoil(i,j) = NO_DATA !Water Soil
+            ave_evap(i,j) = NO_DATA !Evapotranspiration
+            ave_cres(i,j) = NO_DATA !Canopy Resistance
+           ave_cres1(i,j) = NO_DATA !Canopy Resistance_PFT1
+           ave_cres2(i,j) = NO_DATA !Canopy Resistance_PFT2
+           ave_cres3(i,j) = NO_DATA !Canopy Resistance_PFT3
+            do k=1,12
+               wsoil(i,j,k) = NO_DATA !Soil Moisture(mm)
+               gsoil(i,j,k) = NO_DATA !Soil Ice(mm)
+               ssoil(i,j,k) = NO_DATA !Soil Snow(mm)
+               snowm(i,j,k) = NO_DATA !Snowmelt(mm/day)
+               runom(i,j,k) = NO_DATA !Runoff(mm/day)
+               evapm(i,j,k) = NO_DATA !Actual Evapotranspiration(mm/day)
+               emaxm(i,j,k) = NO_DATA !Maximum Evapotranspiration(mm/day)
+                 wg0(i,j,k) = NO_DATA !Moisture of the previous year (mm)
+              wsoil2(i,j,k) = NO_DATA !For testing purpose
+                cres(i,j,k) = NO_DATA !Canopy Resistance (s/m)
+               cres1(i,j,k) = NO_DATA !Canopy Resistance_PFT1 (s/m)
+               cres2(i,j,k) = NO_DATA !Canopy Resistance_PFT2 (s/m)
+               cres3(i,j,k) = NO_DATA !Canopy Resistance_PFT3 (s/m)
+                 lai(i,j,k) = NO_DATA !Leaf Area Index
+               photo(i,j,k) = NO_DATA !Photosynthesis
+               aresp(i,j,k) = NO_DATA !Autotrophic Respiration
+                npp(i,j,k)  = NO_DATA !NPP
+                npp1(i,j,k) = NO_DATA !NPP_PFT1
+                npp2(i,j,k) = NO_DATA !NPP_PFT2
+                npp3(i,j,k) = NO_DATA !NPP_PFT3
+                clit(i,j,k) = NO_DATA !Carbon Litter
+               csoil(i,j,k) = NO_DATA !Carbon Soil
+               hresp(i,j,k) = NO_DATA !Heterotrophic Respiration
 !
-      tmin(i,j)   =  NO_DATA   !Minimal temperature
-      seanpp(i,j) =  NO_DATA   
-      meanpp(i,j) =  NO_DATA   !NPP
-      meanpp1(i,j) = NO_DATA   !NPP_PFT1
-      meanpp2(i,j) = NO_DATA   !NPP_PFT2
-      meanpp3(i,j) = NO_DATA   !NPP_PFT3
-      mphoto(i,j) =  NO_DATA   !Photosynthesis
-      maresp(i,j) =  NO_DATA    !Autotrophic Respiration
-      meanhr(i,j) =  NO_DATA    !Heterotrophic Respiration
-      meancs(i,j) =  NO_DATA    !Carbon Soil
-      ave_wsoil(i,j) = NO_DATA !Water Soil
-      ave_evap(i,j) =  NO_DATA  !Evapotranspiration
-      ave_cres(i,j) =  NO_DATA  !Canopy Resistance
-      ave_cres1(i,j) = NO_DATA !Canopy Resistance_PFT1
-      ave_cres2(i,j) = NO_DATA !Canopy Resistance_PFT2
-      ave_cres3(i,j) = NO_DATA !Canopy Resistance_PFT3
-!
-      do k=1,12
-!
-        wsoil(i,j,k)   =       NO_DATA                                                          !Soil Moisture(mm)
-        gsoil(i,j,k)   =       NO_DATA                                                          !Soil Ice(mm)
-        ssoil(i,j,k)   =       NO_DATA                                                          !Soil Snow(mm)
-        snowm(i,j,k)   =       NO_DATA                                                          !Snowmelt(mm/day)
-        runom(i,j,k)   =       NO_DATA                                                          !Runoff(mm/day)
-        evapm(i,j,k)   =       NO_DATA                                                          !Actual Evapotranspiration(mm/day)
-        emaxm(i,j,k)   =       NO_DATA                                                          !Maximum Evapotranspiration(mm/day)
-          wg0(i,j,k)   =       NO_DATA                                                          !Moisture of the previous year (mm)
-        wsoil2(i,j,k)  =       NO_DATA                                                          !For testing purpose
-         cres(i,j,k)   =       NO_DATA                                                          !Canopy Resistance (s/m)
-        cres1(i,j,k)   =       NO_DATA                                                          !Canopy Resistance_PFT1 (s/m)
-        cres2(i,j,k)   =        NO_DATA                                                         !Canopy Resistance_PFT2 (s/m)
-        cres3(i,j,k)   =        NO_DATA                                                          !Canopy Resistance_PFT3 (s/m)
-        lai(i,j,k)     =         NO_DATA                                                          !Leaf Area Index
-        photo(i,j,k)   =         NO_DATA                                                       !Photosynthesis
-        aresp(i,j,k)   =         NO_DATA                                                         !Autotrophic Respiration
-        npp(i,j,k)     =         NO_DATA                                                         !NPP
-        npp1(i,j,k)    =         NO_DATA                                                         !NPP_PFT1
-        npp2(i,j,k)    =         NO_DATA                                                          !NPP_PFT2
-        npp3(i,j,k)    =         NO_DATA                                                          !NPP_PFT3
-        clit(i,j,k)    =         NO_DATA                                                !Carbon Litter
-        csoil(i,j,k)   =         NO_DATA                                                          !Carbon Soil
-        hresp(i,j,k)   =         NO_DATA                                                         !Heterotrophic Respiration
-!
-      enddo
+            enddo
+            
 !
 ! Only for land grid points
 ! -------------------------
 !
-      if (int(lsmk(i,j)).ne.0) then
+            if (nint(lsmk(i,j)).ne.0) then
 !
 ! Set some variables
 ! ------------------
-!
-      wini  = 0.01                                                                             !Soil Moisture_Initial Condition(mm)
-      gini  = 0.0                                                                              !Soil Ice_Initial Condition(mm)
-      sini  = 0.0                                                                              !Overland Snow_Initial Condition(mm)
+!     
+               wini  = 0.01     !Soil Moisture_Initial Condition(mm)
+               gini  = 0.0      !Soil Ice_Initial Condition(mm)
+               sini  = 0.0      !Overland Snow_Initial Condition(mm)
 !
 ! Initialization
 ! --------------
 !
-      do k=1,12
-      wg0(i,j,k) = -1.0                                                                                              !wb0?
-      enddo
-      spre = p0(i,j)                                                                           !Surface Pressure(mb)
+               do k=1,12
+                  wg0(i,j,k) = -1.0 !wb0?
+               enddo
+               spre = p0(i,j)   !Surface Pressure(mb)
 !
 ! Start integration
 ! -----------------
 !
-      n = 0
-   10 continue
-      n = n + 1
+               n = 0
+ 10            continue
+               n = n + 1
+!     
+!     Pre-processing
+!     --------------
+!     
+               k = mod(n,12)
+               if (k.eq.0) k = 12
+               mes = k
+               td = tsoil(i,j,k)
+               ta = temp(i,j,k)
+               pr = prec(i,j,k)
+               ipar = par(i,j,k)
+!     ae = 2.26457*ta + 67.5876 !available energy (W/m2) [Eq. 8]
+               ae = 2.895*ta+52.326 !Available energy(W/m2)_From NCEP-NCAR Reanalysis Data
+!     
+!     Monthly water budget
+!     ====================
+!     
+               call budget (mes,wini,gini,sini,td,ta,pr,
+     &              spre,ae,ca,ipar,
+     &              wfim,gfim,sfim,smes,rmes,emes,epmes,
+     &              phmes,armes,nppmes,laimes,
+     &              clmes,csmes,hrmes,cresmes,
+     &              cresmes1,cresmes2,cresmes3,
+     &              nppmes1,nppmes2,nppmes3)
+!     
+!     
+!     Update variables
+!     ----------------
+!     
+               wsoil(i,j,k) = wfim
+               gsoil(i,j,k) = gfim
+               ssoil(i,j,k) = sfim
+               snowm(i,j,k) = smes
+               runom(i,j,k) = rmes
+               evapm(i,j,k) = emes
+               emaxm(i,j,k) = epmes
+                cres(i,j,k) = cresmes
+               cres1(i,j,k) = cresmes1
+               cres2(i,j,k) = cresmes2
+               cres3(i,j,k) = cresmes3
+                 lai(i,j,k) = laimes
+               photo(i,j,k) = phmes
+               aresp(i,j,k) = armes
+                 npp(i,j,k) = nppmes
+                npp1(i,j,k) = nppmes1
+                npp2(i,j,k) = nppmes2
+                npp3(i,j,k) = nppmes3
+                clit(i,j,k) = clmes
+               csoil(i,j,k) = csmes
+               hresp(i,j,k) = hrmes
+                       wini = wfim
+                       gini = gfim
+                       sini = sfim
 !
-! Pre-processing
-! --------------
+!     Check if equilibrium is attained
+!     --------------------------------
+!     
+                       if (k.eq.12) then
+                          wmax = 500.
+                          nerro = 0
+                          do kk=1,12
+                             wsaux1 = wsoil(i,j,kk) + gsoil(i,j,kk) 
+                             dwww = (wsaux1 - wg0(i,j,kk)) / wmax
+                             if (abs(dwww).gt.0.001) nerro = nerro + 1
+                          enddo
+                          if (nerro.ne.0) then
+                             do kk=1,12
+                                wg0(i,j,kk)=wsoil(i,j,kk)+gsoil(i,j,kk)
+                             enddo
+                          else
+                             goto 100
+                          endif
+                       endif
+                       goto 10
+ 100                   continue
 !
-      k = mod(n,12)
-      if (k.eq.0) k = 12
-      mes = k
-      td = tsoil(i,j,k)
-      ta = temp(i,j,k)
-      pr = prec(i,j,k)
-      ipar = par(i,j,k)
-!      ae = 2.26457*ta + 67.5876 !available energy (W/m2) [Eq. 8]
-      ae = 2.895*ta+52.326                                                                     !Available energy(W/m2)_From NCEP-NCAR Reanalysis Data
-!
-! Monthly water budget
-! ====================
-!
-      call budget (mes,wini,gini,sini,td,ta,pr,spre,ae,ca,ipar,
-     &                 wfim,gfim,sfim,smes,rmes,emes,epmes,
-     &                 phmes,armes,nppmes,laimes,
-     &                 clmes,csmes,hrmes,cresmes,
-     &                 cresmes1,cresmes2,cresmes3,
-     &                 nppmes1,nppmes2,nppmes3)
-!
-!
-! Update variables
-! ----------------
-!
-        wsoil(i,j,k) = wfim
-        gsoil(i,j,k) = gfim
-        ssoil(i,j,k) = sfim
-        snowm(i,j,k) = smes
-        runom(i,j,k) = rmes
-        evapm(i,j,k) = emes
-        emaxm(i,j,k) = epmes
-        cres(i,j,k)  = cresmes
-        cres1(i,j,k) = cresmes1
-        cres2(i,j,k) = cresmes2
-        cres3(i,j,k) = cresmes3
-        lai(i,j,k) = laimes
-        photo(i,j,k) = phmes
-        aresp(i,j,k) = armes
-        npp(i,j,k) = nppmes
-        npp1(i,j,k) = nppmes1
-        npp2(i,j,k) = nppmes2
-        npp3(i,j,k) = nppmes3
-        clit(i,j,k) = clmes
-        csoil(i,j,k) = csmes
-        hresp(i,j,k) = hrmes
-        wini = wfim
-        gini = gfim
-        sini = sfim
-!
-! Check if equilibrium is attained
-! --------------------------------
-!
-      if (k.eq.12) then
-         wmax = 500.
-         nerro = 0
-         do kk=1,12
-            dwww = (wsoil(i,j,kk)+gsoil(i,j,kk)-wg0(i,j,kk))/wmax
-            if (abs(dwww).gt.0.001) nerro = nerro + 1
-         enddo
-         if (nerro.ne.0) then
-            do kk=1,12
-               wg0(i,j,kk) = wsoil(i,j,kk) + gsoil(i,j,kk)
-            enddo
-         else
-            goto 100
-         endif
-      endif
-      goto 10
-  100 continue
-!
-! Environmental variables
-! =======================
-!
-! Initialize
-! ----------
-!
-      tmin(i,j) = 100.0
-      seanpp(i,j) = 0.0
-      meanpp(i,j) = 0.0
-      meanpp1(i,j) = 0.0
-      meanpp2(i,j) = 0.0
-      meanpp3(i,j) = 0.0
-      mphoto(i,j) = 0.0
-      maresp(i,j) = 0.0
-      nppmin(i,j) = 100.0
-      nppmax(i,j) = -100.0
-      meanhr(i,j) = 0.0
-      meancs(i,j) = 0.0
-      ave_wsoil(i,j) = 0.0
-      ave_evap(i,j) = 0.0
-      ave_cres(i,j) = 0.0
-      ave_cres1(i,j) = 0.0
-      ave_cres2(i,j) = 0.0
-      ave_cres3(i,j) = 0.0
+!     Environmental variables
+!     =======================
+!     
+!     Initialize
+!     ----------
+!     
+                       tmin(i,j)      = 100.0
+                       seanpp(i,j)    = 0.0
+                       meanpp(i,j)    = 0.0
+                       meanpp1(i,j)   = 0.0
+                       meanpp2(i,j)   = 0.0
+                       meanpp3(i,j)   = 0.0
+                       mphoto(i,j)    = 0.0
+                       maresp(i,j)    = 0.0
+                       nppmin(i,j)    = 100.0
+                       nppmax(i,j)    = -100.0
+                       meanhr(i,j)    = 0.0
+                       meancs(i,j)    = 0.0
+                       ave_wsoil(i,j) = 0.0
+                       ave_evap(i,j)  = 0.0
+                       ave_cres(i,j)  = 0.0
+                       ave_cres1(i,j) = 0.0
+                       ave_cres2(i,j) = 0.0
+                       ave_cres3(i,j) = 0.0
 !
 ! Calculate tmin, meanpp, seanpp
 ! ------------------------------
 !
-      counter = counter + 1
+                       counter = counter + 1
 !
-      do k=1,12
-         if (temp(i,j,k).lt.tmin(i,j)) tmin(i,j) = temp(i,j,k)
-         meanpp(i,j) = meanpp(i,j) + (npp(i,j,k)/12)
-         meanpp1(i,j) = meanpp1(i,j) + (npp1(i,j,k)/12)
-         meanpp2(i,j) = meanpp2(i,j) + (npp2(i,j,k)/12)
-         meanpp3(i,j) = meanpp3(i,j) + (npp3(i,j,k)/12)
-         mphoto(i,j) = mphoto(i,j) + (photo(i,j,k)/12)
-         maresp(i,j) = maresp(i,j) + (aresp(i,j,k)/12)
-         meanhr(i,j) = meanhr(i,j) + (hresp(i,j,k)/12)
-         meancs(i,j) = meancs(i,j) + (csoil(i,j,k)/12)
-         ave_wsoil(i,j) = ave_wsoil(i,j) + (wsoil(i,j,k)/12)
-         ave_evap(i,j) = ave_evap(i,j) + (evapm(i,j,k)/12)
-         ave_cres(i,j) = ave_cres(i,j) + (cres(i,j,k)/12)
-         ave_cres1(i,j) = ave_cres1(i,j) + (cres1(i,j,k)/12)
-         ave_cres2(i,j) = ave_cres2(i,j) + (cres2(i,j,k)/12)
-         ave_cres3(i,j) = ave_cres3(i,j) + (cres3(i,j,k)/12)
+                       do k=1,12
+                          if (temp(i,j,k).lt.tmin(i,j))then
+                             tmin(i,j)=temp(i,j,k)
+                          endif
+                          
+                          meanpp(i,j)=meanpp(i,j)+(npp(i,j,k)/12)
+                          meanpp1(i,j)=meanpp1(i,j)+(npp1(i,j,k)/12)
+                          meanpp2(i,j)=meanpp2(i,j)+(npp2(i,j,k)/12)
+                          meanpp3(i,j)=meanpp3(i,j)+(npp3(i,j,k)/12)
+                          mphoto(i,j)=mphoto(i,j)+(photo(i,j,k)/12)
+                          maresp(i,j)=maresp(i,j)+(aresp(i,j,k)/12)
+                          meanhr(i,j)=meanhr(i,j)+(hresp(i,j,k)/12)
+                          meancs(i,j)=meancs(i,j)+(csoil(i,j,k)/12)
+
+                         ave_wsoil(i,j)=ave_wsoil(i,j)+(wsoil(i,j,k)/12)
+                         ave_evap(i,j)=ave_evap(i,j)+(evapm(i,j,k)/12)
+                         ave_cres(i,j)=ave_cres(i,j)+(cres(i,j,k)/12)
+                         ave_cres1(i,j)=ave_cres1(i,j)+(cres1(i,j,k)/12)
+                         ave_cres2(i,j)=ave_cres2(i,j)+(cres2(i,j,k)/12)
+                         ave_cres3(i,j)=ave_cres3(i,j)+(cres3(i,j,k)/12)
 !
          if (npp(i,j,k).lt.nppmin(i,j)) nppmin(i,j) = npp(i,j,k)
          if (npp(i,j,k).gt.nppmax(i,j)) nppmax(i,j) = npp(i,j,k)
@@ -422,14 +468,14 @@ c23456789
 !=======================================================================
 c23456789
 !
-      subroutine budget (month,w1,g1,s1,tsoil,temp,prec,p0,ae,ca,                              !input
-     &                    ipar,w2,g2,s2,smavg,ruavg,evavg,                                      !output
+      subroutine budget (month,w1,g1,s1,tsoil,temp,prec,p0,ae,ca,     !input
+     &                    ipar,w2,g2,s2,smavg,ruavg,evavg,            !output
      &                         epavg,phavg,aravg,nppavg,laiavg,
      &                         clavg,csavg,hravg,cresavg,
      &                   cresavg1,cresavg2,cresavg3,
      &                   nppavg1,nppavg2,nppavg3)
 !
-! Surface water                                                                                !soil moisture, snow and ice budget for a single month
+! Surface water    !soil moisture, snow and ice budget for a single month
 ! =============
 !
 ! Input
