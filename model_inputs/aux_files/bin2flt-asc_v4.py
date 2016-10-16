@@ -2,8 +2,8 @@ import numpy as np
 import os
 
 #GLOBAL
-nx = 720   # ncol
-ny = 360   # nrow
+nx = 192   # ncol
+ny = 96   # nrow
 
 pixel_depht = 32  # float 32 bits
 

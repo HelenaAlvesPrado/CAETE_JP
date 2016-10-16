@@ -1,4 +1,4 @@
-subroutine flip_image(input, output, a, b)
+subroutine flip_image(input, a, b)
 
   implicit none
 

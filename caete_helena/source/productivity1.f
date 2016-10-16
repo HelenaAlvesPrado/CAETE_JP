@@ -24,7 +24,7 @@ c23456789
 ! Input
 ! -----
 !
-!     temp           : Mean monthly temperature                                                !oC
+!     temp           : Mean monthly temperature !oC
 !     p0             : Mean surface pressure                                                   !hPa
 !     wa,w,wmax      : Soil moisture                                                           !Dimensionless
 !     ca             : Atmospheric CO2 pressure                                                !Pa

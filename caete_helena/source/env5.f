@@ -210,57 +210,58 @@ c23456789
 !
 ! Nomeando celulas de grad
 ! ------------------------
+c!
+c      do i=1,nx
+c         do j=1,ny
+!c
+c            if (nint(lsmk(i,j)).eq.1) then
+c               var_id = var_id + 1
+c               cell_id(var_id) = var_id
+c               aux_lat(var_id) = lat(i,j)
+c               aux_long(var_id) = long(i,j)
+c               do k=1,12
+c                  if (cell_id(var_id).eq.5245) then
+c!     print*,rc(i,j,k)
+c                  endif
+c               enddo
+c               if (cell_id(var_id).eq.5245) then
+!     print*,ave_rc(i,j)
+c               endif
 !
-      do i=1,nx
-      do j=1,ny
+c               cellx= 134       !longitude
+c               celly= -25       !latitude
+c               long_graus = a/nx !extensao longitudinal de cada celula em graus
+c               lat_graus = b/ny !extensao latitudinal de cada celula em graus
+c               long(i,j) = long_graus*(i) !coloca em coordenada "0-360"
+c               if (long(i,j).lt.180) then
+c                  long(i,j) = long(i,j) !transforma para coordenada "-180|180"
+c               else
+c                  long(i,j) = (360-long(i,j))*(-1)
+c              endif
+c               lat(i,j) = (lat_graus*(j)) !coloca em coordenada "0-180'
+c               lat(i,j) = (lat(i,j) - 90.0)
 !
-         if (lsmk(i,j).eq.1) then
-         var_id = var_id + 1
-         cell_id(var_id) = var_id
-         aux_lat(var_id) = lat(i,j)
-         aux_long(var_id) = long(i,j)
-                do k=1,12
-                   if (cell_id(var_id).eq.5245) then
-!                   print*,rc(i,j,k)
-                   endif
-                enddo
-         if (cell_id(var_id).eq.5245) then
-!         print*,ave_rc(i,j)
-         endif
-!
-         cellx= 134                                                                            !longitude
-         celly= -25                                                                          !latitude
-         long_graus = a/nx                                                                        !extensao longitudinal de cada celula em graus
-         lat_graus = b/ny                                                                         !extensao latitudinal de cada celula em graus
-         long(i,j) = long_graus*(i)                                                               !coloca em coordenada "0-360"
-                if (long(i,j).lt.180) then
-                long(i,j) = long(i,j)                                                                    !transforma para coordenada "-180|180"
-                else
-                long(i,j) = (360-long(i,j))*(-1)
-                endif
-         lat(i,j) = (lat_graus*(j))                                                               !coloca em coordenada "0-180'
-         lat(i,j) = (lat(i,j) - 90.0)
-!
-      if (lat(i,j).ge.celly.and.lat(i,j).lt.(celly+1.875)                                      !para o ano inteiro
-     & .and.long(i,j).ge.cellx.and.long(i,j).lt.(cellx+1.875)) then
-!      print*,cell_id(var_id),"oi"
-      endif
-!
-      if (cell_id(var_id).eq.3197) then
+c      if (lat(i,j).ge.celly.and.lat(i,j).lt.(celly+1.875)            !para o ano inteiro
+c     &        .and.long(i,j).ge.cellx.and.long(i,j)
+c     &        .lt.(cellx+1.875)) then
+!     print*,cell_id(var_id),"oi"
+c      endif
+!     
+c      if (cell_id(var_id).eq.3197) then
 !      print*,ave_rc(i,j)
-      endif
+c      endif
 !
-      if (cell_id(var_id).eq.3197) then
+c      if (cell_id(var_id).eq.3197) then
 !      print*,mnpp(i,j,k),meanpp(i,j),lat(i,j),long(i,j)
-      endif
+c      endif
 !
-      if (cell_id(var_id).eq.5245) then
+c      if (cell_id(var_id).eq.5245) then
 !      print*,ave_rc(i,j),lat(i,j),long(i,j)
-      endif
+c      endif
 !
-      endif
-      enddo
-      enddo
+c      endif
+c      enddo
+c      enddo
 !
 !==============================================================================================
 !
@@ -420,7 +421,7 @@ c23456789
 ! Write monthly canopy resistance_pft2
 ! ------------------------------------
 !
-      open(25,file='../outputs/cres2.flt',
+      open(25,file='../outputs/cres2.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
