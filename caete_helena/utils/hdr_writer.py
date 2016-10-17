@@ -10,18 +10,18 @@ import os
 
 ## print("BUILDING EXTERNAL DEPENDENCIES", os.linesep)
 
-try:
-    os.system("f2py3 -c --quiet flip_image.f95 -m flip") # fortran function to flip image
-except:
-    flip_b = False
-    print('Compilation exit status 1 - ')
-else:
-    print('Compilation exit status 0 - ')
-    flip_b = True
+#try:
+#    os.system("f2py3 -c --quiet flip_image.f95 -m flip") # fortran function to flip image
+#except:
+#    flip_b = False
+#    print('Compilation exit status 1 - ')
+#else:
+#    print('Compilation exit status 0 - ')
+#    flip_b = True
 
-if flip_b:
-    from flip import flip_image_1 as flip1
-    from flip import flip_image_2 as flip2
+#if flip_b:
+#    from flip import flip_image_1 as flip1
+#    from flip import flip_image_2 as flip2
 
 #GLOBAL VARIABLES 
 nx = 192
@@ -122,17 +122,17 @@ def main():
         nlayers = catch_nt(path_in, nx, ny, pixel_depht)
         write_header(path_out, nlayers, nx, ny )
 
-        z = catch_data(path_in,nlayers, nx, ny)
-        
-        with open (path_in, 'wb') as fh1:
-            if nlayers == 1:
-                z1 = flip1(input=z,a=nx,b=ny)
-            else:
-                z1 = flip2(input=z,a=nx,b=ny,c=nlayers)
-            z1.tofile(fh1, format = "%.12f")
+ #       z = catch_data(path_in,nlayers, nx, ny)
+ #       
+ #       with open (path_in, 'wb') as fh1:
+ #           if nlayers == 1:
+ #               z1 = flip1(input=z,a=nx,b=ny)
+ #           else:
+ #               z1 = flip2(input=z,a=nx,b=ny,c=nlayers)
+ #           z1.tofile(fh1, format = "%.12f")
 
-        z = None
-        z1 = None
+  #      z = None
+  #      z1 = None
 
         print(nlayers)
         print(path_in)
