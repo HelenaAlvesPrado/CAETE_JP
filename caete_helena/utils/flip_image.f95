@@ -1,15 +1,15 @@
-subroutine flip_image_1(input, output, a, b)
+subroutine flip_image_1(input, a, b, output)
 
   implicit none
 
   integer, intent (in) :: a, b
-  real,    intent (in), dimension (0:a-1,0:b-1) :: input
-  real,    intent(out), dimension (0:a-1,0:b-1) :: output
+  real(kind=4), intent (in), dimension (a,b) :: input
+  real(kind=4), intent(out), dimension (a,b) :: output
   
   integer :: i, j
-  do i = 0, a-1
+  do i = 1, a
 
-     do j = b, 0, -1
+     do j = b, 1, -1
 
         output(i, j) = input(i, (b + 1 - j))
 
@@ -19,18 +19,18 @@ subroutine flip_image_1(input, output, a, b)
 
 end subroutine flip_image_1
 
-subroutine flip_image_2(input, output, a, b, c)
+subroutine flip_image_2(input, a, b, c, output)
 
   implicit none
 
   integer, intent (in) :: a, b, c
-  real,    intent (in), dimension (0:a-1,0:b-1,0:c-1) :: input
-  real,    intent(out), dimension (0:a-1,0:b-1,0:c-1) :: output
+  real(kind=4),    intent (in), dimension (a, b, c) :: input
+  real(kind=4),    intent(out), dimension (a, b, c) :: output
   
   integer :: i, j, k
-  do k = 0, c-1
-     do i = 0, a-1
-        do j = b, 0, -1
+  do k = 1, c
+     do i = 1, a
+        do j = b, 1, -1
 
            output(i, j, k) = input(i, (b + 1 - j), k)
 
