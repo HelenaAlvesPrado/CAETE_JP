@@ -10,6 +10,7 @@ import os
 
 ## print("BUILDING EXTERNAL DEPENDENCIES", os.linesep)
 
+<<<<<<< HEAD
 try:
     os.system("f2py3 -c --quiet flip_image.f95 -m flip") # fortran function to flip image
     for x in range(500):
@@ -27,6 +28,20 @@ else:
     flip_b = True
 
 if flip_b:
+=======
+#try:
+#    os.system("f2py3 -c --quiet flip_image.f95 -m flip") # fortran function to flip image
+#except:
+#    flip_b = False
+#    print('Compilation exit status 1 - ')
+#else:
+#    print('Compilation exit status 0 - ')
+#    flip_b = True
+
+#if flip_b:
+#    from flip import flip_image_1 as flip1
+#    from flip import flip_image_2 as flip2
+>>>>>>> f9194cbe579d1de3bb0bf9a85f90bcf3cc79d1ac
 
 
 #GLOBAL VARIABLES 
@@ -37,6 +52,7 @@ if flip_b:
     
     pixel_depht = 32
     
+<<<<<<< HEAD
     pixel_type  = 'FLOAT' # || SIGNINT || UNSIGNINT
     
     bnd_layout = 'BSQ' # || BIL || BIP
@@ -115,6 +131,35 @@ if flip_b:
     
     
     def main():
+=======
+    bin_files_path = '../outputs' 
+
+    raw_list =[ i for i in os.listdir(bin_files_path) if i.split('.')[-1] in FILE_EXT]
+
+    for i in raw_list:
+        
+        path_in = os.path.join(bin_files_path,i)
+        path_out = os.path.join(bin_files_path, (i.split('.')[0] + str('.hdr')))
+
+        nlayers = catch_nt(path_in, nx, ny, pixel_depht)
+        write_header(path_out, nlayers, nx, ny )
+
+ #       z = catch_data(path_in,nlayers, nx, ny)
+ #       
+ #       with open (path_in, 'wb') as fh1:
+ #           if nlayers == 1:
+ #               z1 = flip1(input=z,a=nx,b=ny)
+ #           else:
+ #               z1 = flip2(input=z,a=nx,b=ny,c=nlayers)
+ #           z1.tofile(fh1, format = "%.12f")
+
+  #      z = None
+  #      z1 = None
+
+        print(nlayers)
+        print(path_in)
+        print(path_out, '\n')
+>>>>>>> f9194cbe579d1de3bb0bf9a85f90bcf3cc79d1ac
         
         bin_files_path = '../outputs' 
     
