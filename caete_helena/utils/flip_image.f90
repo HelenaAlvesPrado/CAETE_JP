@@ -48,11 +48,10 @@ real*4 :: input_data(nx,ny), out_data(nx,ny)
 
        open(14,file=file_in,status='old', access='direct',recl=strd)
        read(14, rec=1) input_data
-       close(14)
        
        open(15,file=file_out,status='new',access='direct',recl=strd)
        write(15,rec=1) out_data
-       close(15)
+       
 
        call read_and_flip(14,15,nlay)
 
@@ -93,6 +92,8 @@ real*4 :: input_data(nx,ny), out_data(nx,ny)
            call flip_image1(aux, aux1, nx, ny)
            write(nunit_out,rec=k) aux1
         enddo
+	close(nunit_in)
+	close(nunit_out)
         return
       end subroutine read_and_flip
       
