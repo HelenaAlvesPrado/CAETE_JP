@@ -1,6 +1,6 @@
-c
+c     
       program maior_de_3
-
+      
       integer  len
       parameter (len=3)         ! numero de suas proporcoes de biomassa
       integer i
@@ -12,9 +12,9 @@ c
       data x /0.25, 0.25, 0.50/ ! criando valores teoricos pras suas prop.
       
       do i = 1,len
-         if(x(i) .gt. max_value) max_value = x(i) 
+         if(x(i) .gt. max_value) max_value = x(i)
       enddo
-
+      
       print*, max_value
       end program maior_de_3
       
