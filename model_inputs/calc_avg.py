@@ -5,19 +5,16 @@ Created on Thu Mar 17 16:09:36 2016
 @author: jpdarela
 
 """
+import numpy as np
 import h5py
 import os
-import numpy as np
 import ada_love as al
 from ada_love import mont as mont
 
 # GLOBALS
 dir_sep = os.path.sep
-
 month_index = al.month_index(30) # indices para 30 anos
-
 NO_DATA = np.float32(-9999)
-
 mask_array = np.load('mask.npy') # True for no_data
 #mask_array = not mask_array
 
@@ -48,7 +45,6 @@ def temp_conversion(array):
 def check_arr(arr, name):
     if len(arr.shape) == 3:
         print('ndims ok')
-
         for array in arr:
             if array.sum()==0:
                 print('sum = 0 - Array: ',name )
@@ -101,7 +97,6 @@ def extr_data(files_list, var_name, var_arr1):
     files_list.sort()
     for file_ in files_list:
         print(file_)
-
         # try open file
         try:
             fh  = h5py.File(file_, 'r')
@@ -153,7 +148,7 @@ def main():
     # loop over datasets and make things happen
     npy_files = []
     for el in vr_set:
-        if el in ['rhs', 'huss', 'tasmax', 'tasmin', 'wind', 'rlds', 'hurs']:
+        if el in ['rhs', 'huss', 'tasmax', 'tasmin', 'rlds', 'hurs']:
             continue
         fls=[el1 for el1 in fl_set if el==el1.split(dir_sep)[-1].split('_')[0]]
         #criando aux_array
@@ -177,17 +172,14 @@ def main():
             npy_files.append(str(el)+ '.npy')
             del(media_mensal)
 
-    ### Arquivos npy salvos...
-    # a saga continua... salvar inputs pro caete
-    out_dir = 'inputs_caete4'
+    ### npy done
+    out_dir = 'inputs_caete'
     out_path = os.getcwd() + os.path.sep + out_dir
     if os.path.exists(out_path):
         pass
     else:
         os.system('mkdir %s'%out_dir)
         os.system('cp ./aux_files/ascii2bin.f90 ./%s'%out_dir)
-        os.system('cp ./aux_files/flip_image.f90 ./%s'%out_dir)
-        os.system('cp ./aux_files/bin2flt-asc_v4.py ./%s'%out_dir)
     txt_files = []
     for npy in npy_files:
         txt_files.append(npy.split('.')[0] + '.txt')
@@ -207,9 +199,6 @@ def main():
                     fh.write(line)
                 month += 1
 #==============================================================================
-    # ascii2bin
-    # bin2flt
-    # flip_image
     curdir= os.getcwd()
     os.chdir(out_path)
     print('compilando ascii2bin.f90')
@@ -230,15 +219,7 @@ def main():
         except:
             pass
 
-    os.system('rm ascii2bin.f90')    
-
-    print('criando arquivos flt')
-
-    os.system ("python3 bin2flt-asc_v4.py")
-    
-    os.system('rm bin2flt-asc_v4.py')
-    os.system('rm flip_image.f90')
-
+    os.system('rm ascii2bin.f90')
     os.chdir(curdir)
 
     print('FINALIZADO')
