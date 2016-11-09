@@ -3,6 +3,8 @@ import os
 import glob
 import gdal
 from netCDF4 import Dataset as dt
+import time
+from ILAMB.Variable import Variable
 
 mask_fpath = './mask12.npy'
 NO_DATA = [-9999.0, -9999.0]
@@ -53,7 +55,7 @@ def write_CAETE_output(nc_filename, arr, var):
     time      = rootgrp.createVariable(varname="time", datatype=np.float32, dimensions=("time",))
     latitude  = rootgrp.createVariable(varname="latitude", datatype=np.float32,dimensions=("latitude",))
     longitude = rootgrp.createVariable(varname="longitude", datatype=np.float32, dimensions=("longitude",))
-    var_      = rootgrp.createVariable(varname='annual_cycle_mean_of_' + str(flt_attrs()[var][2]),
+    var_      = rootgrp.createVariable(varname = 'annual_cycle_mean_of_' + str(flt_attrs()[var][2]),
                                        datatype=np.float32, dimensions=("time","latitude","longitude",),
                                        fill_value=NO_DATA[0])
 

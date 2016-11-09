@@ -168,8 +168,6 @@ c     234567
 !     
                call budget (mes,wini,gini,sini,td,ta,pr,spre,ae,ca,ipar,
      &              wfim,gfim,sfim,smes,rmes,emes,epmes,
-     &              phmes,armes,nppmes,laimes,
-     &              clmes,csmes,hrmes,rcmes)
 
                clit(i,j,k) = clmes
                csoil(i,j,k) = csmes
