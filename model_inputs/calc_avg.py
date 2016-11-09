@@ -27,11 +27,11 @@ def save_txt(filename, input_data):
 
 
 def prec_conversion(array):
-    """conversion factor: 1e4 * 1e-6 * 2.592e8 """
-    # from kg/m²/s to mm*month⁻¹
+    """conversion factor: 2.62974e+06 """
+    # from kg/m²/s to kg/m²/month  (same of mm*month⁻¹)
     index = 0
     for arr in array:
-        array[index] = arr * 2592000
+        array[index] = arr * 2.62974e+06
         index += 1
 
 
@@ -173,7 +173,7 @@ def main():
             del(media_mensal)
 
     ### npy done
-    out_dir = 'inputs_caete'
+    out_dir = 'inputs_caete3453'
     out_path = os.getcwd() + os.path.sep + out_dir
     if os.path.exists(out_path):
         pass
