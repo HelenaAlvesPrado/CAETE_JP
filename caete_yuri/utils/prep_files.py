@@ -20,7 +20,7 @@ def flt_attrs():
             'ps'    : ['sur_pressure',        'Pa',                        'ps'],
             'tas'   : ['sur_temperature_2m',  'celcius',                  'tas'],  
             'pr'    : ['precipitation',       'Kg m-2 month-1',            'pr'],      
-            'wsoil' : ['soil_water_fraction', 'kg m-2',                 'wsoil'],
+            'wsoil' : ['soil_water_content', 'kg m-2',                  'wsoil'],
             'et'    : ['evapotranpiration',   'kg m-2 day-1',              'et'],
             'runoff': ['runoff',              'kg m-2 day-1',          'runoff']}
 
