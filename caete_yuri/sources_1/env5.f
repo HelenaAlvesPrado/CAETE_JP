@@ -146,23 +146,23 @@ c      enddo
 !      close(16)
 c
 c write wsoil2
-      open(17,file='../outputs/wsoil2.flt',
+c      open(17,file='../outputs/wsoil2.flt',
 !      open(17,file='../ipcc_env_vars2/'//
 !     & 'soilm_HADCM3_A2_onlyclimate.bin',
-     &        status='unknown',form='unformatted',
-     &        access='direct',recl=4*nx*ny)
-      do k=1,12
-         do i=1,nx
-         do j=1,ny
-            waux(i,j) = wsoil2(i,j,k)
-         enddo
-         enddo
-         write(17,rec=k) waux
-      enddo
-      close(17)
+c     &        status='unknown',form='unformatted',
+c     &        access='direct',recl=4*nx*ny)
+c      do k=1,12
+c         do i=1,nx
+c        do j=1,ny
+c            waux(i,j) = wsoil2(i,j,k)
+c         enddo
+c         enddo
+c         write(17,rec=k) waux
+c      enddo
+c      close(17)
 c
 c write evapotranspiration
-      open(18,file='../outputs/et.flt',
+      open(18,file='../outputs/et.bin',
 !      open(18,file='../ipcc_env_vars2/'//
 !     & 'evaptr_HADCM3_A2_onlyclimate.bin',
      &        status='unknown',form='unformatted',
@@ -178,7 +178,7 @@ c write evapotranspiration
       close(18)
 c
 c write monthly NPP
-      open(19,file='../outputs/npp.flt',
+      open(19,file='../outputs/npp.bin',
 c      open(19,file='../ipcc_env_vars2/'//
 c     & 'mon_npp_HADCM3_A2_onlyclimate.bin',
      &        status='unknown',form='unformatted',
@@ -194,7 +194,7 @@ c     & 'mon_npp_HADCM3_A2_onlyclimate.bin',
       close(19)
       
 c write monthly Photosynthesis
-      open(20,file='../outputs/ph.flt',
+      open(20,file='../outputs/ph.bin',
 !      open(20,file='../ipcc_env_vars2/'//
 !     & 'mon_photo_HADCM3_A2_onlyclimate.bin',
      &        status='unknown',form='unformatted',
@@ -210,7 +210,7 @@ c write monthly Photosynthesis
       close(20)
 c
 c write monthly plant respiration
-      open(21,file='../outputs/ar.flt',
+      open(21,file='../outputs/ar.bin',
 c      open(21,file='../ipcc_env_vars2/'//
 c     & 'mon_ar_HADCM3_A2_onlyclimate.bin',
      &        status='unknown',form='unformatted',
@@ -226,7 +226,7 @@ c     & 'mon_ar_HADCM3_A2_onlyclimate.bin',
       close(21)
 c
 c write canopy resistance
-      open(22,file='../outputs/rc.flt',
+      open(22,file='../outputs/rc.bin',
 !      open(22,file='../ipcc_env_vars2/'//
 !     & 'rc_HADCM3_A2_onlyclimate.bin',
      &        status='unknown',form='unformatted',
@@ -309,7 +309,7 @@ c write canopy resistance
 !      close(28)
 
       
-      open(29,file='../outputs/wsoil.flt',
+      open(29,file='../outputs/wsoil.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
         do k=1,12 
@@ -322,7 +322,7 @@ c write canopy resistance
          enddo
       close(29)
 
-      open(30,file='../outputs/runoff.flt',
+      open(30,file='../outputs/runoff.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12

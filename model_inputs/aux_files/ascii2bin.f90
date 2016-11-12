@@ -7,7 +7,7 @@ program ascii2bin
     
     integer :: nx, ny, i, j
     
-    parameter (nx=720, ny=360*12)   ! mudar ny para 360 linhas * 12 meses
+    parameter (nx=720, ny=4320)   ! mudar ny para 360 linhas * 12 meses
     real*4, dimension(nx,ny):: arr_in
     
     CALL GETARG(1,BUFFER)

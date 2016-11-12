@@ -14,11 +14,9 @@ from ada_love import mont as mont
 # GLOBALS
 dir_sep = os.path.sep
 month_index = al.month_index(30) # indices para 30 anos
-NO_DATA = np.float32(-9999)
+NO_DATA = [-9999.0, -9999.0]
 mask_array = np.load('mask.npy') # True for no_data
 #mask_array = not mask_array
-
-
 #-----------------------------------
 
 def save_txt(filename, input_data):
@@ -173,7 +171,7 @@ def main():
             del(media_mensal)
 
     ### npy done
-    out_dir = 'inputs_caete3453'
+    out_dir = 'new_inputs_caete'
     out_path = os.getcwd() + os.path.sep + out_dir
     if os.path.exists(out_path):
         pass

@@ -22,7 +22,7 @@ c234567
 ! i/o variables
 !
       parameter(nx=720,ny=360)
-      real, parameter :: NO_DATA = -9999.000000000000
+      real, parameter :: NO_DATA = -9999.0
       real prec(nx,ny,12),temp(nx,ny,12),lsmk(nx,ny),p0(nx,ny,12)
       real tmin(nx,ny),seanpp(nx,ny),meanpp(nx,ny),meanhr(nx,ny),
      &     meancs(nx,ny),mphoto(nx,ny),maresp(nx,ny),ave_wsoil(nx,ny),
