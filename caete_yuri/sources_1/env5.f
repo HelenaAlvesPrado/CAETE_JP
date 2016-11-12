@@ -309,7 +309,7 @@ c write canopy resistance
 !      close(28)
 
       
-      open(29,file='../outputs/wsoil.bin',
+      open(29,file='../outputs/mrso.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
         do k=1,12 
@@ -322,7 +322,7 @@ c write canopy resistance
          enddo
       close(29)
 
-      open(30,file='../outputs/runoff.bin',
+      open(30,file='../outputs/mrro.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12

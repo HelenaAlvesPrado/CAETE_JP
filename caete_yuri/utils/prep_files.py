@@ -14,15 +14,15 @@ files = glob.glob1(fdir, '*.bin')
 
 
 def flt_attrs():
-    return {'header': ['long_name',           'unit',           'standart_name'],
-            'rsds'  : ['short_wav_rad_down',  'W m-2',                   'rsds'], 
-            'wind'  : ['wind_velocity',       'm s-1',                   'wind'],
-            'ps'    : ['sur_pressure',        'Pa',                        'ps'],
-            'tas'   : ['sur_temperature_2m',  'celcius',                  'tas'],  
-            'pr'    : ['precipitation',       'Kg m-2 month-1',            'pr'],      
-            'wsoil' : ['soil_water_content', 'kg m-2',                  'wsoil'],
-            'et'    : ['evapotranpiration',   'kg m-2 day-1',              'et'],
-            'runoff': ['runoff',              'kg m-2 day-1',          'runoff']}
+    return {'header': ['long_name',                 'unit',           'standart_name'],
+            'rsds'  : ['short_wav_rad_down',        'W m-2',                   'rsds'], 
+            'wind'  : ['wind_velocity',             'm s-1',                   'wind'],
+            'ps'    : ['sur_pressure',              'Pa',                        'ps'],
+            'tas'   : ['sur_temperature_2m',        'celcius',                  'tas'],  
+            'pr'    : ['precipitation',             'Kg m-2 month-1',            'pr'],      
+            'mrso'  : ['soil_water_content-wsoil',  'kg m-2',                  'mrso'],
+            'et'    : ['evapotranpiration',         'kg m-2 day-1',              'et'],
+            'mrro'  : ['total_runoff',              'kg m-2 day-1',            'mrro']}
 
 
 
