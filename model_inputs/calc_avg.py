@@ -13,11 +13,12 @@ from ada_love import mont as mont
 
 # GLOBALS
 dir_sep = os.path.sep
-month_index = al.month_index(30) # indices para 30 anos
+month_index = al.month_index(30)  # indices para 30 anos
 NO_DATA = [-9999.0, -9999.0]
-mask_array = np.load('mask.npy') # True for no_data
-#mask_array = not mask_array
-#-----------------------------------
+mask_array = np.load('mask.npy')  # True for no_data
+# mask_array = not mask_array
+# -----------------------------------
+
 
 def save_txt(filename, input_data):
     np.savetxt(filename, input_data, fmt='%.10f')
@@ -44,18 +45,19 @@ def check_arr(arr, name):
     if len(arr.shape) == 3:
         print('ndims ok')
         for array in arr:
-            if array.sum()==0:
-                print('sum = 0 - Array: ',name )
+            if array.sum() == 0:
+                print('sum = 0 - Array: ', name)
                 return False
-    print(name,"-->ok")
+    print(name, "-->ok")
     return True
+
 
 def calc_avg(arr_var, month):
 
     """ Calcula média para mes month para uma variável"""
 
-    mean_arr = np.zeros(shape = (360,720), dtype=al.f32)
-    arr_month =  arr_var[month_index[month]]
+    mean_arr = np.zeros(shape=(360, 720), dtype=al.f32)
+    arr_month = arr_var[month_index[month]]
     for arr in arr_month:
         mean_arr += arr/len(month_index[month])
 
@@ -67,16 +69,17 @@ def vars_avg(var):
     """Calcula média mensal para os 12 meses do ano
        Retorna lista com médias mensais ordenadas jan...dec
     """
-    #global -> mont
+    # global -> mont
     arr_m_list = []
     for m in mont:
         mn = calc_avg(var, m)
         arr_m_list.append(mn)
-    return arr_m_list   ## OLHA AQUI - MESES ORDENADOS
+    return arr_m_list   # OLHA AQUI - MESES ORDENADOS
+
 
 def catch_metadata(cdf_str_path):
 
-    fh  = h5py.File(cdf_str_path, 'r')
+    fh = h5py.File(cdf_str_path, 'r')
     fileHandler_active = True
 
     for name in fh:
@@ -91,23 +94,24 @@ def extr_data(files_list, var_name, var_arr1):
 
     """    """
     INDEX_COUNTER = 0
-    #iterating over files
+    # iterating over files
     files_list.sort()
     for file_ in files_list:
         print(file_)
         # try open file
         try:
-            fh  = h5py.File(file_, 'r')
+            fh = h5py.File(file_, 'r')
             closed = False
-            #iterates over datasets in file
+            # iterates over datasets in file
             for ds in fh:
-                #print(ds, '->>>', fh[ds])
+                # print(ds, '->>>', fh[ds])
                 # if dataset is var_name
                 if ds == str(var_name):
-                    #print('dataset = ', ds, 'shape', fh[ds].shape)
-                    #iterates over var_name_ monthly arrays & store it in var_arr
+                    # print('dataset = ', ds, 'shape', fh[ds].shape)
+                    # iterates over var_name_ monthly arrays &
+                    # store it in var_arr
                     for index in list(range(fh[ds].shape[0])):
-                        #print(index, '->', index+INDEX_COUNTER)
+                        # print(index, '->', index+INDEX_COUNTER)
                         var_arr1[index + INDEX_COUNTER] = fh[ds][index]
                     INDEX_COUNTER += fh[ds].shape[0]
             fh.close()
@@ -124,11 +128,11 @@ def extr_data(files_list, var_name, var_arr1):
 
 
 def main():
-    
+
     dlds_files = os.getcwd() + dir_sep + 'dlds'
 
-    files, names = al.list_files(dlds_files) # diretório .nc4 fls
-    #print(names)
+    files, names = al.list_files(dlds_files)  # diretório .nc4 fls
+    # print(names)
     files = sorted(files, reverse=True)
 
     shapeaux = (360, 360, 720)
@@ -148,15 +152,15 @@ def main():
     for el in vr_set:
         if el in ['rhs', 'huss', 'tasmax', 'tasmin', 'rlds', 'hurs']:
             continue
-        fls=[el1 for el1 in fl_set if el==el1.split(dir_sep)[-1].split('_')[0]]
-        #criando aux_array
-        aux_array = np.zeros(shape = shapeaux, dtype=al.f32)
+        fls=[el1 for el1 in fl_set if el == el1.split(dir_sep)[-1].split('_')[0]]
+        # criando aux_array
+        aux_array = np.zeros(shape=shapeaux, dtype=al.f32)
         # extraindo dados dos arquivos nc4
         aux_arr2 = extr_data(fls, el, aux_array)
         del(aux_array)
 
         if check_arr(aux_arr2, el):
-            #calculando médias
+            # calculando médias
             media_mensal = vars_avg(aux_arr2)
             del(aux_arr2)
 
@@ -167,17 +171,17 @@ def main():
                 temp_conversion(media_mensal)
 
             np.save(el, media_mensal)
-            npy_files.append(str(el)+ '.npy')
+            npy_files.append(str(el) + '.npy')
             del(media_mensal)
 
-    ### npy done
-    out_dir = 'new_inputs_caete'
+    # npy done
+    out_dir = 'new_inputs_caete2'
     out_path = os.getcwd() + os.path.sep + out_dir
     if os.path.exists(out_path):
         pass
     else:
-        os.system('mkdir %s'%out_dir)
-        os.system('cp ./aux_files/ascii2bin.f90 ./%s'%out_dir)
+        os.system('mkdir %s' % out_dir)
+        os.system('cp ./aux_files/ascii2bin.f90 ./%s' % out_dir)
     txt_files = []
     for npy in npy_files:
         txt_files.append(npy.split('.')[0] + '.txt')
@@ -187,7 +191,7 @@ def main():
         with open(bin_filename, mode='a') as fh:
             for arr in month_arr:
                 np.place(arr, mask_array, NO_DATA)
-                #salvando arquivo binario p modelo
+                # salvando arquivo binario p modelo
                 txt_file = 'np_array_calc_avg_py.txt'
                 np.savetxt(txt_file, arr, fmt='%.10f')
                 with open(txt_file, newline='\n') as fh1:
@@ -196,35 +200,33 @@ def main():
                 for line in reader:
                     fh.write(line)
                 month += 1
-#==============================================================================
-    curdir= os.getcwd()
+# =============================================================================
+    curdir = os.getcwd()
     os.chdir(out_path)
     print('compilando ascii2bin.f90')
     os.system('gfortran ascii2bin.f90 -o ascii2bin')
     for tf in txt_files:
-         print('convertendo ascii - bin: ARQUIVO ---> %s '%tf)
-         os.system('./ascii2bin %s %s'%(tf, tf.split('.')[0]+'.bin'))
-         while True:
-             try:
-                 os.remove(tf)
-                 break
-             except:
-                 pass
+        print('convertendo ascii - bin: ARQUIVO ---> %s ' % tf)
+        os.system('./ascii2bin %s %s' % (tf, tf.split('.')[0] + '.bin'))
+        while True:
+            try:
+                os.remove(tf)
+                break
+            except:
+                pass
     while True:
         try:
             os.remove('ascii2bin')
             break
         except:
             pass
-
     os.system('rm ascii2bin.f90')
     os.chdir(curdir)
 
     print('FINALIZADO')
-    
-#==============================================================================
-    #END PROGRAM
+
+# ==============================================================================
+    # END PROGRAM
 
 if __name__ == '__main__':
     main()
-
