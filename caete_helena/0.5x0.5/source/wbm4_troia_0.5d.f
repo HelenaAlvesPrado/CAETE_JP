@@ -701,7 +701,7 @@ c234567
 !
 ! Carbon cycle (Microbial respiration, litter and soil carbon)
 ! ============================================================
-!
+! PROBLEMA NA CHAMADA A SEGUIR.... de onde vem hr ? 
         call carbon2 (tsoil,f5,evap,laia,                                                  
      &                cl,cs,hr)                                                           
       endif

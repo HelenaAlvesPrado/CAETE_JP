@@ -71,7 +71,9 @@ c234567
       t1 = t0*exp(-1.0/tau) + (1.0 - exp(-1.0/tau))*temp(i,j,k)
       tsoil(i,j,k) = (t0 + t1)/2.0
       t0 = t1
+      
       enddo
+      print*, 't0',t0, 't1', t1, 'tsoil', tsoil(i,j,k)
       endif
 !
       enddo

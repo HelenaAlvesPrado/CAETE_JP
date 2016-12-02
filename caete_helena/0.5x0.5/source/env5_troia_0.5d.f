@@ -177,7 +177,7 @@ c      ca= ((73.73-35.35)*0.5)+35.35 !Pa half effect!!!
 ! Write environmental variables
 ! =============================
 !
-      open(16,file='../outputs/ambientais4_caete_new.flt',
+      open(16,file='../outputs/ambientais4.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       write(16,rec=1) tmin 
@@ -192,26 +192,26 @@ c      ca= ((73.73-35.35)*0.5)+35.35 !Pa half effect!!!
       write(16,rec=10) ave_rc 
       close(16)
 !
-! Write wsoil2 
+! Write wsoil2 ---> mm == kg m-2
 ! ------------
 !
-      open(17,file='../outputs/soilm_caete_new.flt',
-     &        status='unknown',form='unformatted',
-     &        access='direct',recl=4*nx*ny)
-      do k=1,12
-         do i=1,nx
-         do j=1,ny
-            waux(i,j) = wsoil2(i,j,k)
-         enddo
-         enddo
-         write(17,rec=k) waux
-      enddo
-      close(17)
+c      open(17,file='../outputs/mrso.bin',
+c     &        status='unknown',form='unformatted',
+c     &        access='direct',recl=4*nx*ny)
+c      do k=1,12
+c         do i=1,nx
+c         do j=1,ny
+c            waux(i,j) = wsoil2(i,j,k)
+c         enddo
+c         enddo
+c         write(17,rec=k) waux
+c      enddo
+c      close(17)
 !
-! Write evapotranspiration
+! Write evapotranspiration  mm/day == kg m-2 day-1
 ! ------------------------
 !
-      open(18,file='../outputs/evaptr_caete_new.flt',
+      open(18,file='../outputs/et.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
@@ -224,10 +224,10 @@ c      ca= ((73.73-35.35)*0.5)+35.35 !Pa half effect!!!
       enddo
       close(18)
 !
-! Write monthly NPP 
+! Write monthly NPP kg C m-2 year-1
 ! -----------------
 !
-      open(19,file='../outputs/mon_npp_caete_new.flt',
+      open(19,file='../outputs/npp.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
@@ -240,10 +240,10 @@ c      ca= ((73.73-35.35)*0.5)+35.35 !Pa half effect!!!
       enddo
       close(19)
 !      
-! Write monthly photosynthesis 
+! Write monthly photosynthesis kg C m-2 year-1
 ! ----------------------------
 !
-      open(20,file='../outputs/mon_photo_caete_new.flt',
+      open(20,file='../outputs/ph.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
@@ -256,10 +256,10 @@ c      ca= ((73.73-35.35)*0.5)+35.35 !Pa half effect!!!
       enddo
       close(20)
 !
-! Write monthly plant respiration 
+! Write monthly plant respiration  kg C m-2 y-1
 ! -------------------------------
 !
-      open(21,file='../outputs/mon_ar_pft_new.flt',
+      open(21,file='../outputs/ar.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
@@ -272,10 +272,10 @@ c      ca= ((73.73-35.35)*0.5)+35.35 !Pa half effect!!!
       enddo
       close(21)
 !
-! Write monthly canopy resistence 
+! Write monthly canopy resistence s m-1
 ! -------------------------------
 !
-      open(22,file='../outputs/rc_caete_new.flt',
+      open(22,file='../outputs/rc.bin',
      &        status='unknown',form='unformatted',
      &        access='direct',recl=4*nx*ny)
       do k=1,12
@@ -291,20 +291,20 @@ c      ca= ((73.73-35.35)*0.5)+35.35 !Pa half effect!!!
 ! Write annual canopy resistence 
 ! ------------------------------
 !
-      open(23,file='../outputs/ave_rc_caete_new.flt',
-     &        status='unknown',form='unformatted',
-     &        access='direct',recl=4*nx*ny)
-         write(23,rec=1) ave_rc
-      close(23)
+!      open(23,file='../outputs/ave_rc_caete_new.flt',
+!     &        status='unknown',form='unformatted',
+!     &        access='direct',recl=4*nx*ny)
+!         write(23,rec=1) ave_rc
+!      close(23)
 !
 ! Write annual npp 
 ! ----------------
 !
-      open(24,file='../outputs/ave_npp_caete_brandnew.flt',
-     &        status='unknown',form='unformatted',
-     &        access='direct',recl=4*nx*ny)
-         write(24,rec=1) meanpp
-      close(24)
+!      open(24,file='../outputs/ave_npp_caete_brandnew.flt',
+!     &        status='unknown',form='unformatted',
+!     &        access='direct',recl=4*nx*ny)
+!         write(24,rec=1) meanpp
+!      close(24)
 !
 !     Program end
 !

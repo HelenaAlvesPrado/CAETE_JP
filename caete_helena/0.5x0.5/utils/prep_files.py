@@ -22,7 +22,11 @@ def flt_attrs():
             'pr'    : ['precipitation',             'Kg m-2 month-1',            'pr'],      
             'mrso'  : ['soil_water_content-wsoil',  'kg m-2',                  'mrso'],
             'et'    : ['evapotranpiration',         'kg m-2 day-1',              'et'],
-            'mrro'  : ['total_runoff',              'kg m-2 day-1',            'mrro']}
+            'mrro'  : ['total_runoff',              'kg m-2 day-1',            'mrro'],
+            'npp'   : ['net_primary_prod',          'kg m-2 year-1',            'npp'],
+            'ph'    : ['photosyntesis',             'kg m-2 year-1',             'ph'],
+            'ar'    : ['autotrophic_resp',          'kg m-2 year-1',             'ar'],
+            'rc'    : ['canopy_resistence',         's m-1',                     'rc']}
 
 
 
