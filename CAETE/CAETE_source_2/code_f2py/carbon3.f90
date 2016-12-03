@@ -472,3 +472,107 @@ subroutine soil_temp(temp, tsoil)
      t0 = t1
   enddo
 end subroutine soil_temp
+
+subroutine canopy_resistence(npp, ca, p0, rc2)
+
+  real, intent( in) :: npp, ca, p0
+  real, intent(out) :: rc2
+
+  real :: nppb, p1
+
+  p1 = p0 * 100. ! convertendo mbar(hPa) para Pa
+  
+  nppb = amax1(npp,0.05)
+  rc2 = (ca/(0.9*(nppb*2.64e-6)*0.685*p1))
+
+end subroutine canopy_resistence
+
+subroutine available_energy(temp, ae)
+  real, intent( in) :: temp
+  real, intent(out) :: ae
+  
+  ae = 2.895*temp + 52.326 !from NCEP-NCAR Reanalysis data
+
+end subroutine available_energy
+
+subroutine wgs_partition(temp, prec, p0, rh, wsoil, runoff, evap) ! wgs stands for water/ice/snow 
+
+  ! i/o
+  real, intent( in) :: temp, prec, p0, rh   ! = 0.685 !from NCEP-NCAR Reanalysis data
+  real, intent(out) :: wsoil, runoff, evap
+
+  ! parameters
+  real, parameter ::  wmax  = 500.0  !soil moisture availability (mm)
+  real, parameter ::  tsnow = -1.0   !temperature threshold for snowfall (oC)
+  real, parameter ::  tice  = -2.5   !temperature threshold for soil freezing (oC)
+
+  ! internal vars
+  !c precipitation [Eq. 3]
+  real :: psnow = 0.0
+  real :: prain = 0.0
+  real :: w, g, s, smelt, ds
+  if (temp.lt.tsnow) then
+     psnow = prec !snowfall (mm/day)
+  else
+     prain = prec !rainfall (mm/day)
+  endif
+  !c
+  !c initialization
+
+  w  = 0.01  !soil moisture initial condition (mm)
+  g  = 0.0   !soil ice initial condition (mm)
+  s  = 0.0   !overland snow initial condition (mm)
+
+  !c snow budget
+  
+  smelt = 2.63 + 2.55*temp + 0.0912*temp*prain !snowmelt (mm/day) [Eq. 4]
+  smelt = amax1(smelt,0.0)
+  smelt = amin1(smelt,psnow)
+  ds = psnow - smelt ![Eq. 2]
+
+  !c
+  !c water budget
+  if (tsoil.le.tice) then !frozen soil
+     g = w !soil moisture freezes
+     w = 0.0
+     runoff = smelt + prain
+     evap = 0.0
+     call 
+     !ph = 0.0
+     !ar = 0.0
+     !nppa = 0.0
+     !laia = 0.0
+     !cl = 0.0
+     !cs = 0.0
+     !hr = 0.0
+     !rc2 = 100.0 !default value, equal to aerodynamic resistance (below)
+  else                    !non-frozen soil
+     w = w + g !soil ice melts
+     g = 0.0
+     rimelt = 0.0
+     if (w.gt.wmax) then
+        rimelt = w - wmax !runoff due to soil ice melting
+        w = wmax
+     endif
+     c
+c Canopy resistance (based in Sellers et al. 1996; SiB2)
+c (rc2 ; s/m) [Eq. 32]
+c [NPP*2.64e-6 converts kgC/m2/yr to molCO2/m2/s]
+c [p0*100 convertes hPa (mb) to Pa]
+c
+	!nppb = amax1(nppa,0.05)
+      	!rc2 = (ca/(0.9*(nppb*2.64e-6)*0.685*(p0*100)))
+	call runoff (w,wmax,roff) !soil moisture runoff (roff, mm/day) [Eq. 10]
+        call penman (p0,temp,w,wmax,rh,ae,rc2,evap) !actual evapotranspiration (evap, mm/day)
+	dw = prain + smelt - evap - roff ![Eq. 1]
+        w = w + dw
+        if (w.gt.wmax) then
+          roff = roff + (w - wmax)
+          w = wmax
+        endif
+        if (w.lt.0.) w = 0.
+        roff = roff + rimelt !total runoff
+c carbon cycle (Microbial respiration, litter and soil carbon)
+	call carbon2 (tsoil,f5,evap,laia, !input
+     &                cl,cs,hr)              !output
+      endif

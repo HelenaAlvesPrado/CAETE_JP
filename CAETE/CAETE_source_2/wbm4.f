@@ -386,8 +386,8 @@ c (rc2 ; s/m) [Eq. 32]
 c [NPP*2.64e-6 converts kgC/m2/yr to molCO2/m2/s]
 c [p0*100 convertes hPa (mb) to Pa]
 c
-	nppb = amax1(nppa,0.05)
-      	rc2 = (ca/(0.9*(nppb*2.64e-6)*0.685*(p0*100)))
+	!nppb = amax1(nppa,0.05)
+      	!rc2 = (ca/(0.9*(nppb*2.64e-6)*0.685*(p0*100)))
 	call runoff (w,wmax,roff) !soil moisture runoff (roff, mm/day) [Eq. 10]
         call penman (p0,temp,w,wmax,rh,ae,rc2,evap) !actual evapotranspiration (evap, mm/day)
 	dw = prain + smelt - evap - roff ![Eq. 1]
