@@ -233,7 +233,8 @@ subroutine prod (temp,p0,w,wmax,ca,ipar,ph,ar,nppa,laia,f5)
   
 end subroutine prod
 
-!c Microbial (heterotrophic) respiration ================================
+
+
 subroutine carbon_hr (tsoil,f5,evap,laia,cl,cs,hr)
 
   implicit none
@@ -287,6 +288,8 @@ subroutine carbon_hr (tsoil,f5,evap,laia,cl,cs,hr)
   endif
   !c
 end subroutine carbon_hr
+
+
 
 subroutine penman (spre,temp,ur,rn,rc2,evap)
 
@@ -368,6 +371,8 @@ subroutine penman (spre,temp,ur,rn,rc2,evap)
   endif
 end subroutine penman
 
+
+
 subroutine evpot2 (spre,temp,ur,rn,evap)
   !c
   !c Entradas
@@ -439,6 +444,7 @@ subroutine evpot2 (spre,temp,ur,rn,evap)
 end subroutine evpot2
 
 
+
 subroutine soil_temp(temp, tsoil)
   ! Calcula a temperatura do solo. Aqui vamos mudar no futuro!
   ! a tsoil deve ter relacao com a et realizada...
@@ -473,6 +479,8 @@ subroutine soil_temp(temp, tsoil)
   enddo
 end subroutine soil_temp
 
+
+
 subroutine canopy_resistence(npp, ca, p0, rc2)
 
   real, intent( in) :: npp, ca, p0
@@ -487,6 +495,8 @@ subroutine canopy_resistence(npp, ca, p0, rc2)
 
 end subroutine canopy_resistence
 
+
+
 subroutine available_energy(temp, ae)
   real, intent( in) :: temp
   real, intent(out) :: ae
@@ -495,58 +505,69 @@ subroutine available_energy(temp, ae)
 
 end subroutine available_energy
 
-subroutine wgs_partition(temp, prec, p0, rh, wsoil, runoff, evap) ! wgs stands for water/ice/snow 
+
+
+subroutine runoff_c(w, wmax, roff)
+  real, intent( in) :: w, wmax
+  real, intent(out) :: roff
+  
+  roff = 38.*((w/wmax)**11.) ! [Eq. 10]
+  roff = 11.5*((w/wmax)**6.6) !from NCEP-NCAR Reanalysis data 
+end subroutine runoff_c
+
+
+
+subroutine budget(wi, gi, si, temp, prec, p0, rh, par, ca, tsoil,&
+     wf, gf, sf, wsoil, runoff, evap, emax, &
+     ph, ar, nppa, laia,&
+     cl, cs, hr)
+  
 
   ! i/o
-  real, intent( in) :: temp, prec, p0, rh   ! = 0.685 !from NCEP-NCAR Reanalysis data
-  real, intent(out) :: wsoil, runoff, evap
-
+  real, intent( in) :: wi, gi, si ! initial water/ice/snow soil content
+  real, intent( in) :: temp, prec, p0, rh, par, ca, tsoil   ! = 0.685 !from NCEP-NCAR Reanalysis data
+  real, intent(out) :: wf, gf, sf, wsoil, runoff, evap, emax
+  real, intent(out) :: ph, ar, nppa, laia
+  real, intent(out) :: cl, cs, hr
   ! parameters
   real, parameter ::  wmax  = 500.0  !soil moisture availability (mm)
   real, parameter ::  tsnow = -1.0   !temperature threshold for snowfall (oC)
   real, parameter ::  tice  = -2.5   !temperature threshold for soil freezing (oC)
 
   ! internal vars
-  !c precipitation [Eq. 3]
   real :: psnow = 0.0
   real :: prain = 0.0
-  real :: w, g, s, smelt, ds
+  real :: w, g, s, smelt, dw, rc2, f5, ae
+  
   if (temp.lt.tsnow) then
      psnow = prec !snowfall (mm/day)
   else
      prain = prec !rainfall (mm/day)
   endif
-  !c
-  !c initialization
-
-  w  = 0.01  !soil moisture initial condition (mm)
-  g  = 0.0   !soil ice initial condition (mm)
-  s  = 0.0   !overland snow initial condition (mm)
-
-  !c snow budget
   
+  !c initialization
+  w  = wi   !soil moisture initial condition (mm)
+  g  = gi   !soil ice initial condition (mm)
+  s  = si   !overland snow initial condition (mm)
+  
+  !NPP +  potential evapotranspiration
+  call prod(temp,p0,w,wmax,ca,par,ph,ar,nppa,laia,f5)
+  call evpot2(p0,temp,rh,par,emax)
+ 
+  !c snow budget
   smelt = 2.63 + 2.55*temp + 0.0912*temp*prain !snowmelt (mm/day) [Eq. 4]
   smelt = amax1(smelt,0.0)
   smelt = amin1(smelt,psnow)
-  ds = psnow - smelt ![Eq. 2]
-
-  !c
+  s = psnow - smelt
+  
   !c water budget
   if (tsoil.le.tice) then !frozen soil
      g = w !soil moisture freezes
      w = 0.0
      runoff = smelt + prain
      evap = 0.0
-     call 
-     !ph = 0.0
-     !ar = 0.0
-     !nppa = 0.0
-     !laia = 0.0
-     !cl = 0.0
-     !cs = 0.0
-     !hr = 0.0
-     !rc2 = 100.0 !default value, equal to aerodynamic resistance (below)
-  else                    !non-frozen soil
+     rc2 = 100.0 !default value, equal to aerodynamic resistance (below)
+  else
      w = w + g !soil ice melts
      g = 0.0
      rimelt = 0.0
@@ -554,25 +575,31 @@ subroutine wgs_partition(temp, prec, p0, rh, wsoil, runoff, evap) ! wgs stands f
         rimelt = w - wmax !runoff due to soil ice melting
         w = wmax
      endif
-     c
-c Canopy resistance (based in Sellers et al. 1996; SiB2)
-c (rc2 ; s/m) [Eq. 32]
-c [NPP*2.64e-6 converts kgC/m2/yr to molCO2/m2/s]
-c [p0*100 convertes hPa (mb) to Pa]
-c
-	!nppb = amax1(nppa,0.05)
-      	!rc2 = (ca/(0.9*(nppb*2.64e-6)*0.685*(p0*100)))
-	call runoff (w,wmax,roff) !soil moisture runoff (roff, mm/day) [Eq. 10]
-        call penman (p0,temp,w,wmax,rh,ae,rc2,evap) !actual evapotranspiration (evap, mm/day)
-	dw = prain + smelt - evap - roff ![Eq. 1]
-        w = w + dw
-        if (w.gt.wmax) then
-          roff = roff + (w - wmax)
-          w = wmax
-        endif
-        if (w.lt.0.) w = 0.
-        roff = roff + rimelt !total runoff
-c carbon cycle (Microbial respiration, litter and soil carbon)
-	call carbon2 (tsoil,f5,evap,laia, !input
-     &                cl,cs,hr)              !output
-      endif
+
+     call canopy_resistence(nppa, ca, p0, rc2)
+     call available_energy(temp, ae)
+     call runoff_c(w,wmax,runoff) !soil moisture runoff (roff, mm/day) [Eq. 10]
+     call penman (p0,temp,rh,ae,rc2,evap) !actual evapotranspiration (evap, mm/day)
+     dw = prain + smelt - evap - runoff ![Eq. 1]
+     w = w + dw
+     if (w.gt.wmax) then
+        runoff = runoff + (w - wmax)
+        w = wmax
+     endif
+     if (w.lt.0.) w = 0.
+     runoff = runoff + rimelt !total runoff
+  endif
+  call carbon_hr(tsoil,f5,evap,laia,cl,cs,hr)
+
+  wf = w
+  gf = g
+  sf = s
+  wsoil = w
+
+end subroutine budget
+
+subroutine wbm5(temp, prec, p0, )
+      wini  = 0.01  !soil moisture initial condition (mm)
+      gini  = 0.0   !soil ice initial condition (mm)
+      sini  = 0.0   !overland snow initial condition (mm)
+end subroutine wbm5
