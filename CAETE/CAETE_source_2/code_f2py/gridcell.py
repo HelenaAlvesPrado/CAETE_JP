@@ -9,13 +9,15 @@ import os
 class gridcell:
     
     
-    def __init__(self, x, y, cell_id):
+    def __init__(self, x, y, time, cell_id):
         
         # CELL Identifiers 
         self.x = np.int32(x)
         self.y = np.int32(y)
+        self.time = time
         self.cell_id = cell_id
         self.pos = (self.x, self.y)
+        self.name = 'id%s' % str(cell_id)
         
         # Input data
         self.pr = 0 # these must be vectors

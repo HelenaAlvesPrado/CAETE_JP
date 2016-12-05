@@ -1,1 +1,0 @@
-jpdarela@jpdarela-Latitude-D530.9715:1480686200
