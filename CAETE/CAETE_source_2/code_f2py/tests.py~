@@ -1,0 +1,3 @@
+# testing carbon funcions
+
+prod_var = tuple(stemp,p0,w,wmax,ca,ipar = (25.0, 987, 0.23, 500.0, 4000, 230))

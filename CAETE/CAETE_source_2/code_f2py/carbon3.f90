@@ -211,7 +211,7 @@ subroutine prod (temp,p0,w,wmax,ca,ipar,ph,ar,nppa,laia,f5)
   !c Non-leaf parts respiration (kgC/m2/yr)
   !c [rp ; Eq. 24]
   !c
-  rp = 3.85*rl
+  rp = 3.85*rl !3.85?
   !c
   !c Autotrophic (plant) respiration (kgC/m2/yr)
   !c [ar ; Eq. 22]
@@ -229,9 +229,12 @@ subroutine prod (temp,p0,w,wmax,ca,ipar,ph,ar,nppa,laia,f5)
   !c [npp ; Eq. 25]
   !c
   nppa = ph-ar
-  if (nppa.lt.0.0) nppa = 0.0
+  !if (nppa.lt.0.0) nppa = 0.0
   
 end subroutine prod
+
+
+
 
 
 
@@ -288,6 +291,9 @@ subroutine carbon_hr (tsoil,f5,evap,laia,cl,cs,hr)
   endif
   !c
 end subroutine carbon_hr
+
+
+
 
 
 
@@ -373,6 +379,9 @@ end subroutine penman
 
 
 
+
+
+
 subroutine evpot2 (spre,temp,ur,rn,evap)
   !c
   !c Entradas
@@ -445,6 +454,9 @@ end subroutine evpot2
 
 
 
+
+
+
 subroutine soil_temp(temp, tsoil)
   ! Calcula a temperatura do solo. Aqui vamos mudar no futuro!
   ! a tsoil deve ter relacao com a et realizada...
@@ -460,7 +472,7 @@ subroutine soil_temp(temp, tsoil)
   ! i/o
   
   real,dimension(m), intent( in) :: temp ! future __ make temps an allocatable array
-  real, intent(out) :: tsoil
+  real,dimension(m), intent(out) :: tsoil
  
   ! internal vars
   
@@ -474,10 +486,13 @@ subroutine soil_temp(temp, tsoil)
      k = mod(n,m)
      if (k.eq.0) k = 12
      t1 = (t0*exp(-1.0/TAU) + (1.0 - exp(-1.0/TAU)))*temp(k)
-     tsoil = (t0 + t1)/2.0
+     tsoil(k) = (t0 + t1)/2.0
      t0 = t1
   enddo
 end subroutine soil_temp
+
+
+
 
 
 
@@ -497,6 +512,10 @@ end subroutine canopy_resistence
 
 
 
+
+
+
+
 subroutine available_energy(temp, ae)
   real, intent( in) :: temp
   real, intent(out) :: ae
@@ -504,6 +523,10 @@ subroutine available_energy(temp, ae)
   ae = 2.895*temp + 52.326 !from NCEP-NCAR Reanalysis data
 
 end subroutine available_energy
+
+
+
+
 
 
 
@@ -517,89 +540,304 @@ end subroutine runoff_c
 
 
 
-subroutine budget(wi, gi, si, temp, prec, p0, rh, par, ca, tsoil,&
-     wf, gf, sf, wsoil, runoff, evap, emax, &
-     ph, ar, nppa, laia,&
-     cl, cs, hr)
-  
 
-  ! i/o
-  real, intent( in) :: wi, gi, si ! initial water/ice/snow soil content
-  real, intent( in) :: temp, prec, p0, rh, par, ca, tsoil   ! = 0.685 !from NCEP-NCAR Reanalysis data
-  real, intent(out) :: wf, gf, sf, wsoil, runoff, evap, emax
-  real, intent(out) :: ph, ar, nppa, laia
-  real, intent(out) :: cl, cs, hr
-  ! parameters
-  real, parameter ::  wmax  = 500.0  !soil moisture availability (mm)
-  real, parameter ::  tsnow = -1.0   !temperature threshold for snowfall (oC)
-  real, parameter ::  tice  = -2.5   !temperature threshold for soil freezing (oC)
 
-  ! internal vars
-  real :: psnow = 0.0
-  real :: prain = 0.0
-  real :: w, g, s, smelt, dw, rc2, f5, ae
-  
+
+
+subroutine budget (month,w1,g1,s1,tsoil,temp,prec,p0,ae,ca,&
+     ipar,w2,g2,s2,smavg,ruavg,evavg,&
+     epavg,phavg,aravg,nppavg,laiavg,& 
+     clavg,csavg,hravg,rcavg)
+
+  implicit none
+  ! Surface water (soil moisture, snow and ice) budget for a single month.
+  !c
+  !c I/O variables
+  !c -------------
+  !c input  month : actual month (1-12)
+  !c        w1    : initial (previous month last day) soil moisture storage (mm)
+  !c        g1    : initial soil ice storage (mm)
+  !c        s1    : initial overland snow storage (mm)
+  !c        tsoil : soil temperature (oC)
+  !c        temp  : surface air temperature (oC)
+  !c        prec  : precipitation (mm/day)
+  !c        p0    : surface pressure (mb)
+  !c        ae    : available energy (W/m2)
+  !c output w2    : final (last day) soil moisture storage (mm)
+  !c        g2    : final soil ice storage (mm)
+  !c        s2    : final overland snow storage (mm)
+  !c        smavg : snowmelt monthly average (mm/day)
+  !c        ruavg : runoff monthly average (mm/day)
+  !c        evavg : actual evapotranspiration monthly average (mm/day)
+  !c        epavg : maximum evapotranspiration monthly average (mm/day)
+  !c
+  !c=======================================================================
+  !c
+  !c i/o variables
+  integer, intent( in) ::  month
+  real, intent( in) ::  w1,g1,s1,tsoil,temp,prec,p0,ae,ca,ipar
+  real, intent(out) ::  w2,g2,s2,smavg,ruavg,evavg,epavg,rcavg
+  real, intent(out) ::  phavg,aravg,nppavg,laiavg
+  real, intent(out) ::  clavg,csavg,hravg
+  !c
+  !c internal variables
+  real :: rh,wmax,tsnow,tice
+  real :: psnow,prain
+  real :: w,g,s
+  real :: rimelt,smelt,roff,evap,emax, ds, dw, rc2
+  integer ::  ndmonth(12) !number of days for each month
+  data ndmonth /31,28,31,30,31,30,31,31,30,31,30,31/
+  !c carbon cycle
+  integer :: i 
+  real :: ph,ar,nppa,laia,cl,cs,hr, f5
+  !c
+  !c parameters
+  !c      rh    = 0.6   !relative humidity (adimensional)
+  rh    = 0.685 !from NCEP-NCAR Reanalysis data
+  wmax  = 500.0 !soil moisture availability (mm)
+  tsnow = -1.0  !temperature threshold for snowfall (oC)
+  tice  = -2.5  !temperature threshold for soil freezing (oC)
+  !c
+  !c precipitation [Eq. 3]
+  psnow = 0.0
+  prain = 0.0
   if (temp.lt.tsnow) then
-     psnow = prec !snowfall (mm/day)
+     psnow = prec/real(ndmonth(month)) !snowfall (mm/day)
   else
-     prain = prec !rainfall (mm/day)
+     prain = prec/real(ndmonth(month)) !rainfall (mm/day)
   endif
-  
+  !c
   !c initialization
-  w  = wi   !soil moisture initial condition (mm)
-  g  = gi   !soil ice initial condition (mm)
-  s  = si   !overland snow initial condition (mm)
-  
-  !NPP +  potential evapotranspiration
-  call prod(temp,p0,w,wmax,ca,par,ph,ar,nppa,laia,f5)
-  call evpot2(p0,temp,rh,par,emax)
- 
-  !c snow budget
-  smelt = 2.63 + 2.55*temp + 0.0912*temp*prain !snowmelt (mm/day) [Eq. 4]
-  smelt = amax1(smelt,0.0)
-  smelt = amin1(smelt,psnow)
-  s = psnow - smelt
-  
-  !c water budget
-  if (tsoil.le.tice) then !frozen soil
-     g = w !soil moisture freezes
-     w = 0.0
-     runoff = smelt + prain
-     evap = 0.0
-     rc2 = 100.0 !default value, equal to aerodynamic resistance (below)
-  else
-     w = w + g !soil ice melts
-     g = 0.0
-     rimelt = 0.0
-     if (w.gt.wmax) then
-        rimelt = w - wmax !runoff due to soil ice melting
-        w = wmax
+  w = w1 !w = daily soil moisture storage (mm)
+  g = g1 !g = daily soil ice storage (mm)
+  s = s1 !s = daily overland snow storage (mm)
+  smavg = 0.
+  ruavg = 0.
+  evavg = 0.
+  epavg = 0.
+  rcavg = 0.
+  laiavg = 0.
+  phavg = 0.
+  aravg = 0.
+  nppavg = 0.
+  clavg = 0.
+  csavg = 0.
+  hravg = 0.
+  !c
+  !c numerical integration
+  do i=1,ndmonth(month)
+     !c
+     !c carbon cycle (photosynthesis, plant respiration and NPP)
+     call prod (temp,p0,w,wmax,ca,ipar, ph,ar,nppa,laia,f5)
+     !c maximum evapotranspiration (emax)
+     call evpot2 (p0,temp,rh,ae,emax)
+     !c
+     !c snow budget
+     smelt = 2.63 + 2.55*temp + 0.0912*temp*prain !snowmelt (mm/day) [Eq. 4]
+     smelt = amax1(smelt,0.)
+     smelt = amin1(smelt,s+psnow)
+     ds = psnow - smelt ![Eq. 2]
+     s = s + ds
+     !c
+     !c water budget
+     if (tsoil.le.tice) then !frozen soil
+        g = g + w !soil moisture freezes
+        w = 0.0
+        roff = smelt + prain
+        evap = 0.0
+        ph = 0.0
+        ar = 0.0
+        nppa = 0.0
+        laia = 0.0
+        cl = 0.0
+        cs = 0.0
+        hr = 0.0
+        rc2 = 100.0 !default value, equal to aerodynamic resistance (below)
+     else                    !non-frozen soil
+        w = w + g !soil ice melts
+        g = 0.0
+        rimelt = 0.0
+        if (w.gt.wmax) then
+           rimelt = w - wmax !runoff due to soil ice melting
+           w = wmax
+        endif
+        
+        
+        call canopy_resistence(nppa, ca, p0, rc2)
+        call runoff_c (w,wmax,roff) !soil moisture runoff (roff, mm/day) [Eq. 10]
+        call penman (p0,temp,rh,ae,rc2,evap) !actual evapotranspiration (evap, mm/day)
+        dw = prain + smelt - evap - roff ![Eq. 1]
+        w = w + dw
+        if (w.gt.wmax) then
+           roff = roff + (w - wmax)
+           w = wmax
+        endif
+        if (w.lt.0.) w = 0.
+        roff = roff + rimelt !total runoff
+        !    c carbon cycle (Microbial respiration, litter and soil carbon)
+        call carbon_hr (tsoil,f5,evap,laia, cl,cs,hr)              !output
      endif
-
-     call canopy_resistence(nppa, ca, p0, rc2)
-     call available_energy(temp, ae)
-     call runoff_c(w,wmax,runoff) !soil moisture runoff (roff, mm/day) [Eq. 10]
-     call penman (p0,temp,rh,ae,rc2,evap) !actual evapotranspiration (evap, mm/day)
-     dw = prain + smelt - evap - runoff ![Eq. 1]
-     w = w + dw
-     if (w.gt.wmax) then
-        runoff = runoff + (w - wmax)
-        w = wmax
-     endif
-     if (w.lt.0.) w = 0.
-     runoff = runoff + rimelt !total runoff
-  endif
-  call carbon_hr(tsoil,f5,evap,laia,cl,cs,hr)
-
-  wf = w
-  gf = g
-  sf = s
-  wsoil = w
-
+     !  c
+     !  c updating monthly values
+     smavg = smavg + smelt
+     ruavg = ruavg + roff
+     evavg = evavg + evap
+     epavg = epavg + emax
+     rcavg = rcavg + rc2
+     phavg = phavg + ph/365.0 !kgC/m2
+     aravg = aravg + ar/365.0 !kgC/m2
+     nppavg = nppavg + nppa/365.0 !kgC/m2
+     laiavg = laiavg + laia/365.0
+     clavg = clavg + cl/365.0
+     csavg = csavg + cs/365.0
+     hravg = hravg + hr/365.0 !kgC/m2
+     !   c
+  enddo
+  ! c
+  !c final calculations
+  w2 = w
+  g2 = g
+  s2 = s
+  smavg = smavg/real(ndmonth(month))
+  ruavg = ruavg/real(ndmonth(month))
+  evavg = evavg/real(ndmonth(month))
+  epavg = epavg/real(ndmonth(month))
+  rcavg = rcavg/real(ndmonth(month))
+  phavg = phavg*12.0 !kgC/m2/yr
+  aravg = aravg*12.0 !kgC/m2/yr
+  nppavg = nppavg*12.0 !kgC/m2/yr
+  laiavg = laiavg*12.0
+  clavg = clavg*12.0 !kgC/m2
+  csavg = csavg*12.0 !kgC/m2
+  hravg = hravg*12.0 !kgC/m2/yr
 end subroutine budget
 
-subroutine wbm5(temp, prec, p0, )
-      wini  = 0.01  !soil moisture initial condition (mm)
-      gini  = 0.0   !soil ice initial condition (mm)
-      sini  = 0.0   !overland snow initial condition (mm)
-end subroutine wbm5
+
+
+
+
+subroutine wbm (prec,temp,p0,ca,par,&
+     npp,photo,aresp,rcm,tsoil, wsoil, runom, evapm, emaxm, lai, clit, csoil, hresp)
+  implicit none
+  !c=======================================================================
+  !c
+  !c Water balance model (WBM). From monthly climatologies of
+  !c precipitation and surface temperature, the WBM calculates the
+  !c environmental variables.
+  !c
+  !c 05Jul2005, MDO: ae, rh & runoff are changed.
+  !c 11Jul2005, MDO: wsoil2 is written (for testing purpose).
+  !c 31Ago2006, DML: carbon cycle is included
+  !c
+  !c=======================================================================
+  !c
+  !c i/o variables
+  integer, parameter :: m = 12
+  real, dimension(m), intent( in) :: prec,temp,p0,par
+  
+  real, dimension(m). intent(out) :: npp,photo,aresp,rcm,tsoil, wsoil, runom, evapm, emaxm, lai, clit, csoil, hresp
+  
+  
+  !c internal variables
+  
+  real, dimension(m) :: wg0, spre
+  
+  real ipar,wfim,gfim,sfim,smes,rmes,emes,epmes,phmes,armes,nppmes,laimes, clmes,csmes,hrmes,rcmes
+  !c
+  integer :: k
+  !c Soil temperature
+  
+  call soil_temp(temp, tsoil)
+  
+  !c Water budget
+  do k=1,m
+     wsoil(k) = 0. !soil moisture (mm)
+     gsoil(k) = 0. !soil ice (mm)
+     ssoil(k) = 0. !soil snow (mm)
+     snowm(k) = 0. !average snowmelt (mm/day)
+     runom(k) = 0. !average runoff (mm/day)
+     evapm(k) = 0. !average actual evapotranspiration (mm/day)
+     emaxm(k) = 0. !average maximum evapotranspiration (mm/day)
+     wg0(  k) = 0. !soil moisture of the previous year (mm)
+     rcm(  k) = 0. !average canopy resistance (s/m)
+     lai(  k) = 0.
+     photo(k) = 0.
+     aresp(k) = 0.
+     npp(  k) = 0.
+     clit( k) = 0.
+     csoil(k) = 0.
+     hresp(k) = 0.
+  end do
+  
+  wini  = 0.01 !soil moisture initial condition (mm)
+  gini  = 0.0  !soil ice initial condition (mm)
+  sini  = 0.0  !overland snow initial condition (mm)
+  !c
+  !c initialization
+  do k=1,m
+     wg0(k) = -1.0
+     spre(k) = p0(k) * 0.01
+  enddo
+  !surface pressure (mb)
+  !c
+  !c start integration
+  n = 0
+10 continue
+  n = n + 1
+  !c
+  !c pre-processing
+  k = mod(n,12)
+  if (k.eq.0) k = 12
+  mes = k
+  td = tsoil(i,j,k)
+  ta = temp(i,j,k)
+  pr = prec(i,j,k)
+  ipar = par(i,j,k)
+  c      ae = 2.26457*ta + 67.5876 !available energy (W/m2) [Eq. 8]
+  ae = 2.895*ta + 52.326 !from NCEP-NCAR Reanalysis data
+  c
+  c monthly water budget
+  call budget (mes,wini,gini,sini,td,ta,pr,spre,ae,ca,ipar,
+  &                 wfim,gfim,sfim,smes,rmes,emes,epmes,
+  &                 phmes,armes,nppmes,laimes,
+  &                 clmes,csmes,hrmes,rcmes)
+  c
+  c update variables
+  wsoil(i,j,k) = wfim
+  gsoil(i,j,k) = gfim
+  ssoil(i,j,k) = sfim
+  snowm(i,j,k) = smes
+  runom(i,j,k) = rmes
+  evapm(i,j,k) = emes
+  emaxm(i,j,k) = epmes
+  rcm(i,j,k) = rcmes
+  lai(i,j,k) = laimes
+  photo(i,j,k) = phmes
+  aresp(i,j,k) = armes
+  npp(i,j,k) = nppmes
+  clit(i,j,k) = clmes
+  csoil(i,j,k) = csmes
+  hresp(i,j,k) = hrmes
+  wini = wfim
+  gini = gfim
+  sini = sfim
+  !c
+  !c check if equilibrium is attained (k=12)
+  if (k.eq.12) then
+         wmax = 500.
+         nerro = 0
+         do kk=1,12
+            dwww = (wsoil(i,j,kk)+gsoil(i,j,kk)-wg0(i,j,kk))/wmax
+            if (abs(dwww).gt.0.001) nerro = nerro + 1
+         enddo
+         if (nerro.ne.0) then
+            do kk=1,12
+               wg0(i,j,kk) = wsoil(i,j,kk) + gsoil(i,j,kk)
+            enddo
+         else
+            goto 100
+         endif
+      endif
+      
+      goto 10
+100   continue
