@@ -1,5 +1,5 @@
 # testing carbon funcions
-import carbon5 as C
+import carbon6 as C
 
 #temp,p0,w,wmax,ca,ipar = (25.0, 987, 234, 500.0, 4000, 230)
 
@@ -22,5 +22,8 @@ pr = [280., 200., 180., 100., 50., 55., 70., 80., 76., 90., 140., 200.]
 par = [320., 300., 290., 200., 170., 155., 100., 130., 180., 200., 260., 310.]
 
 if len(temp) == len(p0) == len(pr) == len(par):
-    wsoil, gsoil, ssoil,total_runoff, evapm, rcm, emaxm, photo, aresp, npp, lai, clit, csoil, hresp = C.wbm5(pr, temp, p0, ca, par)
+    npp,photo,aresp,rcm,tsoil, wsoil, runom, evapm, emaxm, lai, clit, csoil, hresp = C.wbm(pr, temp, p0, ca, par)
     
+
+
+

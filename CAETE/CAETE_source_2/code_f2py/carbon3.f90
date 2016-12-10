@@ -734,21 +734,25 @@ subroutine wbm (prec,temp,p0,ca,par,&
   !c i/o variables
   integer, parameter :: m = 12
   real, dimension(m), intent( in) :: prec,temp,p0,par
+  real, intent( in) :: ca
   
-  real, dimension(m). intent(out) :: npp,photo,aresp,rcm,tsoil, wsoil, runom, evapm, emaxm, lai, clit, csoil, hresp
-  
+  real, dimension(m), intent(out) :: npp,photo,aresp,rcm,tsoil, wsoil, runom
+  real, dimension(m), intent(out) :: evapm, emaxm, lai, clit, csoil, hresp
   
   !c internal variables
   
-  real, dimension(m) :: wg0, spre
+  real, dimension(m) :: wg0, spre, gsoil, ssoil, snowm
   
-  real ipar,wfim,gfim,sfim,smes,rmes,emes,epmes,phmes,armes,nppmes,laimes, clmes,csmes,hrmes,rcmes
+  real ae,wini,gini,sini,ipar,wfim,gfim,sfim,smes,rmes,emes,epmes,phmes
+  real armes,nppmes,laimes, clmes,csmes,hrmes,rcmes,ca1,dwww,wmax
+  real pr,ps,ta,td
   !c
-  integer :: k
+  integer :: n, k, kk, mes, nerro
+
   !c Soil temperature
-  
+  ca1 = ca * 0.101325 ! atm CO2 pressure in Pa
   call soil_temp(temp, tsoil)
-  
+ 
   !c Water budget
   do k=1,m
      wsoil(k) = 0. !soil moisture (mm)
@@ -789,55 +793,77 @@ subroutine wbm (prec,temp,p0,ca,par,&
   k = mod(n,12)
   if (k.eq.0) k = 12
   mes = k
-  td = tsoil(i,j,k)
-  ta = temp(i,j,k)
-  pr = prec(i,j,k)
-  ipar = par(i,j,k)
-  c      ae = 2.26457*ta + 67.5876 !available energy (W/m2) [Eq. 8]
+  ps = spre(k)
+  td = tsoil(k)
+  ta = temp(k)
+  pr = prec(k)
+  ipar = par(k)
+  !c      ae = 2.26457*ta + 67.5876 !available energy (W/m2) [Eq. 8]
   ae = 2.895*ta + 52.326 !from NCEP-NCAR Reanalysis data
-  c
-  c monthly water budget
-  call budget (mes,wini,gini,sini,td,ta,pr,spre,ae,ca,ipar,
-  &                 wfim,gfim,sfim,smes,rmes,emes,epmes,
-  &                 phmes,armes,nppmes,laimes,
-  &                 clmes,csmes,hrmes,rcmes)
-  c
-  c update variables
-  wsoil(i,j,k) = wfim
-  gsoil(i,j,k) = gfim
-  ssoil(i,j,k) = sfim
-  snowm(i,j,k) = smes
-  runom(i,j,k) = rmes
-  evapm(i,j,k) = emes
-  emaxm(i,j,k) = epmes
-  rcm(i,j,k) = rcmes
-  lai(i,j,k) = laimes
-  photo(i,j,k) = phmes
-  aresp(i,j,k) = armes
-  npp(i,j,k) = nppmes
-  clit(i,j,k) = clmes
-  csoil(i,j,k) = csmes
-  hresp(i,j,k) = hrmes
+  !c
+  smes = 0.0
+  rmes = 0.0
+  emes = 0.0
+  epmes = 0.0
+  phmes = 0.0
+  armes = 0.0
+  nppmes = 0.0
+  laimes = 0.0
+  clmes = 0.0
+  csmes = 0.0
+  hrmes = 0.0
+  rcmes = 0.0
+  !c monthly water budget
+  
+  ! budget args:
+  !  month,w1,g1,s1,tsoil,temp,prec,p0,ae,ca,&
+  !     ipar,w2,g2,s2,smavg,ruavg,evavg,&
+  !     epavg,phavg,aravg,nppavg,laiavg,& 
+  !     clavg,csavg,hravg,rcavg)
+  
+  call budget (mes,wini,gini,sini,td,ta,pr,ps,ae,ca1,ipar,&
+       wfim,gfim,sfim,smes,rmes,emes,epmes,&
+       phmes,armes,nppmes,laimes,&
+       clmes,csmes,hrmes,rcmes)
+  !c
+  !c update variables
+  wsoil(k) = wfim
+  gsoil(k) = gfim
+  ssoil(k) = sfim
+  snowm(k) = smes
+  runom(k) = rmes
+  evapm(k) = emes
+  emaxm(k) = epmes
+  rcm(k) = rcmes
+  lai(k) = laimes
+  photo(k) = phmes
+  aresp(k) = armes
+  npp(k) = nppmes
+  clit(k) = clmes
+  csoil(k) = csmes
+  hresp(k) = hrmes
   wini = wfim
   gini = gfim
   sini = sfim
   !c
   !c check if equilibrium is attained (k=12)
   if (k.eq.12) then
-         wmax = 500.
-         nerro = 0
-         do kk=1,12
-            dwww = (wsoil(i,j,kk)+gsoil(i,j,kk)-wg0(i,j,kk))/wmax
-            if (abs(dwww).gt.0.001) nerro = nerro + 1
-         enddo
-         if (nerro.ne.0) then
-            do kk=1,12
-               wg0(i,j,kk) = wsoil(i,j,kk) + gsoil(i,j,kk)
-            enddo
-         else
-            goto 100
-         endif
-      endif
-      
-      goto 10
-100   continue
+     wmax = 500.
+     nerro = 0
+     do kk=1,12
+        dwww = (wsoil(kk)+gsoil(kk)-wg0(kk))/wmax
+        if (abs(dwww).gt.0.001) nerro = nerro + 1
+     enddo
+     if (nerro.ne.0) then
+        do kk=1,12
+           wg0(kk) = wsoil(kk) + gsoil(kk)
+        enddo
+     else
+        goto 100
+     endif
+  endif
+  
+  goto 10
+100 continue
+  return
+end subroutine wbm
