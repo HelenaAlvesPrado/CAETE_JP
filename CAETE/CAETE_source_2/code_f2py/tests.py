@@ -1,28 +1,41 @@
 # testing carbon funcions
-import carbon6 as C
-
-#temp,p0,w,wmax,ca,ipar = (25.0, 987, 234, 500.0, 4000, 230)
-
-#vars_ = [temp, p0, w, wmax, ca, ipar]
+import numpy as np
+import netCDF4 as nc
+import carbon as C
 
 
-#ph, ar, nppa, laia, f5 = C.prod(*vars_)
+ca = 383.0 # ppmv mean CO² concentration 1981-2010
+# opening input files
+
+pr = nc.Dataset('./inputs/pr_annual_cycle_mean_CAETE.nc')
+tas = nc.Dataset('./inputs/tas_annual_cycle_mean_CAETE.nc')
+ps = nc.Dataset('./inputs/ps_annual_cycle_mean_CAETE.nc')
+rsd = nc.Dataset('./inputs/rsds_annual_cycle_mean_CAETE.nc')
+
+# manaus region
+for x in range (256000):
+    print(x)
+    prec = pr.variables['pr'][:, 174, 240]
+    temp = tas.variables['tas'][:, 174, 240]
+    p0 = ps.variables['ps'][:, 174, 240]
+    rsds = rsd.variables['rsds'][:, 174, 240]
 
 
-# setting some variables to wbm5
+    if len(temp) == len(p0) == len(prec) == len(rsds):
+        npp,photo,aresp,rcm,tsoil, wsoil, runom, evapm, emaxm, lai, clit, csoil, hresp = C.wbm(prec, temp, p0, ca, rsds)
+    
+#prec = np.array(prec)
+#temp = np.array(temp)
+#p0 = np.array(p0)
+#rsds = np.array(rsds)
 
-ca = 400.
+pr.close()
+tas.close()
+ps.close()
+rsd.close()
 
-temp = [27.6, 28.3, 25.5, 23.4, 22.4, 19.4, 17.4, 19.7, 23.5, 26.7, 28.0, 27.0]
 
-p0 = [980., 990., 1000., 1004., 993., 980., 1000., 1000., 980., 970., 1000., 1007.]
 
-pr = [280., 200., 180., 100., 50., 55., 70., 80., 76., 90., 140., 200.]
-
-par = [320., 300., 290., 200., 170., 155., 100., 130., 180., 200., 260., 310.]
-
-if len(temp) == len(p0) == len(pr) == len(par):
-    npp,photo,aresp,rcm,tsoil, wsoil, runom, evapm, emaxm, lai, clit, csoil, hresp = C.wbm(pr, temp, p0, ca, par)
     
 
 

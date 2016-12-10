@@ -9,7 +9,7 @@ import os
 class gridcell:
     
     
-    def __init__(self, x, y, time, cell_id):
+    def __init__(self, x, y, time, cell_id, dscrp=None):
         
         # CELL Identifiers 
         self.x = np.int32(x)
@@ -17,7 +17,10 @@ class gridcell:
         self.time = time
         self.cell_id = cell_id
         self.pos = (self.x, self.y)
-        self.name = 'id%s' % str(cell_id)
+        if not dscrp and type(dscrp) == type('str'):
+            self.name = 'id%s_%s' % (str(cell_id), dscrp)
+        else:
+            self.name = 'id%s' % str(cell_id)
         
         # Input data
         self.pr = 0 # these must be vectors

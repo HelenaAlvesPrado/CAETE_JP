@@ -797,7 +797,7 @@ subroutine wbm (prec,temp,p0,ca,par,&
   td = tsoil(k)
   ta = temp(k)
   pr = prec(k)
-  ipar = par(k)
+  ipar = par(k) / 2.18e5   !converting to Ein/m2/s
   !c      ae = 2.26457*ta + 67.5876 !available energy (W/m2) [Eq. 8]
   ae = 2.895*ta + 52.326 !from NCEP-NCAR Reanalysis data
   !c
