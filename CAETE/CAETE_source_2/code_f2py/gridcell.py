@@ -6,7 +6,7 @@ import netCDF4 as nc
 import os
 import glob
 import carbon as C
-
+import time
 class datasets:
 
     def __init__(self, files_dir):
@@ -19,7 +19,7 @@ class datasets:
         dataset = nc.Dataset(fname_comp, 'r')
         dados = dataset.variables[var][:,:,:]
         dataset.close()
-        return np.array(dados)
+        return np.fliplr(np.array(dados))
         
 
 class gridcell:
@@ -97,10 +97,11 @@ class gridcell:
 
         self.complete = True
 
-# RUNING THE MODEL FOR MANAUS GRID CELL
+# RUNING THE MODEL FOR LAND GRIDCELLS
 
-X = 240
-Y = 176
+mask = np.load('mask.npy')
+
+loops = int((mask.shape[0] * mask.shape[1]) - np.sum(mask))
 
 print('abrindo dados...\n')
 input_data = datasets('./inputs')
@@ -108,9 +109,31 @@ global_pr = input_data.get_var('pr','./inputs')
 global_ps = input_data.get_var('ps', './inputs')
 global_rsds = input_data.get_var('rsds', './inputs')
 global_tas = input_data.get_var('tas', './inputs')
-
 print('dados abertos \n')
 
-grd_manaus = gridcell(X, Y, 'manaus')
-grd_manaus.init_caete()
-grd_manaus.run_model()
+
+# rodando o modelo para todas (land) as celulas do grid
+land_data = dict()
+id_n = 1
+id_su = 'id_'
+
+print('iniciando modelo', end='---> ')
+print(time.ctime())
+for Y in range(mask.shape[0]):
+    for X in range(mask.shape[1]):
+        if not mask[Y][X]:
+            dict_key = id_su + str(id_n)
+            grd_cell = gridcell(X, Y, dict_key)
+            grd_cell.init_caete()
+            grd_cell.run_model()
+            land_data[dict_key] =  grd_cell 
+            #land_data[dict_key].run_model()
+            id_n += 1
+            #print(mask[Y][X])
+        
+        #grd_manaus.init_caete()
+        #grd_manaus.run_model()
+print(id_n)
+print('terminado', end='---: ')
+print(time.ctime())
+
