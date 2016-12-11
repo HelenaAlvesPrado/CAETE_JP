@@ -7,18 +7,26 @@ import os
 import glob
 import carbon as C
 import time
+
+
 class datasets:
 
     def __init__(self, files_dir):
         self.files = sorted(glob.glob1(files_dir, '*.nc'))
+        self.files_dir = files_dir
 
 
-    def get_var(self,var, files_dir):
+    def get_var(self, var):
+        
         fname = [filename for filename in self.files if var == filename.split('_')[0]]
-        fname_comp = files_dir + '/' + fname[0]
+        fname_comp = self.files_dir + os.sep + fname[0]
+        
         dataset = nc.Dataset(fname_comp, 'r')
+
         dados = dataset.variables[var][:,:,:]
+
         dataset.close()
+
         return np.fliplr(np.array(dados))
         
 
@@ -31,7 +39,7 @@ class gridcell:
         self.y = np.int32(y)
         self.cell_id = cell_id
         self.pos = (self.x, self.y)
-        self.name = 'id%s' % str(cell_id)
+        self.name = '%s' % str(cell_id)
         self.filled = False
         self.complete = False
         
@@ -105,10 +113,10 @@ loops = int((mask.shape[0] * mask.shape[1]) - np.sum(mask))
 
 print('abrindo dados...\n')
 input_data = datasets('./inputs')
-global_pr = input_data.get_var('pr','./inputs')
-global_ps = input_data.get_var('ps', './inputs')
-global_rsds = input_data.get_var('rsds', './inputs')
-global_tas = input_data.get_var('tas', './inputs')
+global_pr = input_data.get_var('pr')
+global_ps = input_data.get_var('ps')
+global_rsds = input_data.get_var('rsds')
+global_tas = input_data.get_var('tas')
 print('dados abertos \n')
 
 
@@ -116,7 +124,7 @@ print('dados abertos \n')
 land_data = dict()
 id_n = 1
 id_su = 'id_'
-
+manaus_landgrid_id = 0
 print('iniciando modelo', end='---> ')
 print(time.ctime())
 for Y in range(mask.shape[0]):
@@ -124,8 +132,10 @@ for Y in range(mask.shape[0]):
         if not mask[Y][X]:
             dict_key = id_su + str(id_n)
             grd_cell = gridcell(X, Y, dict_key)
+            if Y == 176 and X == 240:
+                manaus_landgrid_id = dict_key
             grd_cell.init_caete()
-            grd_cell.run_model()
+            #grd_cell.run_model()
             land_data[dict_key] =  grd_cell 
             #land_data[dict_key].run_model()
             id_n += 1
