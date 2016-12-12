@@ -137,12 +137,7 @@ for Y in range(mask.shape[0]):
             grd_cell.init_caete()
             #grd_cell.run_model()
             land_data[dict_key] =  grd_cell 
-            #land_data[dict_key].run_model()
             id_n += 1
-            #print(mask[Y][X])
-        
-        #grd_manaus.init_caete()
-        #grd_manaus.run_model()
 print(id_n)
 print('terminado', end='---: ')
 print(time.ctime())
