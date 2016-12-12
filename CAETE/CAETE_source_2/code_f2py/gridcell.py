@@ -5,7 +5,7 @@ import numpy as np
 import netCDF4 as nc
 import os
 import glob
-import carbon as C
+import carbon_64 as C
 import time
 
 
