@@ -1,43 +1,76 @@
-# "CAETE model driver"
+# "CAETE module"
+
 # author: jpdarela
 
 import numpy as np
-import netCDF4 as nc
+from netCDF4 import Dataset as dt
 import os
 import glob
 import carbon as C
-import time
 
 
 class datasets:
     """ """
 
+    
     def __init__(self, files_dir):
-        self.files = sorted(glob.glob1(files_dir, '*.nc'))
-        self.files_dir = files_dir
 
-        
+        try:    
+            self.files = sorted(glob.glob1(files_dir, '*.nc'))
+            self.NotWork = False
+        except:
+            self.files = None
+            self.NotWork = True
+            print('O diretório indicado não possui arquivos adequados')
+
+
+        self.files_dir = files_dir
+        self.metadata = {}
+
     def get_var(self, var):
-        
-        if type(var) == type('str') and len(self.files) > 0:
+
+
+        if (type(var) == type('str')) and (self.files is not None) and (len(self.files) > 0):
             fname = [filename for filename in self.files if var == filename.split('_')[0]]
         else:
+            self.NotWork = True
+            return None
+
+        try:
+            fname_comp = self.files_dir + os.sep + fname[0]
+        except:
+            print('variável --> %s não está no diretório -->  %s' % (var, self.files_dir))
+            self.NotWork = True
             return None
         
-        fname_comp = self.files_dir + os.sep + fname[0]
-        
         try:
-            dataset = nc.Dataset(fname_comp, 'r')
-            
+            dataset = dt(fname_comp, 'r')  
         except IOError:
             print('Cannot open %s file' % var)
+            self.NotWork = True
             return None
             
         else:
+            # data, time, units & etc.
+            calendar = dataset.variables['time'].calendar
+            time_units = dataset.variables['time'].units
+            time_arr = dataset.variables['time'][:]
+
+            data_units = dataset.variables[var].units
+            var_longname = dataset.variables[var].long_name
+
+            self.metadata[var] = (calendar, time_units, time_arr, data_units, var_longname)
+            
             dados = dataset.variables[var][:,:,:]
             dataset.close()
 
         return np.fliplr(np.array(dados))
+
+
+    def check_dataset(self):
+        if self.NotWork:
+            return False
+        return True
         
 
 class gridcell:
@@ -96,26 +129,30 @@ class gridcell:
         
     def run_model(self):
 
-        if self.filled:
+        if self.filled and not self.complete:
             outputs = C.wbm(self.pr, self.tas, self.ps, self.ca, self.rsds)
 
-        self.npp   = outputs[0]
-        self.photo = outputs[1]
-        self.aresp = outputs[2]
-        self.rcm   = outputs[3]
-        self.tsoil = outputs[4]
-        self.wsoil = outputs[5]
-        self.runom = outputs[6]
-        self.evapm = outputs[7]
-        self.emaxm = outputs[8]
-        self.lai   = outputs[9]
-        self.clit  = outputs[10]
-        self.csoil = outputs[11]
-        self.hresp = outputs[12]
+            self.npp   = outputs[0]
+            self.photo = outputs[1]
+            self.aresp = outputs[2]
+            self.rcm   = outputs[3]
+            self.tsoil = outputs[4]
+            self.wsoil = outputs[5]
+            self.runom = outputs[6]
+            self.evapm = outputs[7]
+            self.emaxm = outputs[8]
+            self.lai   = outputs[9]
+            self.clit  = outputs[10]
+            self.csoil = outputs[11]
+            self.hresp = outputs[12]
+            self.complete = True
+        else:
+            print('the gridcell %s object is either not filled or already completed' % self.name)
 
-        self.complete = True
+# UTIL functions and global variables definition
 
-        # RUNING THE MODEL FOR LAND GRIDCELLS
+# FUNCS
+
 def rm_appy(gridcell_obj):
     
     if gridcell_obj.filled and not gridcell_obj.complete:
@@ -126,46 +163,25 @@ def rm_appy(gridcell_obj):
     else:
         pass
 
-mask = np.load('mask.npy')
+## GLOBAL VARS
 
-loops = int((mask.shape[0] * mask.shape[1]) - np.sum(mask))
+std_shape = (12, 360, 720)
 
-print('abrindo dados...\n')
 input_data = datasets('./inputs')
+assert input_data.check_dataset()
+
 global_pr = input_data.get_var('pr')
+assert global_pr.shape == std_shape 
+assert input_data.check_dataset()
+
 global_ps = input_data.get_var('ps')
+assert global_ps.shape == std_shape
+assert input_data.check_dataset()
+
 global_rsds = input_data.get_var('rsds')
+assert global_rsds.shape == std_shape
+assert input_data.check_dataset()
+
 global_tas = input_data.get_var('tas')
-print('dados abertos \n')
-
-
-# rodando o modelo para todas (land) as celulas do grid
-land_data = dict()
-id_n = 1
-id_su = 'id_'
-manaus_landgrid_id = 0
-
-for Y in range(mask.shape[0]):
-    for X in range(mask.shape[1]):
-        if not mask[Y][X]:
-            dict_key = id_su + str(id_n)
-            grd_cell = gridcell(X, Y, dict_key)
-            if Y == 176 and X == 240:
-                manaus_landgrid_id = dict_key
-            #grd_cell.init_caete()
-            #grd_cell.run_model()
-            land_data[dict_key] =  grd_cell 
-            id_n += 1
-
-print('iniciando aplicação do modelo (1 e 2) para todas as celulas do grid', end='---> ')
-print(time.ctime())
-
-for key in land_data.keys():
-    rm_appy(land_data[key])
-    
-print('modelo aplicado a %d localidades' % id_n)
-print('terminado', end='---: ')
-print(time.ctime())
-
-
-
+assert global_tas.shape == std_shape
+assert input_data.check_dataset()
