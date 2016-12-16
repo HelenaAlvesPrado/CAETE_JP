@@ -178,7 +178,6 @@ c23456
                   
                   rcm_pft(i,j,k,p)  = no_data
                   wg0(i,j,k,p)    = no_data
-                  wsoil_pft(i,j,k,p)  = no_data !Soil moisture
                   gsoil(i,j,k,p)  = no_data !Soil ice
                   ssoil(i,j,k,p)  = no_data !Soil snow
                   

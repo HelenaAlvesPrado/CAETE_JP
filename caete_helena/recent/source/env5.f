@@ -73,17 +73,26 @@ c     VARIAVEIS HIDROLOGICAS IMPORTANTES
       real runom_pft(nx,ny,12,q) !Runoff
       real evapm_pft(nx,ny,12,q) !Actual evapotranspiration        
       real wsoil_pft(nx,ny,12,q) !Soil moisture (mm)      
-
-
-C     Aqui vc pode declarar as variaveis para armazenar as medias anuais
-!     ... ex
-
-c     real annual_csoil_pft1(nx,ny)
-c     real csoil_pft1(nx,ny,12)
-c     e assim por diante...
       
-c     depois que vc chamar wbm vc faz estes calculos e salva os resultados
-      ! tudo aqui no env5.f!
+      
+C     Variaveis que vou usar para salvar os outputs
+!     PRIMEIRO AS MEDIAS MENSAIS GERAIS (MEDIAS ENTRE PFTS)
+      real, dimension(nx,ny,12) :: ph = 0.0
+      real, dimension(nx,ny,12) :: ar = 0.0
+      real, dimension(nx,ny,12) :: npp = 0.0
+      real, dimension(nx,ny,12) :: lai = 0.0
+      real, dimension(nx,ny,12) :: clit = 0.0
+      real, dimension(nx,ny,12) :: csoil = 0.0
+      real, dimension(nx,ny,12) :: hr = 0.0
+      real, dimension(nx,ny,12) :: rcm = 0.0
+      real, dimension(nx,ny,12) :: runom = 0.0
+      real, dimension(nx,ny,12) :: evaptr = 0.0
+      real, dimension(nx,ny,12) :: wsoil = 0.0
+      
+C     internal
+
+      
+      real, dimension(nx,ny) :: waux
 
 
 
@@ -128,57 +137,101 @@ c     close (15)
 !     ===========
 !     
       do i=1,nx
-            do j=1,ny
-          
-               do k=1,12
-!     Photosynthetically active radiation reaching canopy (IPAR:Ein/m2/s)
+         do j=1,ny
+            do k=1,12
+!     Photosynthetically active radiation reaching canopy (IPAR:Ein/m2
+!     /s)
 !     Observed data from ISLSCP2
-                  
-                  par(i,j,k) = (ipar(i,j,k)/(2.18e5)) !Converting to Ein/m2/s
-                  temp(i,j,k) = t(i,j,k) !+ant(i,j,k) !uncomment to use future anomalies
-                  p0(i,j,k) = ps(i,j,k) * 0.01 ! transforamando de pascal pra mbar (kPa)
-                  prec(i,j,k) = pr(i,j,k) !+anpr(i,j,k) !+pr(i,j,k)*0.2 !uncomment to use future anomalies
-                  if (prec(i,j,k).lt.0.0) prec (i,j,k) = 0.0
-                  
-               enddo
+               
+               par(i,j,k) = (ipar(i,j,k)/(2.18e5)) !Converting to Ein/m2/s
+               temp(i,j,k) = t(i,j,k) !+ant(i,j,k) !uncomment to use future anomalies
+               p0(i,j,k) = ps(i,j,k) * 0.01 ! transforamando de pascal pra mbar (kPa)
+               prec(i,j,k) = pr(i,j,k) !+anpr(i,j,k) !+pr(i,j,k)*0.2 !uncomment to use future anomalies
+               if (prec(i,j,k).lt.0.0) prec (i,j,k) = 0.0
+               
             enddo
          enddo
+      enddo
       
 !     
-!     Atmospheric CO2 pressure (Pa)                                         !Ppmv / Pa
-!     (1 Pa CO2 = 9.901 ppmv CO2 (Adams et al. 2004))
-c     ca= 18.18                                                        !Pa (=180 ppmv; Last Glacial Maximum)
-c     ca= 28.28                                                        !Pa (=280 ppmv; Pre-Industrial Rev.)
-c     ca= 35.35                                                        !Pa (=350 ppmv; 1961-1990)
-      ca= 363/9.901   !Pa (=350 ppmv; 1961-1990)
-c     ca= 54.03                                                        !Pa (=535 ppmv; SRES-B1 2080's)
-c     ca= 73.73                                                        !Pa (=730 ppmv; SRES-A2 2080's)
-c     ca= ((73.73-35.35)*0.5)+35.35                                    !Pa half effect!
+!     Atmospheric CO2 pressure (Pa) !Ppmv / Pa
 !     
-         
+!     (1 Pa CO2 = 9.901 ppmv CO2 (Adams et al. 2004))
+c     ca= 18.18                 !Pa (=180 ppmv; Last Glacial Maximum)
+c     
+c     ca= 28.28                 !Pa (=280 ppmv; Pre-Industrial Rev.)
+c     
+c     ca= 35.35                 !Pa (=350 ppmv; 1961-1990)
+c     
+      ca= 363/9.901             !Pa (=350 ppmv; 1961-1990)
+c     ca= 54.03                 !Pa (=535 ppmv; SRES-B1 2080's)
+c     
+c     ca= 73.73                 !Pa (=730 ppmv; SRES-A2 2080's)
+c     
+c     ca= ((73.73-35.35)*0.5)+35.35 !Pa half effect!
+c     
+!     
+      
 !     
 !     =======================================
 !     Calculate environmental variables (wbm)
 !     =======================================
 !     
-         
-         
+      
+      
 !     wbm definition(soh pra lembrar a ordem dos argumentos)
 c     esta eh a ordem que esta na definicao em wbm4.f:
       
-c            subroutine wbm (prec,temp,lsmk,p0,ca,par,
+c     subroutine wbm (prec,temp,lsmk,p0,ca,par,
 c     &     emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,
 c     &     clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,
 c     &     evapm_pft,wsoil_pft)   
-         
-         call wbm (prec,temp,lsmk,p0,ca,par,
+      
+      call wbm (prec,temp,lsmk,p0,ca,par,
      &     emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,
      &     clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,
      &     evapm_pft,wsoil_pft)   
-
-
-
-
+      
+      
+      
+      
+C     preparando o terreno pra salvar as variaveis
+      
+      do i = 1,nx
+         do j = 1,ny
+            do k = 1,12
+               do p = 1,q
+                  ph(i,j,k) = ph(i,j,k) + photo_pft(i,j,k,p)/3.
+                  ar(i,j,k) = ar(i,j,k) + aresp_pft(i,j,k,p)/3.
+                  npp(i,j,k) = npp(i,j,k) + npp_pft(i,j,k,p)/3.
+                  lai(i,j,k) = lai(i,j,k) + lai_pft(i,j,k,p)/3.
+                  clit(i,j,k) = clit(i,j,k) + clit_pft(i,j,k,p)/3.
+                  csoil(i,j,k) = csoil(i,j,k) + csoil_pft(i,j,k,p)/3.
+                  hr(i,j,k) = hr(i,j,k) + hresp_pft(i,j,k,p)/3.
+                  rcm(i,j,k) = rcm(i,j,k) + rcm_pft(i,j,k,p)/3.
+                  runom(i,j,k) = runom(i,j,k) + runom_pft(i,j,k,p)/3.
+                  evaptr(i,j,k) = evaptr(i,j,k) + evapm_pft(i,j,k,p)/3.
+                  wsoil(i,j,k) = wsoil(i,j,k) + wsoil_pft(i,j,k,p)/3.
+               enddo
+            enddo
+         enddo
+      enddo
+      
+      
+      
+      open(17,file='../outputs/npp.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      do k=1,12
+         do i=1,nx
+            do j=1,ny
+               waux(i,j) = npp(i,j,k)
+            enddo
+         enddo
+         write(17,rec=k) waux
+      enddo
+      close(17)
+!     
 C     AGORA JA TEMOS TODOS OS RESULTADOS DO MODELO
 C     PODEMOS REALIZAR TODOS OS CALCULOS DE MEDIAS ANUAIS
 C     E SALVAR OS RESULTADOS EM ARQUIVOS DE RASTER =P
