@@ -77,18 +77,63 @@ c     VARIAVEIS HIDROLOGICAS IMPORTANTES
       
 C     Variaveis que vou usar para salvar os outputs
 !     PRIMEIRO AS MEDIAS MENSAIS GERAIS (MEDIAS ENTRE PFTS)
-      real, dimension(nx,ny,12) :: ph = 0.0
-      real, dimension(nx,ny,12) :: ar = 0.0
+c      real, dimension(nx,ny,12) :: ph = 0.0
+c      real, dimension(nx,ny,12) :: ar = 0.0
       real, dimension(nx,ny,12) :: npp = 0.0
-      real, dimension(nx,ny,12) :: lai = 0.0
-      real, dimension(nx,ny,12) :: clit = 0.0
-      real, dimension(nx,ny,12) :: csoil = 0.0
-      real, dimension(nx,ny,12) :: hr = 0.0
+c      real, dimension(nx,ny,12) :: lai = 0.0
+c      real, dimension(nx,ny,12) :: clit = 0.0
+c      real, dimension(nx,ny,12) :: csoil = 0.0
+c      real, dimension(nx,ny,12) :: hr = 0.0
       real, dimension(nx,ny,12) :: rcm = 0.0
-      real, dimension(nx,ny,12) :: runom = 0.0
-      real, dimension(nx,ny,12) :: evaptr = 0.0
-      real, dimension(nx,ny,12) :: wsoil = 0.0
+c      real, dimension(nx,ny,12) :: runom = 0.0
+c      real, dimension(nx,ny,12) :: evaptr = 0.0
+c      real, dimension(nx,ny,12) :: wsoil = 0.0
+
+!     medias mensais para cada pft
+c      real, dimension(nx,ny,12) :: ph1 = 0.0
+c      real, dimension(nx,ny,12) :: ph2 = 0.0
+c      real, dimension(nx,ny,12) :: ph3 = 0.0
       
+c      real, dimension(nx,ny,12) :: ar1 = 0.0
+c      real, dimension(nx,ny,12) :: ar2 = 0.0
+c      real, dimension(nx,ny,12) :: ar3 = 0.0
+      
+      real, dimension(nx,ny,12) :: npp1 = 0.0
+      real, dimension(nx,ny,12) :: npp2 = 0.0
+      real, dimension(nx,ny,12) :: npp3 = 0.0
+      
+c      real, dimension(nx,ny,12) :: lai1 = 0.0
+c      real, dimension(nx,ny,12) :: lai2 = 0.0
+c      real, dimension(nx,ny,12) :: lai3 = 0.0
+      
+c      real, dimension(nx,ny,12) :: clit1 = 0.0
+c      real, dimension(nx,ny,12) :: clit2 = 0.0
+c      real, dimension(nx,ny,12) :: clit3 = 0.0
+      
+c      real, dimension(nx,ny,12) :: csoil1 = 0.0
+c      real, dimension(nx,ny,12) :: csoil2 = 0.0
+c      real, dimension(nx,ny,12) :: csoil3 = 0.0
+
+c      real, dimension(nx,ny,12) :: hr1 = 0.0
+c      real, dimension(nx,ny,12) :: hr2= 0.0
+c      real, dimension(nx,ny,12) :: hr3 = 0.0
+      
+      real, dimension(nx,ny,12) :: rcm1 = 0.0
+      real, dimension(nx,ny,12) :: rcm2 = 0.0
+      real, dimension(nx,ny,12) :: rcm3 = 0.0
+      
+c      real, dimension(nx,ny,12) :: runom1 = 0.0
+c      real, dimension(nx,ny,12) :: runom2 = 0.0
+c      real, dimension(nx,ny,12) :: runom3 = 0.0
+      
+c      real, dimension(nx,ny,12) :: evaptr1 = 0.0
+c      real, dimension(nx,ny,12) :: evaptr2 = 0.0
+c      real, dimension(nx,ny,12) :: evaptr3 = 0.0
+      
+c      real, dimension(nx,ny,12) :: wsoil1 = 0.0
+c      real, dimension(nx,ny,12) :: wsoil2 = 0.0
+c      real, dimension(nx,ny,12) :: wsoil3 = 0.0
+
 C     internal
 
       
@@ -201,23 +246,36 @@ C     preparando o terreno pra salvar as variaveis
          do j = 1,ny
             do k = 1,12
                do p = 1,q
-                  ph(i,j,k) = ph(i,j,k) + photo_pft(i,j,k,p)/3.
-                  ar(i,j,k) = ar(i,j,k) + aresp_pft(i,j,k,p)/3.
+                  !ph(i,j,k) = ph(i,j,k) + photo_pft(i,j,k,p)/3.
+                  !ar(i,j,k) = ar(i,j,k) + aresp_pft(i,j,k,p)/3.
                   npp(i,j,k) = npp(i,j,k) + npp_pft(i,j,k,p)/3.
-                  lai(i,j,k) = lai(i,j,k) + lai_pft(i,j,k,p)/3.
-                  clit(i,j,k) = clit(i,j,k) + clit_pft(i,j,k,p)/3.
-                  csoil(i,j,k) = csoil(i,j,k) + csoil_pft(i,j,k,p)/3.
-                  hr(i,j,k) = hr(i,j,k) + hresp_pft(i,j,k,p)/3.
+                  !lai(i,j,k) = lai(i,j,k) + lai_pft(i,j,k,p)/3.
+                  !clit(i,j,k) = clit(i,j,k) + clit_pft(i,j,k,p)/3.
+                  !csoil(i,j,k) = csoil(i,j,k) + csoil_pft(i,j,k,p)/3.
+                  !hr(i,j,k) = hr(i,j,k) + hresp_pft(i,j,k,p)/3.
                   rcm(i,j,k) = rcm(i,j,k) + rcm_pft(i,j,k,p)/3.
-                  runom(i,j,k) = runom(i,j,k) + runom_pft(i,j,k,p)/3.
-                  evaptr(i,j,k) = evaptr(i,j,k) + evapm_pft(i,j,k,p)/3.
-                  wsoil(i,j,k) = wsoil(i,j,k) + wsoil_pft(i,j,k,p)/3.
+                  !runom(i,j,k) = runom(i,j,k) + runom_pft(i,j,k,p)/3.
+                  !evaptr(i,j,k) = evaptr(i,j,k) + evapm_pft(i,j,k,p)/3.
+                  !wsoil(i,j,k) = wsoil(i,j,k) + wsoil_pft(i,j,k,p)/3.
                enddo
             enddo
          enddo
       enddo
+
+      do i=1,nx
+         do j=1,ny
+            do k=1,12
+               npp1(i,j,k) = npp_pft(i,j,k,1)
+               npp2(i,j,k) = npp_pft(i,j,k,2)
+               npp3(i,j,k) = npp_pft(i,j,k,3)
+               rcm1(i,j,k) = rcm_pft(i,j,k,1)
+               rcm2(i,j,k) = rcm_pft(i,j,k,2)
+               rcm3(i,j,k) = rcm_pft(i,j,k,3)
+            enddo
+         enddo
+      enddo
       
-      
+               
       
       open(17,file='../outputs/npp.bin',
      &     status='unknown',form='unformatted',
@@ -231,7 +289,22 @@ C     preparando o terreno pra salvar as variaveis
          write(17,rec=k) waux
       enddo
       close(17)
-!     
+
+            open(18,file='../outputs/rcm.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      do k=1,12
+         do i=1,nx
+            do j=1,ny
+               waux(i,j) = rcm(i,j,k)
+            enddo
+         enddo
+         write(18,rec=k) waux
+      enddo
+      close(18)
+
+
+      
 C     AGORA JA TEMOS TODOS OS RESULTADOS DO MODELO
 C     PODEMOS REALIZAR TODOS OS CALCULOS DE MEDIAS ANUAIS
 C     E SALVAR OS RESULTADOS EM ARQUIVOS DE RASTER =P

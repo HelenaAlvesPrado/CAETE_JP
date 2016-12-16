@@ -34,13 +34,11 @@ c     --------------------------I N P U T S----------------------------
       real par(nx,ny,12)        !IPAR (Ein/m2/s)
 C     -----------------------------E N D-------------------------------
       
-      
 c     -------------------------O U T P U T S---------------------------
       
 c     primeiro algumas variaveis que nao sao dependentes de pfts
       real emaxm(nx,ny,12)
       real tsoil(nx,ny,12)
-      
       
 c     agora as variaveis para pfts
       real photo_pft(nx,ny,12,q) !Monthly photosynthesis   (kgC/m2)
@@ -58,7 +56,6 @@ c     VARIAVEIS HIDROLOGICAS IMPORTANTES
       real evapm_pft(nx,ny,12,q) !Actual evapotranspiration        
       real wsoil_pft(nx,ny,12,q) !Soil moisture (mm)  
 c --------------------------------E N D--------------------------------
-      
 
 c     VARIAVEIS HIDROLOGICAS IMPORTANTES   
       real gsoil(nx,ny,12,q)      !Soil ice 
@@ -66,13 +63,7 @@ c     VARIAVEIS HIDROLOGICAS IMPORTANTES
       real snowm(nx,ny,12,q)      !Snowmelt
       real wg0(nx,ny,12,q)        !Moisture of the previous year
 
-
-
-      integer counter
       integer i, j, k, kk, mes, nerro, p
-
-
-
 
       real, parameter :: H = 1.0 !Soil layer(m) 
       real, parameter :: diffu = 4.e-7*(30.*86400.0) !Soil thermal diffusivity (m2/month)
@@ -83,36 +74,17 @@ c     VARIAVEIS HIDROLOGICAS IMPORTANTES
       
       real wsaux1
       real ae,dwww,wmax
-      real mgama,jc,jl,je,jp,f4sun,f4shade
       real sini,gfim,sfim,gini,wfim,wini
       real pr,ice,spre,ta,td,ipar
       real rmes,phmes,smes,rcmes,hrmes,nppmes,laimes
       real armes,clmes,csmes,emes,epmes
-!     
-!     Counting
-!     --------
-!     
-      counter = 0
-!     
-!     Initialize
-!     ----------
-!     
-      mgama    = 0.0
-      jc       = 0.0
-      jl       = 0.0
-      je       = 0.0
-      jp       = 0.0
-      f4sun    = 0.0
-      f4shade  = 0.0
-      one      = 0.0
-!     
+
+      
 !     Soil temperature
 !     ================
-!     
-!     
 !     For all grid points
 !     -------------------
-c     234567
+c234567
 !     
       do i=1,nx
          do j=1,ny
@@ -249,7 +221,7 @@ c     VARIAVEIS HIDROLOGICAS IMPORTANTES
 !     ----------------
 !     
                   
-                  emaxm(i,j,k) = epmes
+                  if (p.eq.1) emaxm(i,j,k) = epmes
                   gsoil(i,j,k,p) = gfim
                   ssoil(i,j,k,p) = sfim
                   wsoil_pft(i,j,k,p) = wfim
@@ -346,19 +318,10 @@ c     daqui por diante nada util --- vai tudo para env5.f
       real csavg                !Monthly carbon soil
       real hravg                !Monthly heterotrophic respiration
       real rcavg                !Monthly canopy resistence
-!     
+
+      
 !     Internal Variables
-!     ------------------
-!     
-c      real nppa_pft(q),rc_pft(q)
-c      real nppa_pft1,nppa_pft2,nppa_pft3 !Auxiliars
-c      real ph_pft1,ph_pft2,ph_pft3 !Auxiliars
-c      real ar_pft1,ar_pft2,ar_pft3 !Auxiliars
-c      real laia_pft1,laia_pft2,laia_pft3 !Auxiliars
-c      real f5_pft1,f5_pft2,f5_pft3 !Auxiliars
-c      real f1_pft1,f1_pft2,f1_pft3 !Auxiliars
-c      real vpd_pft1,vpd_pft2,vpd_pft3 !Auxiliars
-c      real rc_pft1,rc_pft2,rc_pft3 !Auxiliars
+
       real rh                   !Relative humidity
       real wmax                 !Soil moisture availability (mm)
       real tsnow                !Temperature threshold for snowfall (oC)
@@ -432,83 +395,40 @@ c      real rc_pft1,rc_pft2,rc_pft3 !Auxiliars
       evavg       = 0.0
       epavg       = 0.0
       rcavg       = 0.0
-c      rcavg_pft1  = 0.0
-c      rcavg_pft2  = 0.0
-c      rcavg_pft3  = 0.0
       laiavg      = 0.0
       phavg       = 0.0
-c      phavg_pft1  = 0.0
-c      phavg_pft2  = 0.0
-c      phavg_pft3  = 0.0
       aravg       = 0.0
       nppavg      = 0.0
-c      nppavg_pft1 = 0.0
-c      nppavg_pft2 = 0.0
-c      nppavg_pft3 = 0.0
       clavg       = 0.0
       csavg       = 0.0
       hravg       = 0.0
-!     
-c     do p=1,q
-c         rcavg_pft(p) = 0.0
-c         nppavg_pft(p) = 0.0
-c      enddo
-!     
+
 !     Numerical integration
 !     ---------------------
 !     
       do i=1,ndmonth(month)
 !     
          nppa      = 0.0        !Auxiliar_nppa
-c         nppa_pft1 = 0.0
-c         nppa_pft2 = 0.0
-c         nppa_pft3 = 0.0
          ph        = 0.0        !Auxiliar_ph
-c         ph_pft1   = 0.0
-c         ph_pft2   = 0.0
-c         ph_pft3   = 0.0
          ar        = 0.0        !Auxiliar_ar
-c         ar_pft1   = 0.0        !Auxiliar_ar
-c         ar_pft2   = 0.0        !Auxiliar_ar
-c         ar_pft3   = 0.0        !Auxiliar_ar
          laia      = 0.0        !Auxiliar_laia
-c         laia_pft1 = 0.0
-c         laia_pft2 = 0.0
-c         laia_pft3 = 0.0
          f5        = 0.0        !Auxiliar_f5
-c         f5_pft1   = 0.0        !Auxiliar_f5
-c         f5_pft2   = 0.0        !Auxiliar_f5
-c         f5_pft3   = 0.0        !Auxiliar_f5
          f1        = 0.0        !Auxiliar_f1
-c         f1_pft1   = 0.0        !Auxiliar_f1
-c         f1_pft2   = 0.0        !Auxiliar_f1
-c         f1_pft3   = 0.0        !Auxiliar_f1
          vpd       = 0.0
-c         vpd_pft1  = 0.0
-c         vpd_pft1  = 0.0
-c         vpd_pft1  = 0.0
          rc2       = 0.0        !Auxiliar_rc2
-c         rc_pft1   = 0.0
-c         rc_pft2   = 0.0
-c         rc_pft3   = 0.0
-!     
-c         do p=1,q
-c            nppa_pft(p) = 0.0     
-c            rc_pft(p)  = 0.0  
-c         enddo
          
 !     Carbon cycle (photosynthesis, plant respiration and NPP)
 !     ========================================================
 !     NOTE QUE EU USEI um NOVO ARGUMENTO DA BUDGET PARA CHAMAR A PRODUCTIVITY
          call productivity1 (temp,p0,w,wmax,ca,ipar,pft, !Inputs
      &        ph,ar,nppa,laia,f5,f1,vpd) !Outputs
-!
-
+!     
+         
 !     Maximum evapotranspiration (emax)
 !     =================================
-!     
-         call evpot2 (p0,temp,rh,ae,emax)
-!     
+         if (pft.eq.1) then
+            call evpot2 (p0,temp,rh,ae,emax)
+         endif
 !     Snow budget
 !     ===========
 !     
@@ -521,7 +441,7 @@ c         enddo
 !     Water budget
 !     ============
 !     
-         if (ts.le.tice) then !Frozen soil
+         if (ts.le.tice) then   !Frozen soil
             g = g + w           !Soil moisture freezes
             w = 0.0
             roff = smelt + prain !mm/day
@@ -549,7 +469,7 @@ c
 !     
             call canopy_resistence (pft,vpd,f1,rc2)     
             call runoff (w,wmax,roff) !Soil moisture runoff (roff, mm/day)
-            call penman (p0,temp,w,wmax,rh,ae,rc2,evap) !Actual evapotranspiration (evap, mm/day)
+            call penman (p0,temp,rh,ae,rc2,evap) !Actual evapotranspiration (evap, mm/day)
             dw = prain + smelt - evap - roff
             w = w + dw
             if (w.gt.wmax) then
@@ -569,11 +489,12 @@ c
 !     
 !     Updating monthly values
 !     =======================
-!     
+!
+         if (pft.eq.1) epavg = epavg + emax   !mm/day
          smavg = smavg + smelt  !mm/day
          ruavg = ruavg + roff   !mm/day
          evavg = evavg + evap   !mm/day
-         epavg = epavg + emax   !mm/day
+         
          rcavg = rcavg + rc2    !s/m/day
          phavg = phavg + ph/365.0 !kgC/m2/day
          aravg = aravg + ar/365.0 !kgC/m2/day
@@ -594,7 +515,7 @@ c
       smavg = smavg/real(ndmonth(month))
       ruavg = ruavg/real(ndmonth(month))
       evavg = evavg/real(ndmonth(month))
-      epavg = epavg/real(ndmonth(month))
+      if (pft.eq.1) epavg = epavg/real(ndmonth(month))
       rcavg = rcavg/real(ndmonth(month))
       phavg = phavg * 12.0      !kgC/m2/yr
       aravg = aravg * 12.0      !kgC/m2/yr
@@ -603,20 +524,19 @@ c
       clavg = clavg * 12.0      !kgC/m2
       csavg = csavg * 12.0      !kgC/m2
       hravg = hravg * 12.0      !kgC/m2/yr
-     
+      
       return
       end subroutine budget
 !     
 !     =========================================================
 !     
-      subroutine penman (spre,temp,w,wmax,ur,rn,rc2,evap)
+      subroutine penman (spre,temp,ur,rn,rc2,evap)
 !     
 !     Inputs
 !     ------
 !     
       real spre                 !Surface pressure (mb)
       real temp                 !Temperature (oC)
-      real w                    !Saturation (0-1,dimensionless)
       real ur                   !Relative humidity (0-1,dimensionless)
       real rn                   !Radiation balance (W/m2)
       real rc2                  !Canopy resistence (s/m)

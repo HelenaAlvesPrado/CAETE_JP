@@ -1,0 +1,201 @@
+jpdarela@jpdarela-Latitude-D530:~/Desktop/caete_jp/dev/CAETE_JP/caete_helena/recent/utils$ python3 model_runner.py 
+env5.f:23:27:
+
+       integer nx,ny,i,j,k,n,p,q
+                           1
+Warning: Unused variable ‘n’ declared at (1) [-Wunused-variable]
+wbm4.f:354:24:
+
+       real f4sun,f4shade        !Scaling-up to canopy level(dimensionless)
+                        1
+Warning: Unused variable ‘f4shade’ declared at (1) [-Wunused-variable]
+wbm4.f:354:16:
+
+       real f4sun,f4shade        !Scaling-up to canopy level(dimensionless)
+                1
+Warning: Unused variable ‘f4sun’ declared at (1) [-Wunused-variable]
+wbm4.f:353:13:
+
+       real jc,je,jl,jp          !Factors that limit photosynthesis
+             1
+Warning: Unused variable ‘jc’ declared at (1) [-Wunused-variable]
+wbm4.f:353:16:
+
+       real jc,je,jl,jp          !Factors that limit photosynthesis
+                1
+Warning: Unused variable ‘je’ declared at (1) [-Wunused-variable]
+wbm4.f:353:19:
+
+       real jc,je,jl,jp          !Factors that limit photosynthesis
+                   1
+Warning: Unused variable ‘jl’ declared at (1) [-Wunused-variable]
+wbm4.f:353:22:
+
+       real jc,je,jl,jp          !Factors that limit photosynthesis
+                      1
+Warning: Unused variable ‘jp’ declared at (1) [-Wunused-variable]
+wbm4.f:352:16:
+
+       real mgama                !Photo-respiration compensation point (Pa)
+                1
+Warning: Unused variable ‘mgama’ declared at (1) [-Wunused-variable]
+wbm4.f:347:20:
+
+       real nppa,nppb            !Net primary productivity / auxiliar
+                    1
+Warning: Unused variable ‘nppb’ declared at (1) [-Wunused-variable]
+wbm4.f:78:17:
+
+       real pr,ice,spre,ta,td,ipar
+                 1
+Warning: Unused variable ‘ice’ declared at (1) [-Wunused-variable]
+productivity1.f:76:13:
+
+       real p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,
+             1
+Warning: Unused variable ‘p1’ declared at (1) [-Wunused-variable]
+productivity1.f:76:16:
+
+       real p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,
+                1
+Warning: Unused variable ‘p2’ declared at (1) [-Wunused-variable]
+
+
+
+	Executando caete- inicio em--->Fri Dec 16 04:12:09 2016
+ working:          10
+ working:          20
+ working:          30
+ working:          40
+ working:          50
+ working:          60
+ working:          70
+ working:          80
+ working:          90
+ working:         100
+ working:         110
+ working:         120
+ working:         130
+ working:         140
+ working:         150
+ working:         160
+ working:         170
+ working:         180
+ working:         190
+ working:         200
+ working:         210
+ working:         220
+ working:         230
+ working:         240
+ working:         250
+ working:         260
+ working:         270
+ working:         280
+ working:         290
+ working:         300
+ working:         310
+ working:         320
+ working:         330
+ working:         340
+ working:         350
+ working:         360
+ working:         370
+ working:         380
+ working:         390
+ working:         400
+ working:         410
+ working:         420
+ working:         430
+ working:         440
+ working:         450
+ working:         460
+ working:         470
+ working:         480
+ working:         490
+ working:         500
+ working:         510
+ working:         520
+ working:         530
+ working:         540
+ working:         550
+ working:         560
+ working:         570
+ working:         580
+ working:         590
+ working:         600
+ working:         610
+ working:         620
+ working:         630
+ working:         640
+ working:         650
+ working:         660
+ working:         670
+ working:         680
+ working:         690
+ working:         700
+ working:         710
+ working:         720
+Note: The following floating-point exceptions are signalling: IEEE_UNDERFLOW_FLAG IEEE_DENORMAL
+
+
+
+	Finalizando caete - em--->Fri Dec 16 04:24:36 2016
+
+
+Tempo de execução: 12 minutos e 26.47 segundos
+12
+../outputs/npp.bin
+../outputs/npp.hdr 
+
+12
+../outputs/rcm.bin
+../outputs/rcm.hdr 
+
+jpdarela@jpdarela-Latitude-D530:~/Desktop/caete_jp/dev/CAETE_JP/caete_helena/recent/utils$ cd ../outputs/
+bash: cd: ../out: No such file or directory
+jpdarela@jpdarela-Latitude-D530:~/Desktop/caete_jp/dev/CAETE_JP/caete_helena/recent/utils$ cd ../outputs/
+jpdarela@jpdarela-Latitude-D530:~/Desktop/caete_jp/dev/CAETE_JP/caete_helena/recent/outputs$ ls
+npp_annual_cycle_mean_CAETE.nc  npp.bin  npp.hdr  rcm.bin  rcm.hdr
+jpdarela@jpdarela-Latitude-D530:~/Desktop/caete_jp/dev/CAETE_JP/caete_helena/recent/outputs$ ipython3
+Python 3.5.2 (default, Nov 17 2016, 17:05:23) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 2.4.1 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+In [1]  
+
+In [1]: %pyplot
+ERROR: Line magic function `%pyplot` not found.
+
+In [2]: %
+ERROR: Line magic function `%` not found.
+
+In [3]: import matplotlib.pyplot as plt
+
+In [4]: import numpy as np
+
+In [5]: mask = np.load('../utils/mask12.npy')
+
+In [6]: import gdal
+
+In [7]: dt = gdal.Open('rcm.bin')
+
+In [8]: z = np.ma.masked_array(dt.ReadAsArray(),mask)
+
+In [9]: plt.imshow(z[10])
+Out[9]: <matplotlib.image.AxesImage at 0xa89a3aac>
+
+In [10]: plt.colorbar()
+Out[10]: <matplotlib.colorbar.Colorbar at 0xa895530c>
+
+In [11]: plt.show()
+
+In [12]: exit
+jpdarela@jpdarela-Latitude-D530:~/Desktop/caete_jp/dev/CAETE_JP/caete_helena/recent/outputs$ exit
+exit
+
+Process shell finished
