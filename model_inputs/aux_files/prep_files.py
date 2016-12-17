@@ -12,7 +12,7 @@ mask_fpath = './mask12.npy'
 NO_DATA = [-9999.0, -9999.0]
 lsmk = np.load(mask_fpath)
 
-fdir = '../new_inputs_caete'
+fdir = '../new_inputs_caete3'
 files = glob.glob1(fdir, '*.bin')
 
 

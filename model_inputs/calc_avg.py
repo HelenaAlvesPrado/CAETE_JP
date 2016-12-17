@@ -90,9 +90,7 @@ def catch_metadata(cdf_str_path):
         print('nf')
 
 
-def extr_data(files_list, var_name, var_arr1):
-
-    """    """
+def extr_data2(files_list, var_name, var_arr1):
     INDEX_COUNTER = 0
     # iterating over files
     files_list.sort()
@@ -101,32 +99,20 @@ def extr_data(files_list, var_name, var_arr1):
         # try open file
         try:
             fh = h5py.File(file_, 'r')
-            closed = False
-            # iterates over datasets in file
+        except:
+            print('IOERROR- Cannot open %s' % file_)
+            return None
+        else:
             for ds in fh:
-                # print(ds, '->>>', fh[ds])
-                # if dataset is var_name
                 if ds == str(var_name):
-                    # print('dataset = ', ds, 'shape', fh[ds].shape)
-                    # iterates over var_name_ monthly arrays &
-                    # store it in var_arr
                     for index in list(range(fh[ds].shape[0])):
-                        # print(index, '->', index+INDEX_COUNTER)
                         var_arr1[index + INDEX_COUNTER] = fh[ds][index]
                     INDEX_COUNTER += fh[ds].shape[0]
             fh.close()
-            del(fh)
-            closed = True
-        except:
-            print('deumerdadeu')
-    if closed:
-        return var_arr1
-    else:
-        if 'fh' in dir():
-            fh.close()
-            del(fh)
-
-
+                        
+    return var_arr1
+                        
+                        
 def main():
 
     dlds_files = os.getcwd() + dir_sep + 'dlds'
@@ -156,7 +142,7 @@ def main():
         # criando aux_array
         aux_array = np.zeros(shape=shapeaux, dtype=al.f32)
         # extraindo dados dos arquivos nc4
-        aux_arr2 = extr_data(fls, el, aux_array)
+        aux_arr2 = extr_data2(fls, el, aux_array)
         del(aux_array)
 
         if check_arr(aux_arr2, el):
@@ -175,7 +161,7 @@ def main():
             del(media_mensal)
 
     # npy done
-    out_dir = 'new_inputs_caete2'
+    out_dir = 'new_inputs_caete3'
     out_path = os.getcwd() + os.path.sep + out_dir
     if os.path.exists(out_path):
         pass

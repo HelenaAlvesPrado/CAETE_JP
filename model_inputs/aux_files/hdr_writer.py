@@ -10,7 +10,7 @@ import os
 flip_b = True
 
 if flip_b:
-    path_to_files = '../new_inputs_caete'
+    path_to_files = '../new_inputs_caete3'
 #GLOBAL VARIABLES 
     nx = 720
     ny = 360
