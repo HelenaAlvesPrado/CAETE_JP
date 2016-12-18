@@ -322,11 +322,12 @@ C     output
                do i6=1,npft
                   reloop = .false.
                   obs_sensi = 9999.0000000
- 666              continue            
+ 666              continue
+                  if (reloop) then
+                     npp_pot(i,j) = veg_pool(i,j,i6)
+                  endif
+                  
                   do k=1,nt
-                     if (reloop) then
-                        npp_pot(i,j) = veg_pool(i,j,i6)
-                     endif
                      
                      if ((k.eq.1) .and. (.not. reloop)) then
                         veg_pool_aux(i,j,k) = allocation_coefs(i6) *
@@ -339,28 +340,31 @@ C     output
                         veg_pool_aux(i,j,k) = ((allocation_coefs(i6) *
      $                       npp_pot(i,j)) - (k_minus_one /
      $                       turnover_coefs(i6))) + k_minus_one
-     
+                        
                         kk =  int(k*0.66)
                         
                         if(veg_pool_aux(i,j,k)/veg_pool_aux(i,j
      $                       ,kk).lt.sensi) then
                            obs_sensi = veg_pool_aux(i,j,k)
      $                          /veg_pool_aux(i,j,kk)
+                           print*, 'cel ok'
                            veg_pool(i,j,i6) = veg_pool_aux(i,j,k)
                            exit
-                        else if (((veg_pool_aux(i,j,k)/veg_pool_aux(i,j
-     $                          ,kk)).gt.sensi) .and.(k .gt. 1499)) then
-                           veg_pool(i,j,i6) = veg_pool_aux(i,j,k)
-                           reloop = .true.
-                           obs_sensi = veg_pool_aux(i,j,k)
-     $                          /veg_pool_aux(i,j,kk)
-                           goto 666
-                           
+                        else
+                           if (k .gt. 1499) then
+                              veg_pool(i,j,i6) = veg_pool_aux(i,j,k)
+                              reloop = .true.
+                              obs_sensi = veg_pool_aux(i,j,k)
+     $                             /veg_pool_aux(i,j,kk)
+                              print*, 'relooping'
+                              exit
+                              goto 666
+                           endif
                         endif               
                      endif
                   enddo
                enddo
-               print*, obs_sensi
+               print*, obs_sensi, i6,k
             else
                do i7=1,npft
                   veg_pool(i,j,i7) = -9999.0
@@ -370,5 +374,4 @@ C     output
       enddo
       return
       end subroutine spinup3
-                           
 
