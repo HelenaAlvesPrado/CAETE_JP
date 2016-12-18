@@ -290,4 +290,85 @@ c
       return
       end subroutine spinup2			   
       
+      subroutine spinup3(npp_pot, lsmk, allocation_coefs, turnover_coefs
+     $     ,wood,veg_pool)
       
+      implicit none
+      
+C     inputs and internal vars
+      integer i6, i7, i, j, k, kk
+      integer, parameter :: nx= 720, ny = 360, nt = 1500
+      integer, parameter :: npft = 3
+      logical :: wood, reloop
+      real, dimension(nx,ny) :: npp_pot, lsmk, aux_var
+      real, dimension(npft) :: allocation_coefs, turnover_coefs
+      real :: sensi, k_minus_one, obs_sensi
+      real, dimension(nx,ny,nt) :: veg_pool_aux
+C     output
+      real, dimension(nx,ny,npft) :: veg_pool
+
+      
+      if (wood) then
+         sensi = 1.400000
+      else
+         sensi = 1.100000
+      endif
+      
+      
+      
+      do i=1,nx
+         do j=1,ny
+            if (nint(lsmk(i,j)).ne.0) then
+               do i6=1,npft
+                  reloop = .false.
+                  obs_sensi = 9999.0000000
+ 666              continue            
+                  do k=1,nt
+                     if (reloop) then
+                        npp_pot(i,j) = veg_pool(i,j,i6)
+                     endif
+                     
+                     if ((k.eq.1) .and. (.not. reloop)) then
+                        veg_pool_aux(i,j,k) = allocation_coefs(i6) *
+     $                       npp_pot(i,j)
+                     else if ((k .eq. 1) .and. reloop) then
+                        veg_pool_aux(i,j,k) = npp_pot(i,j)
+                     else
+                        k_minus_one = veg_pool_aux(i,j,k-1)
+                        
+                        veg_pool_aux(i,j,k) = ((allocation_coefs(i6) *
+     $                       npp_pot(i,j)) - (k_minus_one /
+     $                       turnover_coefs(i6))) + k_minus_one
+     
+                        kk =  int(k*0.66)
+                        
+                        if(veg_pool_aux(i,j,k)/veg_pool_aux(i,j
+     $                       ,kk).lt.sensi) then
+                           obs_sensi = veg_pool_aux(i,j,k)
+     $                          /veg_pool_aux(i,j,kk)
+                           veg_pool(i,j,i6) = veg_pool_aux(i,j,k)
+                           exit
+                        else if (((veg_pool_aux(i,j,k)/veg_pool_aux(i,j
+     $                          ,kk)).gt.sensi) .and.(k .gt. 1499)) then
+                           veg_pool(i,j,i6) = veg_pool_aux(i,j,k)
+                           reloop = .true.
+                           obs_sensi = veg_pool_aux(i,j,k)
+     $                          /veg_pool_aux(i,j,kk)
+                           goto 666
+                           
+                        endif               
+                     endif
+                  enddo
+               enddo
+               print*, obs_sensi
+            else
+               do i7=1,npft
+                  veg_pool(i,j,i7) = -9999.0
+               enddo
+            endif
+         enddo
+      enddo
+      return
+      end subroutine spinup3
+                           
+
