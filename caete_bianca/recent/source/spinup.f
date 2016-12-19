@@ -326,7 +326,7 @@ C     output
  10               continue
                   
                   if (reloop) then
-                     npp_pot(i,j) = veg_pool(i,j,i6)
+!     npp_pot(i,j) = veg_pool(i,j,i6)
                      k=0
                   endif
                   
@@ -351,11 +351,10 @@ C     output
                         
                         if(veg_pool_aux(i,j,k)/veg_pool_aux(i,j
      $                       ,kk).lt.sensi) then
-                           obs_sensi = veg_pool_aux(i,j,k)
-     $                          /veg_pool_aux(i,j,kk)
-                           print*, 'cel ok'
+!     print*, 'cel ok'
                            veg_pool(i,j,i6) = veg_pool_aux(i,j,k)
                            exit
+
                         else
                            if (k .gt. 1499) then
                                if(veg_pool_aux(i,j,k)/veg_pool_aux(i,j
