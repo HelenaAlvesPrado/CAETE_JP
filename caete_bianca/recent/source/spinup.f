@@ -337,9 +337,10 @@ C     output
      $                       npp_pot(i,j)
                         
                      else if ((k .eq. 1) .and. reloop) then
-                        veg_pool_aux(i,j,k) = ((allocation_coefs(i6) *
-     $                       npp_pot(i,j)) - (k_minus_one /
-     $                       turnover_coefs(i6))) + k_minus_one
+                        veg_pool_aux(i,j,k) = aux_var(i,j)
+c                       veg_pool_aux(i,j,k) = ((allocation_coefs(i6) *
+c    $                       npp_pot(i,j)) - (k_minus_one /
+c    $                       turnover_coefs(i6))) + k_minus_one
                      else
                         k_minus_one = veg_pool_aux(i,j,k-1)
                         
@@ -351,7 +352,7 @@ C     output
                         
                         if(veg_pool_aux(i,j,k)/veg_pool_aux(i,j
      $                       ,kk).lt.sensi) then
-!     print*, 'cel ok'
+                           print*, 'cel ok'
                            veg_pool(i,j,i6) = veg_pool_aux(i,j,k)
                            exit
 
@@ -359,8 +360,9 @@ C     output
                            if (k .gt. 1499) then
                                if(veg_pool_aux(i,j,k)/veg_pool_aux(i,j
      $                             ,kk).gt.sensi) then
+                                  print*, 'relooping'
                                   reloop = .true.
-                                  npp_pot(i,j) = veg_pool_aux(i,j,k)
+                                  aux_var(i,j) = veg_pool_aux(i,j,k)
                                   goto 10
                                endif
                            endif
