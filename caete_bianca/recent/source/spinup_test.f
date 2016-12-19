@@ -60,7 +60,7 @@ c     &     cbwoodini1,cstoini1,cotherini1,crepini1)
      $     leaf_turnover_coeffs, .false.,cleaf_ini)
 
       
-      open(23,file='../outputs/cleaf_ini_spinup30m.bin',status='new'
+      open(23,file='../outputs/cleaf_ini_spinup30m_ok.bin',status='new'
      $     ,form='unformatted',access='direct',recl=4*nx*ny)
       
 c      open(24,file='./outputs/cawood_ini_pft.bin',status='new',
