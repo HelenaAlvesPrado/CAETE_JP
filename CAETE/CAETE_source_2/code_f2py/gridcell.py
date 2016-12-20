@@ -5,27 +5,37 @@ import numpy as np
 import netCDF4 as nc
 import os
 import glob
-import carbon_64 as C
+import carbon as C
 import time
 
 
 class datasets:
+    """ """
 
     def __init__(self, files_dir):
         self.files = sorted(glob.glob1(files_dir, '*.nc'))
         self.files_dir = files_dir
 
-
+        
     def get_var(self, var):
         
-        fname = [filename for filename in self.files if var == filename.split('_')[0]]
+        if type(var) == type('str') and len(self.files) > 0:
+            fname = [filename for filename in self.files if var == filename.split('_')[0]]
+        else:
+            return None
+        
         fname_comp = self.files_dir + os.sep + fname[0]
         
-        dataset = nc.Dataset(fname_comp, 'r')
-
-        dados = dataset.variables[var][:,:,:]
-
-        dataset.close()
+        try:
+            dataset = nc.Dataset(fname_comp, 'r')
+            
+        except IOError:
+            print('Cannot open %s file' % var)
+            return None
+            
+        else:
+            dados = dataset.variables[var][:,:,:]
+            dataset.close()
 
         return np.fliplr(np.array(dados))
         
@@ -105,7 +115,16 @@ class gridcell:
 
         self.complete = True
 
-# RUNING THE MODEL FOR LAND GRIDCELLS
+        # RUNING THE MODEL FOR LAND GRIDCELLS
+def rm_appy(gridcell_obj):
+    
+    if gridcell_obj.filled and not gridcell_obj.complete:
+        gridcell_obj.run_model()
+    elif not gridcell_obj.filled and not gridcell_obj.complete:
+        gridcell_obj.init_caete()
+        gridcell_obj.run_model()
+    else:
+        pass
 
 mask = np.load('mask.npy')
 
@@ -125,8 +144,7 @@ land_data = dict()
 id_n = 1
 id_su = 'id_'
 manaus_landgrid_id = 0
-print('iniciando modelo', end='---> ')
-print(time.ctime())
+
 for Y in range(mask.shape[0]):
     for X in range(mask.shape[1]):
         if not mask[Y][X]:
@@ -134,11 +152,20 @@ for Y in range(mask.shape[0]):
             grd_cell = gridcell(X, Y, dict_key)
             if Y == 176 and X == 240:
                 manaus_landgrid_id = dict_key
-            grd_cell.init_caete()
+            #grd_cell.init_caete()
             #grd_cell.run_model()
             land_data[dict_key] =  grd_cell 
             id_n += 1
-print(id_n)
+
+print('iniciando aplicação do modelo (1 e 2) para todas as celulas do grid', end='---> ')
+print(time.ctime())
+
+for key in land_data.keys():
+    rm_appy(land_data[key])
+    
+print('modelo aplicado a %d localidades' % id_n)
 print('terminado', end='---: ')
 print(time.ctime())
+
+
 

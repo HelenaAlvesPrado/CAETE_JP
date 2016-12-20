@@ -1,0 +1,62 @@
+# CAETE model driver
+
+from caete import *
+import time
+mask = np.load('mask.npy')
+
+std_shape = (12, 360, 720)
+
+loops = int((mask.shape[0] * mask.shape[1]) - np.sum(mask))
+
+print('abrindo dados...\n')
+
+input_data = datasets('./inputs')
+assert input_data.check_dataset()
+
+global_pr = input_data.get_var('pr')
+assert global_pr.shape == std_shape 
+assert input_data.check_dataset()
+
+global_ps = input_data.get_var('ps')
+assert global_ps.shape == std_shape
+assert input_data.check_dataset()
+
+global_rsds = input_data.get_var('rsds')
+assert global_rsds.shape == std_shape
+assert input_data.check_dataset()
+
+global_tas = input_data.get_var('tas')
+assert global_tas.shape == std_shape
+assert input_data.check_dataset()
+
+
+print('dados abertos \n')
+
+
+# rodando o modelo para todas (land) as celulas do grid
+land_data = dict()
+id_n = 1
+id_su = 'id_'
+manaus_landgrid_id = 0
+
+for Y in range(mask.shape[0]):
+    for X in range(mask.shape[1]):
+        if not mask[Y][X]:
+            dict_key = id_su + str(id_n)
+            grd_cell = gridcell(X, Y, dict_key)
+            if Y == 176 and X == 240:
+                manaus_landgrid_id = dict_key
+            #grd_cell.init_caete()
+            #grd_cell.run_model()
+            land_data[dict_key] =  grd_cell 
+            id_n += 1
+
+print('iniciando aplicação do modelo (1 e 2) para todas as celulas do grid', end='---> ')
+print(time.ctime())
+
+for key in land_data.keys():
+    rm_appy(land_data[key])
+    
+print('modelo aplicado a %d localidades' % id_n)
+print('terminado', end='---: ')
+print(time.ctime())
