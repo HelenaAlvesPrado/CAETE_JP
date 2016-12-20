@@ -9,7 +9,7 @@ c      implicit none
       
       real npp_pot(nx,ny,12)
       
-      real lsmk(nx,ny), aux_npp(nx,ny)
+      real lsmk(nx,ny), aux_npp(nx,ny), npp_sca
       
       real, dimension(npft) :: aux1, aux2, aux3, aux4
       real, dimension(npft) :: aux5, aux6, aux7
