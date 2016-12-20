@@ -3,13 +3,12 @@ c     12345
 c      implicit none
 
 
-      integer, parameter :: nx = 720, ny = 360, npft = 3
-      real, parameter :: no_data = -9999.0 
+      integer, parameter :: nx = 192, ny = 96, npft = 3
+      real, parameter :: no_data = -9999.0
       integer i, j, k
-      
-      real npp_pot(nx,ny,12)
-      
+      real npp_pot(nx,ny)
       real lsmk(nx,ny), aux_npp(nx,ny)
+
       
       real, dimension(npft) :: aux1, aux2, aux3, aux4
       real, dimension(npft) :: aux5, aux6, aux7
@@ -24,35 +23,20 @@ c     carbon allocation in plant tissues
       real, dimension(nx,ny,npft) :: csto_ini = no_data
       real, dimension(nx,ny,npft) :: cother_ini = no_data
       real, dimension(nx,ny,npft) :: crep_ini = no_data
-
-
-
-!     ordem de chamada na spinup:
       
-c     &     cleafini,cfrootini,cawoodini,
-c     &     cbwoodini,cstoini,cotherini,crepini)
-
       
-      open(10,file='../inputs/lsmk_30min.bin',status='old',
+      
+      open(10,file='../inputs/lsmk.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
       
-      open(20,file='../inputs/npp.bin',status='old',
+      open(20,file='../inputs/nppot.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
-
+      
       read(10, rec=1) lsmk
-      call read12(20,npp_pot)
+      read(20, rec=1) npp_pot
       close(10)
       close(20)
-
-!     fazendo medias da npp
-      do i =1,nx
-         do j=1,ny
-            aux_npp(i,j) = 0.0
-            do k = 1,12
-               aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
-            enddo
-         enddo
-      enddo
+      
 
       do i=1,nx
          do j=1,ny
@@ -87,25 +71,25 @@ c     &     cbwoodini,cstoini,cotherini,crepini)
 
 
       
-      open(23,file='../outputs2/cleaf_ini_pft.bin',status='new'
+      open(23,file='../outputs192/cleaf_ini_pft.bin',status='new'
      $     ,form='unformatted',access='direct',recl=4*nx*ny)
       
-      open(24,file='../outputs2/cawood_ini_pft.bin',status='new',
+      open(24,file='../outputs192/cawood_ini_pft.bin',status='new',
      &     form='unformatted',access='direct',recl=4*nx*ny)
 
-      open(25,file='../outputs2/cbwood_ini_pft.bin',status='new',
+      open(25,file='../outputs192/cbwood_ini_pft.bin',status='new',
      &     form='unformatted',access='direct',recl=4*nx*ny)
 
-      open(26,file='../outputs2/cfroot_ini_pft.bin',status='new',
+      open(26,file='../outputs192/cfroot_ini_pft.bin',status='new',
      &     form='unformatted',access='direct',recl=4*nx*ny)
       
-      open(27,file='../outputs2/crep_ini_pft.bin',status='new',
+      open(27,file='../outputs192/crep_ini_pft.bin',status='new',
      &     form='unformatted',access='direct',recl=4*nx*ny)
       
-      open(28,file='../outputs2/cother_ini_pft.bin',status='new',
+      open(28,file='../outputs192/cother_ini_pft.bin',status='new',
      &     form='unformatted',access='direct',recl=4*nx*ny)
       
-      open(29,file='../outputs2/csto_ini_pft.bin',status='new',
+      open(29,file='../outputs192/csto_ini_pft.bin',status='new',
      &     form='unformatted',access='direct',recl=4*nx*ny)
 
 
@@ -152,16 +136,12 @@ c     &     cbwoodini,cstoini,cotherini,crepini)
       close(29)
 
 
-      
+   
       end program spin_test
 
-
-
-
-      
       subroutine read12(nunit,var)
 c     auxiliar reading routine
-      parameter(nx=720,ny=360)
+      parameter(nx=192,ny=96)
       integer nunit
       real var(nx,ny,12)
       real aux(nx,ny)
