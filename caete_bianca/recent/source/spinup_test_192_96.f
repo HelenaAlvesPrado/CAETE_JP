@@ -7,7 +7,8 @@ c      implicit none
       real, parameter :: no_data = -9999.0
       integer i, j, k
       real npp_pot(nx,ny)
-      real lsmk(nx,ny), aux_npp(nx,ny)
+      real lsmk(nx,ny)
+      real npp_sca
 
       
       real, dimension(npft) :: aux1, aux2, aux3, aux4
@@ -43,26 +44,31 @@ c     carbon allocation in plant tissues
             
             if (nint(lsmk(i,j)) .ne. 0) then
                
-               npp_sca = aux_npp(i,j)
-               
-               aux1 = 0.0
-               aux2 = 0.0
-               aux3 = 0.0
-               aux4 = 0.0
-               aux5 = 0.0
-               aux6 = 0.0
-               aux7 = 0.0
+               npp_sca = npp_pot(i,j)
+
+               do k = 1,npft
+                  aux1(k) = 0.0
+                  aux2(k) = 0.0
+                  aux3(k) = 0.0
+                  aux4(k) = 0.0
+                  aux5(k) = 0.0
+                  aux6(k) = 0.0
+                  aux7(k) = 0.0
+               enddo
                
                call spinup(npp_sca, aux1, aux2, aux3, aux4, aux5, aux6,
      $              aux7)
-               
-               cleaf_ini(nx,ny,:) = aux1
-               cfroot_ini(nx,ny,:) = aux2
-               cawood_ini(nx,ny,:) = aux3
-               cbwood_ini(nx,ny,:) = aux4
-               csto_ini(nx,ny,:) = aux5
-               cother_ini(nx,ny,:) = aux6
-               crep_ini(nx,ny,:) = aux7
+
+               do k=1,npft                 
+                  cleaf_ini(i,j,k)  = aux1(k)
+                  cfroot_ini(i,j,k) = aux2(k)
+                  cawood_ini(i,j,k) = aux3(k)
+                  cbwood_ini(i,j,k) = aux4(k)
+                  csto_ini(i,j,k)   = aux5(k)
+                  cother_ini(i,j,k) = aux6(k)
+                  crep_ini(i,j,k)   = aux7(k)
+               enddo
+             
             endif
          enddo
          print*, (real(i)/real(nx))*100.0, '%'
