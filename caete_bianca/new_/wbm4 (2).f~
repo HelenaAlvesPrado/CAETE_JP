@@ -56,45 +56,72 @@ c 31Ago2006, DML: carbon cycle is included
 c
 c=======================================================================
 c
-c i/o variables
-      parameter (npft=3,npls=3)
-      parameter(nx=192,ny=96)
-      real prec(nx,ny,12),temp(nx,ny,12),lsmk(nx,ny),p0(nx,ny)
-      real tmin(nx,ny),seanpp(nx,ny),meanpp(nx,ny),meanhr(nx,ny),
-     &     meancs(nx,ny),mphoto(nx,ny),maresp(nx,ny),ave_wsoil(nx,ny),
-     &     ave_evap(nx,ny),ave_rc(nx,ny),
-     &     mean_npp_tbe(nx,ny),mean_npp_tbd(nx,ny),mean_npp_herb(nx,ny),
-     &     mean_npp_pft(nx,ny,npls),npp_pft(nx,ny,12,npls),
-     &     nppavg_pft(npls),
-     &     mean_photo_tbe(nx,ny),mean_photo_tbd(nx,ny),
-     &     mean_photo_herb(nx,ny),mean_photo_pft(nx,ny,npls),
-     &     photo_pft(nx,ny,12,npls),photoavg_pft(npls),
-     &     mean_ar_tbe(nx,ny),mean_ar_tbd(nx,ny),
-     &     mean_ar_herb(nx,ny),mean_ar_pft(nx,ny,npls),
-     &     ar_pft(nx,ny,12,npls),aravg_pft(npls),
-     &     total_npp(nx,ny),total_ph(nx,ny),total_ar(nx,ny)
-      real meanrml(nx,ny),meanrmf(nx,ny),meanrms(nx,ny),meanrm(nx,ny),
-     &     meanrgl(nx,ny),meanrgf(nx,ny),meanrgs(nx,ny),meanrg(nx,ny)
-      real wsoil2(nx,ny,12),par(nx,ny,12)
-      real photo(nx,ny,12),aresp(nx,ny,12),npp(nx,ny,12),
-     &     lai(nx,ny,12),clit(nx,ny,12),csoil(nx,ny,12),hresp(nx,ny,12)
+c     i/o variables
+c     INPUTS________________
+      integer, parameter :: npft=3
+      integer, parameter :: nx=192 ,ny=96
+      real prec(nx,ny,12)
+      real temp(nx,ny,12)
+      real lsmk(nx,ny)
+      real p0(nx,ny)
+      real par(nx,ny,12)
       
-      real monrml(nx,ny,12,),monrmf(nx,ny,12),monrms(nx,ny,12),
-     &    monrm(nx,ny,12),monrgl(nx,ny,12),monrgf(nx,ny,12),
-     &    monrgs(nx,ny,12),monrg(nx,ny,12)
+C     inputs -- initial carbon content in plant tissues      
+      real cleaf_pft(nx,ny,12,npft)
+      real cawood_pft(nx,ny,12,npft)
+      real cbwood_pft(nx,ny,12,npft)
+      real cfroot_pft(nx,ny,12,npft)
+      real csto_pft(nx,ny,12,npft)
+      real crep_pft(nx,ny,12,npft)
+      real cother_pft(nx,ny,12,npft)
+
+C     _____________________
+
+
+C     outputas
+      
+!     maintenance respiration
+      real monrml(nx,ny,12,npft)
+      real monrmf(nx,ny,12,npft)
+      real monrms(nx,ny,12,npft)
+      real monrm(nx,ny,12,npft)
+      real monrgl(nx,ny,12,npft)
+      real monrgf(nx,ny,12,npft)
+      real monrgs(nx,ny,12,npft)
+      real monrg(nx,ny,12,npft)
+
+      
+C     variaveis originais do wbm
+      real tsoil(nx,ny,12)
+      real emaxm(nx,ny,12)
+      
+      real npp(nx,ny,12,npft)
+      real photo(nx,ny,12,npft)
+      real aresp(nx,ny,12,npft)
+      real lai(nx,ny,12,npft)
+      real clit(nx,ny,12,npft)
+      real csoil(nx,ny,12,npft)
+      real hresp(nx,ny,12,npft)
+      
+      real wsoil(nx,ny,12,npft)
+      real runom(nx,ny,12,npft)
+      real evapm(nx,ny,12,npft)
+      real rcm(nx,ny,12,npft)
+      
+!     INTERNAL
+      
+      real gsoil(nx,ny,12,npft)
+      real ssoil(nx,ny,12,npft)
+      real snowm(nx,ny,12,npft)
+      
+      
+
+
+      
+      
       integer npls2             !number of plant life strategies
 
 
-      
-c     new vRIABLWA
-C     cleaf_pft(nx,ny,12,npls)
-C     cawood_pft(nx,ny,12,npls)
-C     cbwood_pft(nx,ny,12,npls)
-C     cfroot_pft(nx,ny,12,npls)
-C     csto_pft(nx,ny,12,npls)
-C     crep_pft(nx,ny,12,npls
-C     cother_pft(nx,ny,12,npls)
-      
 
       
 c carbon allocation
@@ -166,10 +193,8 @@ c carbon allocation
       integer i1,i2 
 c
 c internal variables
-      real H,diffu,tau,tsoil(nx,ny,12),t0,t1
-      real wsoil(nx,ny,12),gsoil(nx,ny,12),ssoil(nx,ny,12),
-     &       snowm(nx,ny,12),runom(nx,ny,12),evapm(nx,ny,12),
-     &       emaxm(nx,ny,12),rcm(nx,ny,12)
+      real H,diffu,tau,t0,t1
+
       real wg0(nx,ny,12)
       real nppmes,laimes,ipar
       real nppmin(nx,ny),nppmax(nx,ny),meant(nx,ny),seat(nx,ny)

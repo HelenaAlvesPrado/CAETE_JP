@@ -110,9 +110,9 @@ C     variaveis originais do wbm
       
 !     INTERNAL
       
-      real gsoil(nx,ny,12)
-      real ssoil(nx,ny,12)
-      real snowm(nx,ny,12) ,
+      real gsoil(nx,ny,12,npft)
+      real ssoil(nx,ny,12,npft)
+      real snowm(nx,ny,12,npft)
       
       
 
@@ -193,7 +193,7 @@ c carbon allocation
       integer i1,i2 
 c
 c internal variables
-      real H,diffu,tau,tsoil(nx,ny,12),t0,t1
+      real H,diffu,tau,t0,t1
 
       real wg0(nx,ny,12)
       real nppmes,laimes,ipar
