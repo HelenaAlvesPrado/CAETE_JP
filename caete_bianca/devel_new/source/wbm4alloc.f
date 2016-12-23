@@ -346,7 +346,7 @@ c$$$     $                 ,crepavg,cotheravg)
      $     ,rgsavg,rgavg,clavg,csavg,hravg,rcavg,cleafavg,cawoodavg
      $     ,cfrootavg,cbwoodavg,cstoavg,crepavg,cotheravg)
 c=======================================================================
-c     
+      implicit none
 c     Surface water (soil moisture, snow and ice) budget for a single
 c     month.
 c     
@@ -384,15 +384,24 @@ c-------------
 c
 c     i/o variablesa
 
-      integer month, pft
+c      (pft,month,w1,g1,s1,ts,temp,prec,p0,ae,ca
+c     $     ,ipar,cleaf_ini,cawood_ini,cfroot_ini,cbwood_ini,csto_ini
+c     $     ,cother_ini,crep_ini,w2,g2,s2,smavg,ruavg,evavg,epavg,phavg
+c     $     ,aravg,nppavg,laiavg,rmlavg,rmfavg,rmsavg,rmavg,rglavg,rgfavg
+c     $     ,rgsavg,rgavg,clavg,csavg,hravg,rcavg,cleafavg,cawoodavg
+c     $     ,cfrootavg,cbwoodavg,cstoavg,crepavg,cotheravg)
+
+      integer month, pft, i
       real w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,
      &     w2,g2,s2,smavg,ruavg,evavg,epavg,rcavg,
      &     phavg,aravg,nppavg,laiavg,
-     &     clavg,csavg,hravg     
+     &     clavg,csavg,hravg,f5, rc2
+      real cleafavg,cawoodavg,cfrootavg,cbwoodavg,cstoavg,crepavg
+     $     ,cotheravg
 c     internal variables
       real rh,wmax,tsnow,tice
       real psnow,prain
-      real w,g,s
+      real w,g,s, ds, dw
       real rimelt,smelt,roff,evap,emax
       integer ndmonth(12)       !number of days for each month
       data ndmonth /31,28,31,30,31,30,31,31,30,31,30,31/
@@ -401,14 +410,17 @@ c     carbon cycle
       real ph,ar,nppa,nppb,laia,cl,cs,hr,
      &     rm,rml,rmf,rms,rg,rgl,rgf,rgs,
      &     rmlavg,rmfavg,rmsavg,rmavg,
-     &     rglavg,rgfavg,rgsavg,rgavg,
-     &     sla
+     &     rglavg,rgfavg,rgsavg,rgavg
 
 c     carbon allocation
       real cleaf_ini,cawood_ini,cfroot_ini,cbwood_ini,csto_ini,
-     &     crep_ini, cl1,cl2,ca1,ca2,cf1,cf2,cb1,cb2,cs1,cs2,
-     &     cr1,cr2,co1,co2, cl2_pft,ca2_pft,cf2_pft,cb2_pft,cs2_pft,
-     &     cr2_pft,co2_pft
+     &     cother_ini,crep_ini, cl1,cl2,ca1,ca2,cf1,cf2,cb1,cb2,cs1,cs2,
+     &     cr1,cr2,co1,co2
+
+      real beta_leaf, alfa_leaf
+      real beta_awood, alfa_awood
+      real beta_froot, alfa_froot
+      real beta_bwood, alfa_bwood
   
 c     
 c     parameters
@@ -469,28 +481,28 @@ c     numerical integration
       do i=1,ndmonth(month)
 
          if ((i .eq. 1) .and. (month.eq.1)) then  ! se for mes 1, pegue os valores vindos de spinup (inputs de wbm)
-            cl1 = cleaf_pft  ! variavel que recebe o tamanho do C pool (Kg m-2)
-            ca1 = cawood_pft    ! membros do lado direito sao inputs para a budget
-            cf1 = cfroot_pft    ! dentro da budget apenas valores escalares! se n complica d+
-            cb1 = cbwood_pft
-            cs1 = csto_pft  
-            cr1 = crep_pft
-            co1 = cother_pft
+            cl1 = cleaf_ini  ! variavel que recebe o tamanho do C pool (Kg m-2)
+            ca1 = cawood_ini    ! membros do lado direito sao inputs para a budget
+            cf1 = cfroot_ini    ! dentro da budget apenas valores escalares! se n complica d+
+            cb1 = cbwood_ini
+            cs1 = csto_ini  
+            cr1 = crep_ini
+            co1 = cother_ini
             
-            beta_leaf=0. 
-            beta_awood=0.
-            beta_bwood=0.
-            beta_froot=0.
+            beta_leaf= 0.01 
+            beta_awood= 0.01
+            beta_bwood= 0.01
+            beta_froot= 0.01
             
             
          else                   ! PEGUE OS VALORES DO DIA ANTERIOR
-            cl1 = cl2_pft       !transforma o valor do dia anterior no valor atual
-            ca1 = ca2_pft
-            cf1 = cf2_pft
-            cb1 = cb2_pft
-            cs1 = cs2_pft       !transforma o valor do dia anterior no valor atual
-            cr1 = cr2_pft
-            co1 = co2_pft
+            cl1 = cl2       !transforma o valor do dia anterior no valor atual
+            ca1 = ca2
+            cf1 = cf2
+            cb1 = cb2
+            cs1 = cs2       !transforma o valor do dia anterior no valor atual
+            cr1 = cr2
+            co1 = co2
             
             beta_leaf = alfa_leaf
             beta_awood = alfa_awood
@@ -501,7 +513,7 @@ c     numerical integration
          
 c     carbon cycle (photosynthesis, plant respiration and NPP)
          call carbon1 (pft, temp,p0,w,wmax,ca,ipar,ts,emax !output !input !input
-     $        ,rc2,cl1,ca1,cf1,cb1,beta_leaf, beta_awood, beta_bwood
+     $        ,cl1,ca1,cf1,cb1,beta_leaf, beta_awood, beta_bwood
      $        ,beta_froot,ph,ar,nppa,laia,f5,rm,rml,rmf,rms
      $        ,rg,rgl,rgf,rgs)        
          
@@ -528,7 +540,7 @@ c     snow budget
          s = s + ds
 c     
 c     water budget
-         if (tsoil.le.tice) then !frozen soil
+         if (ts.le.tice) then !frozen soil
             g = g + w           !soil moisture freezes
             w = 0.0
             roff = smelt + prain
@@ -613,13 +625,6 @@ c     updating monthly values
       w2 = w
       g2 = g
       s2 = s
-      cl2_pft = cl2 !guarda o valor final para o C pool (kg m-2)
-      ca2_pft = ca2
-      cf2_pft = cf2
-      cb2_pft = cb2
-      cs2_pft = cs2
-      cr2_pft = cr2
-      co2_pft = co2
 
       
       cleafavg = cleafavg/real(ndmonth(month)) !monthly carbon content on leaf compart

@@ -210,7 +210,83 @@ c     -------------------------------------------------------
      &     cleaf_pft,cfroot_pft,cawood_pft,cbwood_pft, !outputs
      &     csto_pft, crep_pft, cother_pft)
       
-c     
+c
+      open(23,file='../outputs/cleaf_pft1.bin',status='new'
+     $     ,form='unformatted',access='direct',recl=4*nx*ny)
+
+      do k = 1,12
+         write(23, rec=k) cleaf_pft(:,:,k,1)
+      enddo
+
+      close(23)
+         
+c$$$      
+c$$$      open(24,file='../outputs2/cawood_ini_pft.bin',status='new',
+c$$$     &     form='unformatted',access='direct',recl=4*nx*ny)
+c$$$
+c$$$      open(25,file='../outputs2/cbwood_ini_pft.bin',status='new',
+c$$$     &     form='unformatted',access='direct',recl=4*nx*ny)
+c$$$
+c$$$      open(26,file='../outputs2/cfroot_ini_pft.bin',status='new',
+c$$$     &     form='unformatted',access='direct',recl=4*nx*ny)
+c$$$      
+c$$$      open(27,file='../outputs2/crep_ini_pft.bin',status='new',
+c$$$     &     form='unformatted',access='direct',recl=4*nx*ny)
+c$$$      
+c$$$      open(28,file='../outputs2/cother_ini_pft.bin',status='new',
+c$$$     &     form='unformatted',access='direct',recl=4*nx*ny)
+c$$$      
+c$$$      open(29,file='../outputs2/csto_ini_pft.bin',status='new',
+c$$$     &     form='unformatted',access='direct',recl=4*nx*ny)
+c$$$
+
+            
+         
+c$$$
+c$$$      write(23, rec=1) cleaf_ini(:,:,1)
+c$$$      write(23, rec=2) cleaf_ini(:,:,2)
+c$$$      write(23, rec=3) cleaf_ini(:,:,3)
+c$$$
+c$$$      write(24, rec=1) cawood_ini(:,:,1)
+c$$$      write(24, rec=2) cawood_ini(:,:,2)
+c$$$      write(24, rec=3) cawood_ini(:,:,3)
+c$$$
+c$$$      write(25, rec=1) cbwood_ini(:,:,1)
+c$$$      write(25, rec=2) cbwood_ini(:,:,2)
+c$$$      write(25, rec=3) cbwood_ini(:,:,3)
+c$$$
+c$$$      write(26, rec=1) cfroot_ini(:,:,1)
+c$$$      write(26, rec=2) cfroot_ini(:,:,2)
+c$$$      write(26, rec=3) cfroot_ini(:,:,3)
+c$$$
+c$$$      write(27, rec=1) crep_ini(:,:,1)
+c$$$      write(27, rec=2) crep_ini(:,:,2)
+c$$$      write(27, rec=3) crep_ini(:,:,3)
+c$$$ 
+c$$$      write(28, rec=1) cother_ini(:,:,1)
+c$$$      write(28, rec=2) cother_ini(:,:,2)
+c$$$      write(28, rec=3) cother_ini(:,:,3)
+c$$$
+c$$$      write(29, rec=1) csto_ini(:,:,1)
+c$$$      write(29, rec=2) csto_ini(:,:,2)
+c$$$      write(29, rec=3) csto_ini(:,:,3)
+c$$$
+c$$$
+c$$$
+c$$$
+c$$$      
+c$$$      
+c$$$      close(23)
+c$$$      close(24)
+c$$$      close(25)
+c$$$      close(26)
+c$$$      close(27)
+c$$$      close(28)
+c$$$      close(29)
+c$$$
+
+
+      
 c     Program end
 c     -----------
 c     

@@ -13,13 +13,19 @@ c     is between 0.205 and 0.265, NPP unrealistically drops to a level
 c     below those when wsoil is lesser than 0.205 (because of f5).
 c     
 c=======================================================================
-c     
-      subroutine carbon1 (pft, temp,p0,w,wmax,ca,ipar,tsoil,emax, rc2 !output !input
+c
+c         call carbon1 (pft, temp,p0,w,wmax,ca,ipar,ts,emax !output !input !input
+c     $        ,rc2,cl1,ca1,cf1,cb1,beta_leaf, beta_awood, beta_bwood
+c     $        ,beta_froot,ph,ar,nppa,laia,f5,rm,rml,rmf,rms
+c     $        ,rg,rgl,rgf,rgs)        
+         
+         
+      
+      subroutine carbon1 (pft, temp,p0,w,wmax,ca,ipar,tsoil,emax !output !input
      $     ,cl1,ca1,cf1,cb1,beta_leaf,beta_awood,beta_bwood,beta_froot
      $     ,ph,ar,nppa,laia,f5,rm,rml,rmf,rms,rg,rgl,rgf,rgs)      
-c     
-c     
-      parameter (npls=3,mal=80,maf=80,maw=80)
+
+      implicit none
       
 c     i/o variables
       integer pft
@@ -27,7 +33,7 @@ c     i/o variables
       real p0                   !mean surface pressure (hPa)
       real wa,w,wmax            !soil moisture (dimensionless)
       real ca                   !Atmospheric CO2 pressure (Pa)
-      real ipar,aux_ipar        !incident photos. active radiation
+      real ipar                 !incident photos. active radiation
 c     
       real ph                   !Canopy gross photosyntheis (kgC/m2/yr)tivity
       real laia                 !Leaf area index (m2 leaf/ m2 area)
@@ -42,7 +48,8 @@ c     Rubisco, light and transport limited photosynthesis rate
 c     respectively
       real jc,jl,je,
      &     jp,jp1,jp2,j1,j2     !auxiliars
-      
+
+      real f4sun, f4shade, sunlai, shadelai
 c     Variables to calculate real NPP 
       real tleaf(3)             !leaf turnover time (yr)
       data tleaf /1.0,0.5,1.0/  !leaf turnover time for the 3 PFTs
@@ -69,7 +76,7 @@ c     Variables to calculate real NPP
       real rgl
       real rgf
       real rgs
-      real csai 
+      real csai
       real pt                   !taxa potencial de fornecimento para transpiração (mm/dia)
       real csru                 !Specific root water uptake (0.5 mm/gC/dia; based in Pavlick et al (2013))
       real ad                   !atmospheric demand for transpiration (mm/dia;based in Gerten et al. 2004)
@@ -212,6 +219,11 @@ c
       if ((wa.ge.0.205).and.(wa.le.0.5))
      &     f5 = (wa-0.205)/(0.5-0.205)
       if (wa.lt.0.205) f5 = wa  !Below wilting point f5 accompains wa (then Sahara is well represented)
+
+!     BIANCA n entendi direito essa parte, nestes calculos vc precisa de um valor
+!     de rc2 (que vc n tem ainda) isso gera uma possivel divisao por zero
+!     no calculo de gc, comentei esta parte pra não dar problema
+
       
 !     if (i2.eq.1) then  !first loop for potential NPP  
 !    f5 = f5	   
@@ -226,14 +238,14 @@ c
 !     f5 = 1-(exp(-1*(pt/d)))        !(Based in Pavlick et al. 2013)
 !     endif 
       
-      csru = 0.5 
-      pt = csru*(cf1*1000.)*wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
-      alfm = 1.391
-      gm = 3.26*86400           !(*86400 transform mm/s to mm/dia)
-      gc = (1/rc2)*86400000     !*86400000 transfor m/s to mm/dia)
-      d =(emax*alfm)/(1+gm/gc)  !(based in Gerten et al. 2004)
-!     d = emax
-      f5 = 1-(exp(-1*(pt/d)))   !(Based in Pavlick et al. 2013)
+c      csru = 0.5 
+c      pt = csru*(cf1*1000.)*wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
+c      alfm = 1.391
+c      gm = 3.26*86400           !(*86400 transform mm/s to mm/dia)
+c      gc = (1/rc2)*86400000     !*86400000 transfor m/s to mm/dia) !!! rc2 com problema div by 0
+c      d =(emax*alfm)/(1+gm/gc)  !(based in Gerten et al. 2004)
+c!     d = emax
+c      f5 = 1-(exp(-1*(pt/d)))   !(Based in Pavlick et al. 2013)
       
       
 c     
