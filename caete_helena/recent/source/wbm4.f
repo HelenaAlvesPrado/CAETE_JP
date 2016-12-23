@@ -423,6 +423,9 @@ c     daqui por diante nada util --- vai tudo para env5.f
          call productivity1 (temp,p0,w,wmax,ca,ipar,pft, !Inputs
      &        ph,ar,nppa,laia,f5,f1,vpd) !Outputs
 !     
+
+
+c     call allocation
          
 !     Maximum evapotranspiration (emax)
 !     =================================

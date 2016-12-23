@@ -126,10 +126,6 @@ c     &     cbwoodini,cstoini,cotherini,crepini)
       write(23, rec=2) cleaf_ini(:,:,2)
       write(23, rec=3) cleaf_ini(:,:,3)
 
-      write(26, rec=1) cfroot_ini(:,:,1)
-      write(26, rec=2) cfroot_ini(:,:,2)
-      write(26, rec=3) cfroot_ini(:,:,3)
-
       write(24, rec=1) cawood_ini(:,:,1)
       write(24, rec=2) cawood_ini(:,:,2)
       write(24, rec=3) cawood_ini(:,:,3)
@@ -138,17 +134,23 @@ c     &     cbwoodini,cstoini,cotherini,crepini)
       write(25, rec=2) cbwood_ini(:,:,2)
       write(25, rec=3) cbwood_ini(:,:,3)
 
-      write(29, rec=1) csto_ini(:,:,1)
-      write(29, rec=2) csto_ini(:,:,2)
-      write(29, rec=3) csto_ini(:,:,3)
+      write(26, rec=1) cfroot_ini(:,:,1)
+      write(26, rec=2) cfroot_ini(:,:,2)
+      write(26, rec=3) cfroot_ini(:,:,3)
+
+      write(27, rec=1) crep_ini(:,:,1)
+      write(27, rec=2) crep_ini(:,:,2)
+      write(27, rec=3) crep_ini(:,:,3)
  
       write(28, rec=1) cother_ini(:,:,1)
       write(28, rec=2) cother_ini(:,:,2)
       write(28, rec=3) cother_ini(:,:,3)
 
-      write(27, rec=1) crep_ini(:,:,1)
-      write(27, rec=2) crep_ini(:,:,2)
-      write(27, rec=3) crep_ini(:,:,3)
+      write(29, rec=1) csto_ini(:,:,1)
+      write(29, rec=2) csto_ini(:,:,2)
+      write(29, rec=3) csto_ini(:,:,3)
+
+
 
 
       

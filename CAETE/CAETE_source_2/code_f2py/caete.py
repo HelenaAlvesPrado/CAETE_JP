@@ -1,11 +1,10 @@
 # "CAETE module"
 
 # author: jpdarela
-
-import numpy as np
-from netCDF4 import Dataset as dt
 import os
 import glob
+import numpy as np
+from netCDF4 import Dataset as dt
 import carbon as C
 
 

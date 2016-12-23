@@ -39,17 +39,18 @@ c     internal vars
       real aleaf(3)             !npp percentage alocated to leaf compartment
       data aleaf /0.35,0.35,0.45/
       real aawood (3)           !npp percentage alocated to aboveground woody biomass compartment
-      data aawood /0.40,0.40,0.000000001/
+      data aawood /0.40,0.40,0.001/
       real afroot(3)            !npp percentage alocated to fine roots compartment
       data afroot /0.25,0.25,0.55/ 
       real abwood(3)            !npp percentage alocated to belowground woody biomass compartment
-      data abwood /0.10,0.10,0.000000001/
+      data abwood /0.10,0.10,0.001/
       real asto(3)              !npp percentage alocated to storage compartment
       data asto /0.10,0.10,0.10/
       real arep(3)              !npp percentage alocated to reproduction compartment
       data arep /0.15,0.15,0.10/
       real aother(3)            !npp percentage alocated to other compartment
       data aother /0.05,0.05,0.06/ 
+ 
       real tleaf(3)             !turnover time of the leaf compartment (yr)
       data tleaf /1.0,0.5,1.0/ 
       real tawood (3)           !turnover time of the aboveground woody biomass compartment (yr)
@@ -106,7 +107,7 @@ c     internal vars
      $              /crepi_aux(kk).lt.sensitivity))   then
                   
                   
-                  cleafini(i6) = cleafi_aux(k)
+                  cleafini(i6) = cleafi_aux(k) ! carbon content (kg m-2) 
                   cawoodini(i6) = cawoodi_aux(k)
                   cfrootini(i6) = cfrooti_aux(k)
                   cbwoodini(i6) = cbwoodi_aux(k)
