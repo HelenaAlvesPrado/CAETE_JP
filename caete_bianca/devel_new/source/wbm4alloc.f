@@ -9,8 +9,8 @@ c234567
      &     monrgl,monrgf,monrgs,monrg,
      &     cleaf_pft,cfroot_pft,cawood_pft,cbwood_pft, !outputs
      &     csto_pft, crep_pft, cother_pft)
-      
-c     
+
+      implicit none
 c=======================================================================
 c     
 c     Water balance model (WBM). From monthly climatologies of
