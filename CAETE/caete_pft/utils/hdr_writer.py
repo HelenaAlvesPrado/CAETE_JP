@@ -10,6 +10,8 @@ import os
 #GLOBAL VARIABLES 
 nx = 720
 ny = 360
+
+linesep = '\r\n'
    
 lizt = []
     
@@ -75,17 +77,17 @@ def write_header(file_conn, NBANDS, nx=nx, ny=ny, xllcorner=-180,
 
     cellsize = 360/nx
 
-    write = ['NCOLS %i%s'%(nx, os.linesep),
-            'NROWS %i%s'%(ny, os.linesep),
-            'NBANDS %i%s'%(NBANDS, os.linesep),
-            'NBITS %i%s'%(pixel_depht, os.linesep),
-            'PIXELTYPE %s%s'%(pixel_type, os.linesep),
-            'LAYOUT %s%s'%(bnd_layout, os.linesep),
-            'XLLCORNER %d%s'%(xllcorner,os.linesep),
-            'YLLCORNER %d%s'%(yllcorner,os.linesep),
-            'CELLSIZE %f%s'%(cellsize,os.linesep),
-            'NODATA_VALUE %f%s'%(NO_DATA,os.linesep),
-            'BYTEORDER %s%s'%(byteOrder,os.linesep)
+    write = ['NCOLS %i%s'%(nx, linesep),
+            'NROWS %i%s'%(ny, linesep),
+            'NBANDS %i%s'%(NBANDS, linesep),
+            'NBITS %i%s'%(pixel_depht, linesep),
+            'PIXELTYPE %s%s'%(pixel_type, linesep),
+            'LAYOUT %s%s'%(bnd_layout, linesep),
+            'XLLCORNER %d%s'%(xllcorner,linesep),
+            'YLLCORNER %d%s'%(yllcorner,linesep),
+            'CELLSIZE %f%s'%(cellsize,linesep),
+            'NODATA_VALUE %f%s'%(NO_DATA,linesep),
+            'BYTEORDER %s%s'%(byteOrder,linesep)
             ]
     with open(file_conn, 'w') as fh:
         for line in write:

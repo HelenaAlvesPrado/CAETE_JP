@@ -14,17 +14,34 @@ files = glob.glob1(fdir, '*.bin')
 
 
 def flt_attrs():
-    return {'header': ['long_name',                 'unit',           'standart_name'],
-            'rsds'  : ['short_wav_rad_down',        'W m-2',                   'rsds'], 
-            'wind'  : ['wind_velocity',             'm s-1',                   'wind'],
-            'ps'    : ['sur_pressure',              'Pa',                        'ps'],
-            'tas'   : ['sur_temperature_2m',        'celcius',                  'tas'],  
-            'pr'    : ['precipitation',             'Kg m-2 month-1',            'pr'],      
-            'wsoil'  : ['soil_water_content-wsoil',  'kg m-2',                  'mrso'],
-            'evaptr'    : ['evapotranpiration',         'kg m-2 day-1',              'et'],
-            'runom'  : ['total_runoff',              'kg m-2 day-1',            'mrro']}
-
-
+    return {'header'  : ['long_name',                 'unit',           'standart_name'],
+            'rsds'    : ['short_wav_rad_down',        'W m-2',                   'rsds'], 
+            'wind'    : ['wind_velocity',             'm s-1',                   'wind'],
+            'ps'      : ['sur_pressure',              'Pa',                        'ps'],
+            'tas'     : ['sur_temperature_2m',        'celcius',                  'tas'],  
+            'pr'      : ['precipitation',             'Kg m-2 month-1',            'pr'],      
+            'wsoil'   : ['soil_water_content-wsoil',  'kg m-2',                  'mrso'],
+            'evaptr'  : ['evapotranpiration',         'kg m-2 day-1',              'et'],
+            'runom'   : ['total_runoff',              'kg m-2 day-1',            'mrro'],
+            'ar'      : ['autothrophic respiration',  'kg m-2 year-1',             'ar'],
+            'ph'      : ['photosynthesis',            'kg m-2 year-1',             'ph'],
+            'npp'     : ['net primary productivity',  'kg m-2 year-1',            'npp'],
+            'lai'     : ['Leaf Area Index',           'm-2 m-2',                  'LAI'],
+            'rcm'     : ['stomatal resistence',       's m-1',                    'rcm'],
+            'hr'      : ['heterothrophic respiration','kg m-2 year-1',             'hr'],
+            'clit'    : ['Litter Carbon',             'Kg m-2',                  'clit'],
+            'csoil'   : ['Soil Carbon',               'Kg m-2',                 'csoil'],
+            'rm'      : ['maintenance respiration',   'kg m-2 year-1',             'rm'],
+            'rms'     : ['sapwood rm',                'kg m-2 year-1',            'rms'],
+            'rmf'     : ['fine root rm',              'kg m-2 year-1',            'rmf'],
+            'rml'     : ['leaf rm',                   'kg m-2 year-1',            'rml'],
+            'rg'      : ['growth respiration',        'kg m-2 year-1',             'rg'],
+            'rgs'     : ['sapwood rg',                'kg m-2 year-1',            'rgs'],
+            'rgf'     : ['fine root rg',              'kg m-2 year-1',            'rgf'],
+            'rgl'     : ['leaf rg',                   'kg m-2 year-1',            'rgl'],
+            'cawood'  : ['C in abovewgrownd wood',    'kg m-2 year-1',         'cawood'],
+            'cfroot'  : ['C in fine roots',           'kg m-2 year-1',         'cfroot'],
+            'cleaf'   : ['C in leaves',               'kg m-2 year-1',          'cleaf']}
 
 def read_raster(fpath):
     """Returns the raster file in fpath as a masked numpy array
