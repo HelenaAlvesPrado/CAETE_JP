@@ -7,16 +7,18 @@ c234567
 !     =======================================================================
 !     CPTEC-PVM2
 !     Adapted from env4.f.
-!     Code written by David Lapola and Helena Alves do Prado
+!     Code written by David Lapola and Helena Alves do Prado e Bianca Rius
 c     Reviewed by jpdarela  dec/2016
+
 !     Last update: Dec/2016
 !     
-!     Compile with: g95 (or gfortran) env5.f wbm4.f productivity1.f -o a.exe
+!     Compile with: g95 (or gfortran) env5TR.f wbm4TR.f productivity1.f allocation1.f -o a.exe
 !     Execute with ./a.exe
-!     Then run g95 (gfortran) pvm5.f -o pvm5.exe
-!     Execute with ./pvm5.exe
 !     =======================================================================
-!     
+!     COMENTARIOS:
+C     NOTEM QUE EU SALVEI NA MINHA PASTA INPUTS OS VALORES INICIAIS DE ALOCAÇÃO DE NPP (L 218-231)
+C     PARA NAO TER QUE RODAR A SPINUP TODA VEZ QUE FOR RODAR O MODELO. (L 143-148)
+C     A PARTE DO CALCULO DO SPINUP ESTA COMENTADA NESTE CODIGO (L 180-216) - JP
 !     Parameters and variables
 !     ------------------------
 !     
@@ -334,12 +336,6 @@ C     preparando o terreno pra salvar as variaveis
             if(nint(lsmk(i,j)) .ne. 0) then
                do k = 1,12
                   do p = 1,q
-c                     print*, photo_pft(i,j,k,p)
-c                     print*, aresp_pft(i,j,k,p)
-c                     print*,
-c                     print*,
-c                     print*,
-                     
                      
                      ph(i,j,k) = ph(i,j,k) + photo_pft(i,j,k,p)/3.
                      ar(i,j,k) = ar(i,j,k) + aresp_pft(i,j,k,p)/3.
