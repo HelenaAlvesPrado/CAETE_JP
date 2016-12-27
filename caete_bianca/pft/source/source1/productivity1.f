@@ -23,7 +23,7 @@ c234567
 !     Input
 !     -----
 !     
-      integer l
+      integer pft
       real temp                 !Mean monthly temperature (oC)
       real p0                   !Mean surface pressure (hPa)
       real wa,w,wmax            !Soil moisture (dimensionless)
@@ -253,7 +253,7 @@ c     HELENA____________________________________________________
       j1=(-b2-(sqrt(delta2)))/(2.0*a2)
       j2=(-b2+(sqrt(delta2)))/(2.0*a2)
       f1a = amin1(j1,j2)
-!     
+c      PRINT*, F1A, 'f1a'
 !     Soil water
 !     ==========
 !     
@@ -288,12 +288,15 @@ c      f5 = 1-(exp(-1*(pt/d)))
       else
          f1 = 0.0               !Temperature above/below photosynthesis windown
       endif
-!     
+c      if (f1 .gt. 0.5) PRINT*, f1, 'f1'
 !     Leaf area index (m2 leaf/m2 arEa) bianca
 !     ---------------------------------
-       sla=(0.030*1000.)*((365/(((tleaf(pft))*365)/12))**(-0.46))
-!     laia  = 0.25*exp(2.5*(f1/p25)) !Adjusted after using observed ipar
-       laia = (cl1*365*sla)
+      sla=(0.030*1000.)*((365/(((tleaf(pft))*365)/12))**(-0.46))
+c      PRINT*, sla, 'sla'
+      laia  = 0.25*exp(2.5*(f1/p25)) !Adjusted after using observed ipar
+c      if(cl1 .gt. 0) print*, cl1, 'cl1'
+c      laia = (cl1*365.*sla)
+c      if(laia .gt. 0) PRINT*, laia, 'laia'
 !     SunLAI
 !     ------
 !     
@@ -321,7 +324,7 @@ c      f5 = 1-(exp(-1*(pt/d)))
 !     (31557600 converts seconds to year [with 365.25 days])
 !     
       ph = 0.012*31557600.0*f1*f4sun*f4shade
-!     
+c      PRINT*, PH, 'ph'
 !     Plant respiration
 !     =================
 !     c Maintenance respiration (kgC/m2/yr) (based in Ryan 1991)
@@ -336,8 +339,9 @@ c      f5 = 1-(exp(-1*(pt/d)))
       rms = (ncs*csa)*27*(exp(0.03*temp))
       
       rm = rml + rmf + rms
+c      print*, rm, 'rm'
       
-c     Growth respiration (KgC/m2/yr)(based in Ryan 1991; Sitch et al. 2003; Levis et al. 2004)		 
+c     Growth respiration (KgC/m2/yr)(based in Ryan 1991; Sitch et al. 2003; Levis et al. 2004)         
       
       csai= 0.05*beta_awood
       rgl = (0.25*((beta_leaf)*365))
@@ -345,7 +349,7 @@ c     Growth respiration (KgC/m2/yr)(based in Ryan 1991; Sitch et al. 2003; Levi
       rgs = (0.25*(csai)*365)
       
       rg = rgl + rgf + rgs
-      
+c      print*, rg, 'rg'
       if (rg.lt.0) then
          rg = 0
       endif
@@ -355,6 +359,7 @@ c     Growth respiration (KgC/m2/yr)(based in Ryan 1991; Sitch et al. 2003; Levi
 !     
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
          ar = rm+rg
+c         if (ar .gt. 0.)PRINT*, AR ,'ar'
       else
          ar = 0.0               !Temperature above/below respiration windown
       endif
@@ -367,7 +372,10 @@ c     Growth respiration (KgC/m2/yr)(based in Ryan 1991; Sitch et al. 2003; Levi
 !     ===================================
 !     
       nppa = ph-ar
-      if (nppa.lt.0.0) nppa = 0.0 !Maybe this is incorrect, but demands retuning of every biome limits
+        
+c       if (nppa .gt. 0.) print*, nppa, 'npp'
+c      PRINT*, NPPA
+c      if (nppa.lt.0.0) nppa = 0.0 !Maybe this is incorrect, but demands retuning of every biome limits
 !     
       return
       end subroutine productivity1
