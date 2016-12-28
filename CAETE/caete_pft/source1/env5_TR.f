@@ -137,98 +137,106 @@ C     -------END DECLARATION----------------------------------------
      &     form='unformatted',access='direct',recl=4*nx*ny)
       open(13,file='../inputs/rsds.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
-c      open(20,file='../inputs/npp.bin',status='old',
-c     &     form='unformatted',access='direct',recl=4*nx*ny)
+      open(26,file='../inputs/npp.bin',status='old',
+     &     form='unformatted',access='direct',recl=4*nx*ny)
 
-      open(21,file='../inputs/cleaf_ini.bin',status='old',
-     &     form='unformatted',access='direct',recl=4*nx*ny)
-      open(22,file='../inputs/cfroot_ini.bin',status='old',
-     &     form='unformatted',access='direct',recl=4*nx*ny)
-      open(23,file='../inputs/cawood_ini.bin',status='old',
-     &     form='unformatted',access='direct',recl=4*nx*ny)
+c      open(21,file='../inputs/cleaf_ini.bin',status='old',
+c     &     form='unformatted',access='direct',recl=4*nx*ny)
+c      open(22,file='../inputs/cfroot_ini.bin',status='old',
+c     &     form='unformatted',access='direct',recl=4*nx*ny)
+c      open(23,file='../inputs/cawood_ini.bin',status='old',
+c     &     form='unformatted',access='direct',recl=4*nx*ny)
 
 
       
 !     Read data
 !     =========
       
-      read (9,rec=1) lsmk
-      call read12 (10,ps)
-      call read12 (11,pr)
-      call read12 (12,t)
-      call read12 (13,ipar)
-c      call read12(20,npp_pot)
+       read (9,rec=1) lsmk
+       call read12 (10,ps)
+       call read12 (11,pr)
+       call read12 (12,t)
+       call read12 (13,ipar)
+       call read12(26,npp_pot)
 
-      call read3(21, cleafin)
-      call read3(22,cfrootin)
-      call read3(23,cawoodin)
+c      call read3(21, cleafin)
+c      call read3(22,cfrootin)
+c      call read3(23,cawoodin)
 !     
 !     Close files
 !     ===========
 !     
-      close ( 9)
-      close (10)
-      close (11)
-      close (12)
-      close (13)
-c      close (20)
-      close (21)
-      close (22)
-      close (23)
+       close ( 9)
+       close (10)
+       close (11)
+       close (12)
+       close (13)
+       close (26)
+c      close (21)
+c      close (22)
+c      close (23)
 !     
 
-!     fazendo medias da npp
-c      do i =1,nx
-c         do j=1,ny
-c            if(nint(lsmk(i,j)) .ne. 0) then 
-c               aux_npp(i,j) = 0.0
-c               do k = 1,12
-c                  aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
-c               enddo
-c            else
-c               aux_npp(i,j) = no_data
-c            endif
-c         enddo
-c      enddo
+c     fazendo medias da npp
+      do i =1,nx
+         do j=1,ny
+            if(nint(lsmk(i,j)) .ne. 0) then 
+               aux_npp(i,j) = 0.0
+               do k = 1,12
+                  aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
+               enddo
+            else
+               aux_npp(i,j) = no_data
+            endif
+         enddo
+      enddo
+      
+           open(10,file='../inputs/npp2.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+          write(10,rec=1) aux_npp
+      close(10) 
+      print*, 'npp_saved'
+
 
 !     calling spinup
-c      do i=1,nx
-c         do j=1,ny
-c            if (nint(lsmk(i,j)) .ne. 0) then
-c               npp_sca = aux_npp(i,j)
-c               
-c               do p=1,q   
-c                  aux1(p) = 0.0
-c                  aux2(p) = 0.0
-c                  aux3(p) = 0.0
-c               enddo
-c               
-c               call spinup(npp_sca, aux1, aux2, aux3)
-c
-c               do p=1,q   
-c                  cleafin(i,j,p)  = aux1(p)
-c                  cfrootin(i,j,p) = aux2(p)
-c                  cawoodin(i,j,p) = aux3(p)
-c               enddo
-c            endif
-c         enddo
-c         print*, (real(i)/real(nx))*100.0, '%'
-c      enddo
-c
-c      open(10,file='../inputs/cleaf_ini.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file3(10, cleafin)
-c
-c      open(10,file='../inputs/cfroot_ini.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file3(10, cfrootin)
-c
-c      open(10,file='../inputs/cawood_ini.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file3(10, cawoodin)
+      do i=1,nx
+         do j=1,ny
+            if (nint(lsmk(i,j)) .ne. 0) then
+               npp_sca = aux_npp(i,j)
+               
+               do p=1,q   
+                  aux1(p) = 0.0
+                  aux2(p) = 0.0
+                  aux3(p) = 0.0
+               enddo
+               
+               call spinup(npp_sca, aux1, aux2, aux3)
+
+               do p=1,q   
+                  cleafin(i,j,p)  = aux1(p)
+                  cfrootin(i,j,p) = aux2(p)
+                  cawoodin(i,j,p) = aux3(p)
+               enddo
+            endif
+         enddo
+         print*, (real(i)/real(nx))*100.0, '%'
+      enddo
+
+      open(10,file='../inputs/cleaf_ini.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file3(10, cleafin)
+
+      open(10,file='../inputs/cfroot_ini.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file3(10, cfrootin)
+
+      open(10,file='../inputs/cawood_ini.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file3(10, cawoodin)
 
 !     ===========
 !     

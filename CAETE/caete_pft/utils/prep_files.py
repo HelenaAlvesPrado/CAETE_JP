@@ -5,11 +5,11 @@ import gdal
 from netCDF4 import Dataset as dt
 
 
-mask_fpath = './mask12.npy'
+#mask_fpath = './mask12.npy'
 NO_DATA = [-9999.0, -9999.0]
-lsmk = np.load(mask_fpath)
+#lsmk = np.load(mask_fpath)
 
-fdir = '../outputs'
+fdir = '../inputs'
 files = glob.glob1(fdir, '*.bin')
 
 
@@ -41,7 +41,10 @@ def flt_attrs():
             'rgl'     : ['leaf rg',                   'kg m-2 year-1',            'rgl'],
             'cawood'  : ['C in abovewgrownd wood',    'kg m-2 year-1',         'cawood'],
             'cfroot'  : ['C in fine roots',           'kg m-2 year-1',         'cfroot'],
-            'cleaf'   : ['C in leaves',               'kg m-2 year-1',          'cleaf']}
+            'cleaf'   : ['C in leaves',               'kg m-2 year-1',          'cleaf'],
+          'cawood_ini': ['init C in abovewgrownd wood','kg m-2 year-1',         'cawood'],
+          'cfroot_ini': ['init C in fine roots',       'kg m-2 year-1',         'cfroot'],
+          'cleaf_ini' : ['init C in leaves',           'kg m-2 year-1',          'cleaf']}
 
 def read_raster(fpath):
     """Returns the raster file in fpath as a masked numpy array
@@ -54,7 +57,7 @@ def read_raster(fpath):
     ds = gdal.Open(fpath)
     raw_data = ds.ReadAsArray()
     ds = None
-    np.place(arr=raw_data, mask=lsmk, vals=NO_DATA)
+    np.place(arr=raw_data, mask=lsmk1, vals=NO_DATA)
     return raw_data
 
 
@@ -109,7 +112,8 @@ def write_CAETE_output(nc_filename, arr, var):
     time[:] = times_fill
     longitude[:] = np.arange(-179.75, 180, 0.5)
     latitude[:] =  np.arange(-89.75, 90, 0.5)
-    var_[:,:,:] = np.fliplr(np.ma.masked_array(arr, lsmk))
+
+    var_[:,:,:] = np.fliplr(np.ma.masked_array(arr, lsmk1))
     rootgrp.close()
 
 for fl in range(len(files)):

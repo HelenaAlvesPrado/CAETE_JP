@@ -4,6 +4,7 @@
 import os
 import glob
 import numpy as np
+import gdal
 from netCDF4 import Dataset as dt
 import carbon as C
 
@@ -86,11 +87,12 @@ class gridcell:
         self.complete = False
         
         # Input data
-        self.ca = 383.0 # ppmv CO² 
-        self.pr = None
-        self.ps = None
+        self.ca   = 383.0 # ppmv CO² 
+        self.pr   = None
+        self.ps   = None
         self.rsds = None
-        self.tas = None
+        self.tas  = None
+        self.npp0 = None
         
         # Time attributes
         #self.calendar = 'noleap'
@@ -107,13 +109,28 @@ class gridcell:
         self.photo = None
         self.aresp = None
         self.hresp = None
-        self.npp = None
-        self.rcm = None
-        self.lai = None
-        self.clit = None
+        self.npp   = None
+        self.rcm   = None
+        self.lai   = None
+        self.clit  = None
         self.csoil = None
         
-        
+        # new outputs
+        self.rml    = None
+        self.rmf    = None
+        self.rms    = None
+        self.rm     = None
+        self.rgl    = None
+        self.rgf    = None
+        self.rgs    = None
+        self.rg     = None
+        self.cleaf  = None
+        self.cawood = None
+        self.cfroot = None
+
+
+
+
     def __str__(self):    
         return "gridcell at x = %d; y=%d ---> cell_name: %s" %(self.x, self.y, self.name)
 
@@ -123,27 +140,44 @@ class gridcell:
         self.ps = global_ps[:,self.y, self.x]
         self.rsds = global_rsds[:,self.y, self.x]
         self.tas = global_tas[:,self.y, self.x]
+        self.npp0 = npp_init[self.y, self.x]
         self.filled = True
 
         
     def run_model(self):
 
         if self.filled and not self.complete:
-            outputs = C.wbm(self.pr, self.tas, self.ps, self.ca, self.rsds)
+            leaf, root, wood = C.spinup(self.npp0)
 
-            self.npp   = outputs[0]
-            self.photo = outputs[1]
-            self.aresp = outputs[2]
-            self.rcm   = outputs[3]
-            self.tsoil = outputs[4]
-            self.wsoil = outputs[5]
-            self.runom = outputs[6]
-            self.evapm = outputs[7]
-            self.emaxm = outputs[8]
-            self.lai   = outputs[9]
-            self.clit  = outputs[10]
-            self.csoil = outputs[11]
-            self.hresp = outputs[12]
+#           prec,temp,p0,ca,par, cleaf_ini, cawood_ini, cfroot_ini
+            outputs = C.wbm(self.pr, self.tas, self.ps, self.ca, self.rsds,
+                            leaf, wood, root)
+
+            self.emaxm  = outputs[0]
+            self.tsoil  = outputs[1]
+            self.photo  = outputs[2].T
+            self.aresp  = outputs[3].T
+            self.npp    = outputs[4].T
+            self.lai    = outputs[5].T
+            self.clit   = outputs[6].T
+            self.csoil  = outputs[7].T
+            self.hresp  = outputs[8].T
+            self.rcm    = outputs[9].T
+            self.runom  = outputs[10].T
+            self.evapm  = outputs[11].T          
+            self.wsoil  = outputs[12].T
+            self.rml    = outputs[13].T
+            self.rmf    = outputs[14].T
+            self.rms    = outputs[15].T
+            self.rm     = outputs[16].T
+            self.rgl    = outputs[17].T
+            self.rgf    = outputs[18].T
+            self.rgs    = outputs[19].T
+            self.rg     = outputs[20].T
+            self.cleaf  = outputs[21].T
+            self.cawood = outputs[22].T
+            self.cfroot = outputs[23].T
+
             self.complete = True
         else:
             print('the gridcell %s object is either not filled or already completed' % self.name)
@@ -163,6 +197,10 @@ def rm_appy(gridcell_obj):
         pass
 
 ## GLOBAL VARS
+
+#npp for spinup
+
+npp_init = gdal.Open('./inputs/npp2.bin').ReadAsArray()
 
 std_shape = (12, 360, 720)
 

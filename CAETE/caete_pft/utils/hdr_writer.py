@@ -95,7 +95,7 @@ def write_header(file_conn, NBANDS, nx=nx, ny=ny, xllcorner=-180,
 
 
 def main():
-    bin_files_path = '../outputs' 
+    bin_files_path = '../inputs' 
 
     raw_list =[ i for i in os.listdir(bin_files_path) if i.split('.')[-1] in FILE_EXT]
     

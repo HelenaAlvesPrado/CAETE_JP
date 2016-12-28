@@ -23,7 +23,7 @@ for Y in range(mask.shape[0]):
             if Y == 176 and X == 240:
                 manaus_landgrid_id = dict_key
             grd_cell.init_caete()
-            #grd_cell.run_model()
+            grd_cell.run_model()
             land_data[dict_key] = grd_cell 
             id_n += 1
 
