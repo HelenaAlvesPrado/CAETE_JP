@@ -137,16 +137,16 @@ C     -------END DECLARATION----------------------------------------
      &     form='unformatted',access='direct',recl=4*nx*ny)
       open(13,file='../inputs/rsds.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
-      open(26,file='../inputs/npp.bin',status='old',
+c      open(26,file='../inputs/npp.bin',status='old',
+c     &     form='unformatted',access='direct',recl=4*nx*ny)
+      
+      open(21,file='../inputs/cleaf_ini.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
-
-c      open(21,file='../inputs/cleaf_ini.bin',status='old',
-c     &     form='unformatted',access='direct',recl=4*nx*ny)
-c      open(22,file='../inputs/cfroot_ini.bin',status='old',
-c     &     form='unformatted',access='direct',recl=4*nx*ny)
-c      open(23,file='../inputs/cawood_ini.bin',status='old',
-c     &     form='unformatted',access='direct',recl=4*nx*ny)
-
+      open(22,file='../inputs/cfroot_ini.bin',status='old',
+     &     form='unformatted',access='direct',recl=4*nx*ny)
+      open(23,file='../inputs/cawood_ini.bin',status='old',
+     &     form='unformatted',access='direct',recl=4*nx*ny)
+      
 
       
 !     Read data
@@ -157,12 +157,12 @@ c     &     form='unformatted',access='direct',recl=4*nx*ny)
        call read12 (11,pr)
        call read12 (12,t)
        call read12 (13,ipar)
-       call read12(26,npp_pot)
+      ! call read12(26,npp_pot)
 
-c      call read3(21, cleafin)
-c      call read3(22,cfrootin)
-c      call read3(23,cawoodin)
-!     
+      call read3(21, cleafin)
+      call read3(22,cfrootin)
+      call read3(23,cawoodin)
+     
 !     Close files
 !     ===========
 !     
@@ -171,72 +171,72 @@ c      call read3(23,cawoodin)
        close (11)
        close (12)
        close (13)
-       close (26)
-c      close (21)
-c      close (22)
-c      close (23)
+c       close (26)
+       close (21)
+       close (22)
+       close (23)
 !     
 
 c     fazendo medias da npp
-      do i =1,nx
-         do j=1,ny
-            if(nint(lsmk(i,j)) .ne. 0) then 
-               aux_npp(i,j) = 0.0
-               do k = 1,12
-                  aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
-               enddo
-            else
-               aux_npp(i,j) = no_data
-            endif
-         enddo
-      enddo
-      
-           open(10,file='../inputs/npp2.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-          write(10,rec=1) aux_npp
-      close(10) 
-      print*, 'npp_saved'
-
-
-!     calling spinup
-      do i=1,nx
-         do j=1,ny
-            if (nint(lsmk(i,j)) .ne. 0) then
-               npp_sca = aux_npp(i,j)
-               
-               do p=1,q   
-                  aux1(p) = 0.0
-                  aux2(p) = 0.0
-                  aux3(p) = 0.0
-               enddo
-               
-               call spinup(npp_sca, aux1, aux2, aux3)
-
-               do p=1,q   
-                  cleafin(i,j,p)  = aux1(p)
-                  cfrootin(i,j,p) = aux2(p)
-                  cawoodin(i,j,p) = aux3(p)
-               enddo
-            endif
-         enddo
-         print*, (real(i)/real(nx))*100.0, '%'
-      enddo
-
-      open(10,file='../inputs/cleaf_ini.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file3(10, cleafin)
-
-      open(10,file='../inputs/cfroot_ini.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file3(10, cfrootin)
-
-      open(10,file='../inputs/cawood_ini.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file3(10, cawoodin)
+c$$$       do i =1,nx
+c$$$          do j=1,ny
+c$$$             if(nint(lsmk(i,j)) .ne. 0) then 
+c$$$                aux_npp(i,j) = 0.0
+c$$$                do k = 1,12
+c$$$                   aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
+c$$$                enddo
+c$$$             else
+c$$$                aux_npp(i,j) = no_data
+c$$$             endif
+c$$$          enddo
+c$$$       enddo
+c$$$       
+c$$$       open(10,file='../inputs/npp2.bin',
+c$$$     &      status='unknown',form='unformatted',
+c$$$     &      access='direct',recl=4*nx*ny)
+c$$$       write(10,rec=1) aux_npp
+c$$$      close(10) 
+c$$$      print*, 'npp_saved'
+c$$$      
+c$$$      
+c$$$!     calling spinup
+c$$$      do i=1,nx
+c$$$         do j=1,ny
+c$$$            if (nint(lsmk(i,j)) .ne. 0) then
+c$$$               npp_sca = aux_npp(i,j)
+c$$$               
+c$$$               do p=1,q   
+c$$$                  aux1(p) = 0.0
+c$$$                  aux2(p) = 0.0
+c$$$                  aux3(p) = 0.0
+c$$$               enddo
+c$$$               
+c$$$               call spinup(npp_sca, aux1, aux2, aux3)
+c$$$
+c$$$               do p=1,q   
+c$$$                  cleafin(i,j,p)  = aux1(p)
+c$$$                  cfrootin(i,j,p) = aux2(p)
+c$$$                  cawoodin(i,j,p) = aux3(p)
+c$$$               enddo
+c$$$            endif
+c$$$         enddo
+c$$$         print*, (real(i)/real(nx))*100.0, '%'
+c$$$      enddo
+c$$$
+c$$$      open(10,file='../inputs/cleaf_ini.bin',
+c$$$     &     status='unknown',form='unformatted',
+c$$$     &     access='direct',recl=4*nx*ny)
+c$$$      call save_file3(10, cleafin)
+c$$$
+c$$$      open(10,file='../inputs/cfroot_ini.bin',
+c$$$     &     status='unknown',form='unformatted',
+c$$$     &     access='direct',recl=4*nx*ny)
+c$$$      call save_file3(10, cfrootin)
+c$$$
+c$$$      open(10,file='../inputs/cawood_ini.bin',
+c$$$     &     status='unknown',form='unformatted',
+c$$$     &     access='direct',recl=4*nx*ny)
+c$$$      call save_file3(10, cawoodin)
 
 !     ===========
 !     
@@ -280,382 +280,382 @@ c     $     ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft)
      &     evapm_pft,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft
      $     ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft)   
 
-
-
-      do i = 1,nx
-         do j = 1,ny
-            do k = 1,12
-               if(nint(lsmk(i,j)) .ne. 0) then
-                  ph(i,j,k) = 0.0
-                  ar(i,j,k) = 0.0
-                  npp(i,j,k) = 0.0
-                  lai(i,j,k) = 0.0
-                  clit(i,j,k) = 0.0
-                  csoil(i,j,k) = 0.0
-                  hr(i,j,k) = 0.0
-                  rcm(i,j,k) = 0.0
-                  runom(i,j,k) = 0.0
-                  evaptr(i,j,k) = 0.0
-                  wsoil(i,j,k) = 0.0
-                  rml(i,j,k)  = 0.0
-                  rmf(i,j,k)  = 0.0
-                  rms(i,j,k)  = 0.0
-                  rm(i,j,k)  = 0.0
-                  rgl(i,j,k)  = 0.0
-                  rgf(i,j,k)  = 0.0
-                  rgs(i,j,k)  = 0.0
-                  rg(i,j,k)  = 0.0
-                  cleaf(i,j,k)  = 0.0
-                  cawood(i,j,k)  = 0.0
-                  cfroot(i,j,k)  = 0.0
-               else
-                  ph(i,j,k) = no_data
-                  ar(i,j,k) = no_data
-                  npp(i,j,k) = no_data
-                  lai(i,j,k) = no_data
-                  clit(i,j,k) = no_data
-                  csoil(i,j,k) = no_data
-                  hr(i,j,k) = no_data
-                  rcm(i,j,k) = no_data
-                  runom(i,j,k) = no_data
-                  evaptr(i,j,k) = no_data
-                  wsoil(i,j,k) = no_data
-                  rml(i,j,k)  = no_data
-                  rmf(i,j,k)  = no_data
-                  rms(i,j,k)  = no_data
-                  rm(i,j,k)  = no_data
-                  rgl(i,j,k)  = no_data
-                  rgf(i,j,k)  = no_data
-                  rgs(i,j,k)  = no_data
-                  rg(i,j,k)  = no_data
-                  cleaf(i,j,k)  = no_data
-                  cawood(i,j,k)  = no_data
-                  cfroot(i,j,k)  = no_data
-               endif                     
-            enddo
-         enddo
-      enddo
-      
-           
-C     preparando o terreno pra salvar as variaveis
-      
-      do i = 1,nx
-         do j = 1,ny
-            if(nint(lsmk(i,j)) .ne. 0) then
-               do k = 1,12
-                  do p = 1,q
-                     
-                     ph(i,j,k) = ph(i,j,k) + photo_pft(i,j,k,p)/3.
-                     ar(i,j,k) = ar(i,j,k) + aresp_pft(i,j,k,p)/3.
-                     npp(i,j,k) = npp(i,j,k) + npp_pft(i,j,k,p)/3.
-                     lai(i,j,k) = lai(i,j,k) + lai_pft(i,j,k,p)/3.
-                     clit(i,j,k) = clit(i,j,k) + clit_pft(i,j,k,p)/3.
-                     csoil(i,j,k) = csoil(i,j,k) + csoil_pft(i,j,k,p)/3.
-                     hr(i,j,k) = hr(i,j,k) + hresp_pft(i,j,k,p)/3.
-                     rcm(i,j,k) = rcm(i,j,k) + rcm_pft(i,j,k,p)/3.
-                     runom(i,j,k) = runom(i,j,k) + runom_pft(i,j,k,p)/3.
-                     evaptr(i,j,k) = evaptr(i,j,k) + evapm_pft(i,j,k,p)
-     $                    /3.
-                     wsoil(i,j,k) = wsoil(i,j,k) + wsoil_pft(i,j,k,p)/3.
-                     rml(i,j,k)  = rml(i,j,k) + rml_pft(i,j,k,p)/3.
-                     rmf(i,j,k)  = rmf(i,j,k) + rmf_pft(i,j,k,p)/3.
-                     rms(i,j,k)  = rms(i,j,k) + rms_pft(i,j,k,p)/3.
-                     rm(i,j,k)  = rm(i,j,k) + rm_pft(i,j,k,p)/3.
-                     rgl(i,j,k)  = rgl(i,j,k) + rgl_pft(i,j,k,p)/3.
-                     rgf(i,j,k)  = rgf(i,j,k) + rgf_pft(i,j,k,p)/3.
-                     rgs(i,j,k)  = rgs(i,j,k) + rgs_pft(i,j,k,p)/3.
-                     rg(i,j,k)  = rg(i,j,k) + rg_pft(i,j,k,p)/3.
-                     cleaf(i,j,k)  = cleaf(i,j,k) + cleaf_pft(i,j,k,p)
-     $                    /3.
-                     cawood(i,j,k)  = cawood(i,j,k) + cawood_pft(i,j,k
-     $                    ,p)/3.
-                     cfroot(i,j,k)  = cfroot(i,j,k) + cfroot_pft(i,j,k
-     $                    ,p)/3.
-                     
-                  enddo
-c$$$                 print*, npp(i,j,k)
-               enddo
-            endif
-
-         enddo
-      enddo
-  
-
-      open(10,file='../outputs/ph.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, ph)
-      
-      open(10,file='../outputs/ar.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, ar)
-
-      open(10,file='../outputs/npp.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, npp)
-
-      open(10,file='../outputs/clit.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, clit)
-
-      open(10,file='../outputs/csoil.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, csoil)
-
-      open(10,file='../outputs/hr.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, hr)
-
-      open(10,file='../outputs/rcm.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rcm)
-
-      open(10,file='../outputs/runom.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, runom)
-
-      open(10,file='../outputs/evaptr.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, evaptr)
-
-      open(10,file='../outputs/wsoil.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, wsoil)
-
-      open(10,file='../outputs/rml.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rml)
-
-      open(10,file='../outputs/rms.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rms)
-
-      open(10,file='../outputs/rmf.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rmf)
-
-      open(10,file='../outputs/rm.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rm)
-
-      open(10,file='../outputs/rgl.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rgl)
-
-      open(10,file='../outputs/rgf.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rgf)
-
-      open(10,file='../outputs/rgs.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rgs)
-
-      open(10,file='../outputs/rg.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rg)
-
-      open(10,file='../outputs/cleaf.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cleaf)
-
-      open(10,file='../outputs/cawood.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cawood)
-
-      open(10,file='../outputs/cfroot.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cfroot)
 c$$$
 c$$$
-c$$$
-c$$$      do i=1,nx
-c$$$         do j=1,ny
-c$$$            do k=1,12
+c$$$      do i = 1,nx
+c$$$         do j = 1,ny
+c$$$            do k = 1,12
 c$$$               if(nint(lsmk(i,j)) .ne. 0) then
-c$$$                  npp1(i,j,k) = npp_pft(i,j,k,1)
-c$$$                  npp2(i,j,k) = npp_pft(i,j,k,2)
-c$$$                  npp3(i,j,k) = npp_pft(i,j,k,3)
-c$$$                  
-c$$$                  rcm1(i,j,k) = rcm_pft(i,j,k,1)
-c$$$                  rcm2(i,j,k) = rcm_pft(i,j,k,2)
-c$$$                  rcm3(i,j,k) = rcm_pft(i,j,k,3)
-c$$$
-c$$$                  rm1(i,j,k) =rm_pft(i,j,k,1)
-c$$$                  rm2(i,j,k) = rm_pft(i,j,k,2)
-c$$$                  rm3(i,j,k) = rm_pft(i,j,k,3)
-c$$$
-c$$$                  rg1(i,j,k) = rg_pft(i,j,k,1)
-c$$$                  rg2(i,j,k) = rg_pft(i,j,k,2)
-c$$$                  rg3(i,j,k) = rg_pft(i,j,k,3)
-c$$$
-c$$$                  cleaf1(i,j,k) = cleaf_pft(i,j,k,1)
-c$$$                  cleaf2(i,j,k) = cleaf_pft(i,j,k,2)
-c$$$                  cleaf3(i,j,k) = cleaf_pft(i,j,k,3)
-c$$$
-c$$$                  cfroot1(i,j,k) = cfroot_pft(i,j,k,1)
-c$$$                  cfroot2(i,j,k) = cfroot_pft(i,j,k,2)
-c$$$                  cfroot3(i,j,k) = cfroot_pft(i,j,k,3)
-c$$$                  
-c$$$                  cawood1(i,j,k) = cawood_pft(i,j,k,1)
-c$$$                  cawood2(i,j,k) = cawood_pft(i,j,k,2)
-c$$$                  cawood3(i,j,k) = cawood_pft(i,j,k,3)
+c$$$                  ph(i,j,k) = 0.0
+c$$$                  ar(i,j,k) = 0.0
+c$$$                  npp(i,j,k) = 0.0
+c$$$                  lai(i,j,k) = 0.0
+c$$$                  clit(i,j,k) = 0.0
+c$$$                  csoil(i,j,k) = 0.0
+c$$$                  hr(i,j,k) = 0.0
+c$$$                  rcm(i,j,k) = 0.0
+c$$$                  runom(i,j,k) = 0.0
+c$$$                  evaptr(i,j,k) = 0.0
+c$$$                  wsoil(i,j,k) = 0.0
+c$$$                  rml(i,j,k)  = 0.0
+c$$$                  rmf(i,j,k)  = 0.0
+c$$$                  rms(i,j,k)  = 0.0
+c$$$                  rm(i,j,k)  = 0.0
+c$$$                  rgl(i,j,k)  = 0.0
+c$$$                  rgf(i,j,k)  = 0.0
+c$$$                  rgs(i,j,k)  = 0.0
+c$$$                  rg(i,j,k)  = 0.0
+c$$$                  cleaf(i,j,k)  = 0.0
+c$$$                  cawood(i,j,k)  = 0.0
+c$$$                  cfroot(i,j,k)  = 0.0
 c$$$               else
-c$$$                  npp1(i,j,k) = no_data
-c$$$                  npp2(i,j,k) = no_data
-c$$$                  npp3(i,j,k) = no_data
-c$$$                  
-c$$$                  rcm1(i,j,k) = no_data
-c$$$                  rcm2(i,j,k) = no_data
-c$$$                  rcm3(i,j,k) = no_data
-c$$$                  
-c$$$                  rm1(i,j,k) = no_data
-c$$$                  rm2(i,j,k) = no_data
-c$$$                  rm3(i,j,k) = no_data
-c$$$
-c$$$                  rg1(i,j,k) = no_data
-c$$$                  rg2(i,j,k) = no_data
-c$$$                  rg3(i,j,k) = no_data
-c$$$
-c$$$                  cleaf1(i,j,k) = no_data 
-c$$$                  cleaf2(i,j,k) = no_data
-c$$$                  cleaf3(i,j,k) = no_data
-c$$$
-c$$$                  cfroot1(i,j,k) = no_data
-c$$$                  cfroot2(i,j,k) = no_data
-c$$$                  cfroot3(i,j,k) = no_data
-c$$$                  
-c$$$                  cawood1(i,j,k) = no_data
-c$$$                  cawood2(i,j,k) = no_data
-c$$$                  cawood3(i,j,k) = no_data
-c$$$               endif
+c$$$                  ph(i,j,k) = no_data
+c$$$                  ar(i,j,k) = no_data
+c$$$                  npp(i,j,k) = no_data
+c$$$                  lai(i,j,k) = no_data
+c$$$                  clit(i,j,k) = no_data
+c$$$                  csoil(i,j,k) = no_data
+c$$$                  hr(i,j,k) = no_data
+c$$$                  rcm(i,j,k) = no_data
+c$$$                  runom(i,j,k) = no_data
+c$$$                  evaptr(i,j,k) = no_data
+c$$$                  wsoil(i,j,k) = no_data
+c$$$                  rml(i,j,k)  = no_data
+c$$$                  rmf(i,j,k)  = no_data
+c$$$                  rms(i,j,k)  = no_data
+c$$$                  rm(i,j,k)  = no_data
+c$$$                  rgl(i,j,k)  = no_data
+c$$$                  rgf(i,j,k)  = no_data
+c$$$                  rgs(i,j,k)  = no_data
+c$$$                  rg(i,j,k)  = no_data
+c$$$                  cleaf(i,j,k)  = no_data
+c$$$                  cawood(i,j,k)  = no_data
+c$$$                  cfroot(i,j,k)  = no_data
+c$$$               endif                     
 c$$$            enddo
 c$$$         enddo
 c$$$      enddo
 c$$$      
-c$$$      open(10,file='../outputs/npp1.bin',
-c$$$     &     status='unknown',form='unformatted',
-c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, npp1)
+c$$$           
+c$$$C     preparando o terreno pra salvar as variaveis
+c$$$      
+c$$$      do i = 1,nx
+c$$$         do j = 1,ny
+c$$$            if(nint(lsmk(i,j)) .ne. 0) then
+c$$$               do k = 1,12
+c$$$                  do p = 1,q
+c$$$                     
+c$$$                     ph(i,j,k) = ph(i,j,k) + photo_pft(i,j,k,p)/3.
+c$$$                     ar(i,j,k) = ar(i,j,k) + aresp_pft(i,j,k,p)/3.
+c$$$                     npp(i,j,k) = npp(i,j,k) + npp_pft(i,j,k,p)/3.
+c$$$                     lai(i,j,k) = lai(i,j,k) + lai_pft(i,j,k,p)/3.
+c$$$                     clit(i,j,k) = clit(i,j,k) + clit_pft(i,j,k,p)/3.
+c$$$                     csoil(i,j,k) = csoil(i,j,k) + csoil_pft(i,j,k,p)/3.
+c$$$                     hr(i,j,k) = hr(i,j,k) + hresp_pft(i,j,k,p)/3.
+c$$$                     rcm(i,j,k) = rcm(i,j,k) + rcm_pft(i,j,k,p)/3.
+c$$$                     runom(i,j,k) = runom(i,j,k) + runom_pft(i,j,k,p)/3.
+c$$$                     evaptr(i,j,k) = evaptr(i,j,k) + evapm_pft(i,j,k,p)
+c$$$     $                    /3.
+c$$$                     wsoil(i,j,k) = wsoil(i,j,k) + wsoil_pft(i,j,k,p)/3.
+c$$$                     rml(i,j,k)  = rml(i,j,k) + rml_pft(i,j,k,p)/3.
+c$$$                     rmf(i,j,k)  = rmf(i,j,k) + rmf_pft(i,j,k,p)/3.
+c$$$                     rms(i,j,k)  = rms(i,j,k) + rms_pft(i,j,k,p)/3.
+c$$$                     rm(i,j,k)  = rm(i,j,k) + rm_pft(i,j,k,p)/3.
+c$$$                     rgl(i,j,k)  = rgl(i,j,k) + rgl_pft(i,j,k,p)/3.
+c$$$                     rgf(i,j,k)  = rgf(i,j,k) + rgf_pft(i,j,k,p)/3.
+c$$$                     rgs(i,j,k)  = rgs(i,j,k) + rgs_pft(i,j,k,p)/3.
+c$$$                     rg(i,j,k)  = rg(i,j,k) + rg_pft(i,j,k,p)/3.
+c$$$                     cleaf(i,j,k)  = cleaf(i,j,k) + cleaf_pft(i,j,k,p)
+c$$$     $                    /3.
+c$$$                     cawood(i,j,k)  = cawood(i,j,k) + cawood_pft(i,j,k
+c$$$     $                    ,p)/3.
+c$$$                     cfroot(i,j,k)  = cfroot(i,j,k) + cfroot_pft(i,j,k
+c$$$     $                    ,p)/3.
+c$$$                     
+c$$$                  enddo
+c$$$c$$$                 print*, npp(i,j,k)
+c$$$               enddo
+c$$$            endif
 c$$$
-c$$$      open(10,file='../outputs/npp2.bin',
-c$$$     &     status='unknown',form='unformatted',
-c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, npp2)
+c$$$         enddo
+c$$$      enddo
+c$$$  
 c$$$
-c$$$      open(10,file='../outputs/npp3.bin',
+c$$$      open(10,file='../outputs/ph.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, npp3)
+c$$$      call save_file12(10, ph)
+c$$$      
+c$$$      open(10,file='../outputs/ar.bin',
+c$$$     &     status='unknown',form='unformatted',
+c$$$     &     access='direct',recl=4*nx*ny)
+c$$$      call save_file12(10, ar)
 c$$$
-c$$$      open(10,file='../outputs/rcm1.bin',
+c$$$      open(10,file='../outputs/npp.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, rcm1)
+c$$$      call save_file12(10, npp)
 c$$$
-c$$$      open(10,file='../outputs/rcm2.bin',
+c$$$      open(10,file='../outputs/clit.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, rcm2)
+c$$$      call save_file12(10, clit)
 c$$$
-c$$$      open(10,file='../outputs/rcm3.bin',
+c$$$      open(10,file='../outputs/csoil.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, rcm3)
+c$$$      call save_file12(10, csoil)
 c$$$
-c$$$      open(10,file='../outputs/rm1.bin',
+c$$$      open(10,file='../outputs/hr.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, rm1)
+c$$$      call save_file12(10, hr)
 c$$$
-c$$$      open(10,file='../outputs/rm2.bin',
+c$$$      open(10,file='../outputs/rcm.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, rm2)
+c$$$      call save_file12(10, rcm)
 c$$$
-c$$$      open(10,file='../outputs/rm3.bin',
+c$$$      open(10,file='../outputs/runom.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, rm3)
+c$$$      call save_file12(10, runom)
 c$$$
-c$$$      open(10,file='../outputs/rg1.bin',
+c$$$      open(10,file='../outputs/evaptr.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, rg1)
+c$$$      call save_file12(10, evaptr)
 c$$$
-c$$$      open(10,file='../outputs/rg2.bin',
+c$$$      open(10,file='../outputs/wsoil.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, rg2)
+c$$$      call save_file12(10, wsoil)
 c$$$
-c$$$      open(10,file='../outputs/rg3.bin',
+c$$$      open(10,file='../outputs/rml.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, rg3)
+c$$$      call save_file12(10, rml)
 c$$$
-c$$$      open(10,file='../outputs/cleaf1.bin',
+c$$$      open(10,file='../outputs/rms.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, cleaf1)
+c$$$      call save_file12(10, rms)
 c$$$
-c$$$      open(10,file='../outputs/cleaf2.bin',
+c$$$      open(10,file='../outputs/rmf.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, cleaf2)
+c$$$      call save_file12(10, rmf)
 c$$$
-c$$$      open(10,file='../outputs/cleaf3.bin',
+c$$$      open(10,file='../outputs/rm.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, cleaf3)
+c$$$      call save_file12(10, rm)
 c$$$
-c$$$      open(10,file='../outputs/cawood1.bin',
+c$$$      open(10,file='../outputs/rgl.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, cawood1)
+c$$$      call save_file12(10, rgl)
 c$$$
-c$$$      open(10,file='../outputs/cawood2.bin',
+c$$$      open(10,file='../outputs/rgf.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, cawood2)
+c$$$      call save_file12(10, rgf)
 c$$$
-c$$$      open(10,file='../outputs/cawood3.bin',
+c$$$      open(10,file='../outputs/rgs.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, cawood3)
+c$$$      call save_file12(10, rgs)
 c$$$
-c$$$      open(10,file='../outputs/cfroot1.bin',
+c$$$      open(10,file='../outputs/rg.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, cfroot1)
+c$$$      call save_file12(10, rg)
 c$$$
-c$$$      open(10,file='../outputs/cfroot2.bin',
+c$$$      open(10,file='../outputs/cleaf.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, cfroot2)
+c$$$      call save_file12(10, cleaf)
 c$$$
-c$$$      open(10,file='../outputs/cfroot3.bin',
+c$$$      open(10,file='../outputs/cawood.bin',
 c$$$     &     status='unknown',form='unformatted',
 c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file12(10, cfroot3)
+c$$$      call save_file12(10, cawood)
+c$$$
+c$$$      open(10,file='../outputs/cfroot.bin',
+c$$$     &     status='unknown',form='unformatted',
+c$$$     &     access='direct',recl=4*nx*ny)
+c$$$      call save_file12(10, cfroot)
+
+
+
+      do i=1,nx
+         do j=1,ny
+            do k=1,12
+               if(nint(lsmk(i,j)) .ne. 0) then
+                  npp1(i,j,k) = npp_pft(i,j,k,1)
+                  npp2(i,j,k) = npp_pft(i,j,k,2)
+                  npp3(i,j,k) = npp_pft(i,j,k,3)
+                  
+                  rcm1(i,j,k) = rcm_pft(i,j,k,1)
+                  rcm2(i,j,k) = rcm_pft(i,j,k,2)
+                  rcm3(i,j,k) = rcm_pft(i,j,k,3)
+
+                  rm1(i,j,k) =rm_pft(i,j,k,1)
+                  rm2(i,j,k) = rm_pft(i,j,k,2)
+                  rm3(i,j,k) = rm_pft(i,j,k,3)
+
+                  rg1(i,j,k) = rg_pft(i,j,k,1)
+                  rg2(i,j,k) = rg_pft(i,j,k,2)
+                  rg3(i,j,k) = rg_pft(i,j,k,3)
+
+                  cleaf1(i,j,k) = cleaf_pft(i,j,k,1)
+                  cleaf2(i,j,k) = cleaf_pft(i,j,k,2)
+                  cleaf3(i,j,k) = cleaf_pft(i,j,k,3)
+
+                  cfroot1(i,j,k) = cfroot_pft(i,j,k,1)
+                  cfroot2(i,j,k) = cfroot_pft(i,j,k,2)
+                  cfroot3(i,j,k) = cfroot_pft(i,j,k,3)
+                  
+                  cawood1(i,j,k) = cawood_pft(i,j,k,1)
+                  cawood2(i,j,k) = cawood_pft(i,j,k,2)
+                  cawood3(i,j,k) = cawood_pft(i,j,k,3)
+               else
+                  npp1(i,j,k) = no_data
+                  npp2(i,j,k) = no_data
+                  npp3(i,j,k) = no_data
+                  
+                  rcm1(i,j,k) = no_data
+                  rcm2(i,j,k) = no_data
+                  rcm3(i,j,k) = no_data
+                  
+                  rm1(i,j,k) = no_data
+                  rm2(i,j,k) = no_data
+                  rm3(i,j,k) = no_data
+
+                  rg1(i,j,k) = no_data
+                  rg2(i,j,k) = no_data
+                  rg3(i,j,k) = no_data
+
+                  cleaf1(i,j,k) = no_data 
+                  cleaf2(i,j,k) = no_data
+                  cleaf3(i,j,k) = no_data
+
+                  cfroot1(i,j,k) = no_data
+                  cfroot2(i,j,k) = no_data
+                  cfroot3(i,j,k) = no_data
+                  
+                  cawood1(i,j,k) = no_data
+                  cawood2(i,j,k) = no_data
+                  cawood3(i,j,k) = no_data
+               endif
+            enddo
+         enddo
+      enddo
+      
+      open(10,file='../outputs/npp.1.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, npp1)
+
+      open(10,file='../outputs/npp.2.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, npp2)
+
+      open(10,file='../outputs/npp.3.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, npp3)
+
+      open(10,file='../outputs/rcm.1.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, rcm1)
+
+      open(10,file='../outputs/rcm.2.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, rcm2)
+
+      open(10,file='../outputs/rcm.3.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, rcm3)
+
+      open(10,file='../outputs/rm.1.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, rm1)
+
+      open(10,file='../outputs/rm.2.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, rm2)
+
+      open(10,file='../outputs/rm.3.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, rm3)
+
+      open(10,file='../outputs/rg.1.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, rg1)
+
+      open(10,file='../outputs/rg.2.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, rg2)
+
+      open(10,file='../outputs/rg.3.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, rg3)
+
+      open(10,file='../outputs/cleaf.1.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, cleaf1)
+
+      open(10,file='../outputs/cleaf.2.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, cleaf2)
+
+      open(10,file='../outputs/cleaf.3.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, cleaf3)
+
+      open(10,file='../outputs/cawood.1.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, cawood1)
+
+      open(10,file='../outputs/cawood.2.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, cawood2)
+
+      open(10,file='../outputs/cawood.3.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, cawood3)
+
+      open(10,file='../outputs/cfroot.1.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, cfroot1)
+
+      open(10,file='../outputs/cfroot.2.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, cfroot2)
+
+      open(10,file='../outputs/cfroot.3.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, cfroot3)
 
       stop
       end program env

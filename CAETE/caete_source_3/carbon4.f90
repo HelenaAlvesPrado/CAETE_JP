@@ -1,4 +1,4 @@
-! this code is based on CPTEC-PVM2 source code. Wrote by Carlos Nobre, 
+! this code is based on CPTEC-PVM2/CAETE sourceS. Wrote by Carlos Nobre, 
 ! Marcos Oyama, David Lapola, Bianca Rius e Helena Alves do Prado
 
 
@@ -124,12 +124,12 @@ subroutine prod (pft, temp, p0, w, wmax, ca, ipar, tsoil,&
   !c (vm ; molCO2/m^2s) [Eq. 12]
   vm = (p21(pft)*p22**(p10*(temp-p11)))/(1.0+exp(p23*(temp-p24)))
   !vm = (0.00004*2.0**(0.1*(temp-25.0)))/(1.0+exp(0.3*(temp-36.0)))
-  call critical_value(vm)
+  !call critical_value(vm)
   !c Photo-respiration compensation point
   !c (mgama ; Pa) [Eq. 8]
   !c
   mgama = p3/(p8*(p9**(p10*(temp-p11))))
-  call critical_value(mgama)
+  !call critical_value(mgama)
   !mgama = 21200.0/(5200.0*(0.57**(0.1*(temp-25.0))))
   
   
@@ -137,13 +137,13 @@ subroutine prod (pft, temp, p0, w, wmax, ca, ipar, tsoil,&
   !     ----------------------------------
   !     
   f2 = p12*(p13**(p10*(temp-p11)))
-  call critical_value(f2)
+  !call critical_value(f2)
   !     
   !     Michaelis-Menten O2 constant (Pa)
   !     ---------------------------------
   !     
   f3 = p14*(p15**(p10*(temp-p11)))
-  call critical_value(f3)
+  !call critical_value(f3)
   !     Saturation partial pressure of water vapour (Pa)                                       
   !     -----------------------------------------------
   !call tetens (temp,es)
@@ -153,58 +153,58 @@ subroutine prod (pft, temp, p0, w, wmax, ca, ipar, tsoil,&
      es = 6.1078*exp((9.5*temp/(265.5+temp))*log(10.))
   endif
   
-  call critical_value(es)
+  !call critical_value(es)
   es2 = es*100.0
   vpd = (((100.0-68.5)/100.0)*(es2))/1000.0 !kPa
-  call critical_value(vpd)
+  !call critical_value(vpd)
   !c
   
   !     Saturated mixing ratio (kg/kg)
   !     ------------------------------
   !     
   rmax = 0.622*(es/(p0-es))
-  call critical_value(rmax)
+  !call critical_value(rmax)
   !     
   !     Moisture deficit at leaf level (kg/kg)
   !     --------------------------------------
   !     
   r = -0.315*rmax
-  call critical_value(r)
+  !call critical_value(r)
   
   ci = p19*(1-(r/p20))*(ca-mgama)+mgama
-  call critical_value(ci)
+  !call critical_value(ci)
   !     Rubisco carboxilation limited photosynthesis rate (molCO2/m2/s)
   !     ---------------------------------------------------------------
   !     
   jc = vm*((ci-mgama)/(ci+(f2*(1+(p3/f3)))))
-  call critical_value(jc)
+  !call critical_value(jc)
   !     
   !     Light limited photosynthesis rate (molCO2/m2/s)
   !     -----------------------------------------------
   !     
   jl = p4*(1.0-p5)*ipar*((ci-mgama)/(ci+(p6*mgama)))
-  call critical_value(jl)
+  !call critical_value(jl)
   
   
   je = p7*vm
-  call critical_value(je)
+  !call critical_value(je)
   !     
   !     Jp (minimum between jc and jl)
   !     ------------------------------
   !     
   a = 0.83
   b = (-1)*(jc+jl)
-  call critical_value(b)
+  !call critical_value(b)
   c = jc*jl
-  call critical_value(c)
+  !call critical_value(c)
   delta = (b**2)-4.0*a*c
-  call critical_value(c)
+  !call critical_value(c)
   !     
   jp1=(-b-(sqrt(delta)))/(2.0*a)
   jp2=(-b+(sqrt(delta)))/(2.0*a)
   jp= amin1(jp1,jp2)
   
-  call critical_value(jp)
+  !call critical_value(jp)
   
   !     1
   !     Leaf level gross photosynthesis (minimum between jc, jl and je)
@@ -218,7 +218,7 @@ subroutine prod (pft, temp, p0, w, wmax, ca, ipar, tsoil,&
   j1=(-b2-(sqrt(delta2)))/(2.0*a2)
   j2=(-b2+(sqrt(delta2)))/(2.0*a2)
   f1a = amin1(j1,j2)
-  call critical_value(f1a)
+  !call critical_value(f1a)
   !  c      PRINT*, F1A, 'f1a'
   
   !     Soil water
@@ -237,7 +237,7 @@ subroutine prod (pft, temp, p0, w, wmax, ca, ipar, tsoil,&
   !c Photosysthesis minimum and maximum temperature
   if ((temp.ge.-10.0).and.(temp.le.50.0)) then
      f1 = f1a*f5            !f5:water stress factor
-     call critical_value(f1)
+     !call critical_value(f1)
   else
      f1 = 0.0               !Temperature above/below photosynthesis windown
   endif
@@ -249,24 +249,24 @@ subroutine prod (pft, temp, p0, w, wmax, ca, ipar, tsoil,&
   !  c      PRINT*, sla, 'sla'
   laia  = 0.25*exp(2.5*(f1/p25)) !Adjusted after using observed ipar
   !  c      if(cl1 .gt. 0) print*, cl1, 'cl1'
-  !  c      laia = (cl1*365.*sla)
+!   laia = (cl1*365.*sla)
   !  c      if(laia .gt. 0) PRINT*, laia, 'laia'
   !     SunLAI
   !     ------
   !     
   sunlai = (1.0-(exp(-p26*laia)))/p26
-  call critical_value(sunlai)
+!  call critical_value(sunlai)
   !     ShadeLAI
   !     --------
   !     
   shadelai = laia - sunlai
-  call critical_value(shadelai)
+!  call critical_value(shadelai)
   !     
   !     Scaling-up to canopy level (dimensionless)
   !     ------------------------------------------
   !     
   f4 = (1.0-(exp(-p26*laia)))/p26 !Sun 90 degrees in the whole canopy, to be used for respiration
-  call critical_value(f4)
+!  call critical_value(f4)
   
   !     Sun/Shade approach to canopy scaling                                  !Based in de Pury & Farquhar (1997)
   !     ------------------------------------
@@ -274,15 +274,15 @@ subroutine prod (pft, temp, p0, w, wmax, ca, ipar, tsoil,&
   f4sun = (1.0-(exp(-p26*sunlai)))/p26 !sun 90 degrees
   f4shade = (1.0-(exp(-p27*shadelai)))/p27 !sun ~20 degrees
   !
-  call critical_value(f4sun)
-  call critical_value(f4shade)
+!  call critical_value(f4sun)
+!  call critical_value(f4shade)
   !     Canopy gross photosynthesis (kgC/m2/yr)
   !     =======================================
   !     (0.012 converts molCO2 to kgC)
   !     (31557600 converts seconds to year [with 365.25 days])
   !     
   ph = 0.012*31557600.0*f1*f4sun*f4shade
-  call critical_value(ph)
+!  call critical_value(ph)
   !  c      PRINT*, PH, 'ph'
   
   
@@ -292,34 +292,34 @@ subroutine prod (pft, temp, p0, w, wmax, ca, ipar, tsoil,&
       
       
   csa= 0.05*ca1             !sapwood carbon content (kgC/m2). 5% of woody tissues (Pavlick, 2013)
-  call critical_value(csa)
+!  call critical_value(csa)
   ncl = 0.034               !(gN/gC)
   ncf = 0.034               !(gN/gC)
   ncs = 0.003               !(gN/gC)
   rml = (ncl*cl1)*27*(exp(0.03*temp))
-  call critical_value(rml)
+!  call critical_value(rml)
   rmf = (ncf*cf1)*27*(exp(0.03*tsoil))
-  call critical_value(rmf)
+!  call critical_value(rmf)
   rms = (ncs*csa)*27*(exp(0.03*temp))
-  call critical_value(rms)
+!  call critical_value(rms)
   
   rm = rml + rmf + rms
-  call critical_value(rm)
+!  call critical_value(rm)
   !  c      print*, rm, 'rm'
   
   ! c     Growth respiration (KgC/m2/yr)(based in Ryan 1991; Sitch et al. 2003; Levis et al. 2004)         
   
   csai= 0.05*beta_awood
-  call critical_value(csai)
+!  call critical_value(csai)
   rgl = (0.25*((beta_leaf)*365))
-  call critical_value(rgl)
+!  call critical_value(rgl)
   rgf = (0.25*((beta_froot)*365))
-  call critical_value(rgf)
+!  call critical_value(rgf)
   rgs = (0.25*(csai)*365)
-  call critical_value(rgs)
+!  call critical_value(rgs)
   
   rg = rgl + rgf + rgs
-  call critical_value(rg)
+!  call critical_value(rg)
   !  c      print*, rg, 'rg'
   if (rg.lt.0) then
      rg = 0.
@@ -332,7 +332,7 @@ subroutine prod (pft, temp, p0, w, wmax, ca, ipar, tsoil,&
   !     
   if ((temp.ge.-10.0).and.(temp.le.50.0)) then
      ar = rm+rg
-     call critical_value(ar)
+!     call critical_value(ar)
      !     c         if (ar .gt. 0.)PRINT*, AR ,'ar'
   else
      ar = 0.0               !Temperature above/below respiration windown
@@ -348,7 +348,8 @@ subroutine prod (pft, temp, p0, w, wmax, ca, ipar, tsoil,&
   !     ===================================
   !     
   nppa = ph-ar
-  call critical_value(nppa)
+
+!  call critical_value(nppa)
   
   !  c       if (nppa .gt. 0.) print*, nppa, 'npp'
   !  c      PRINT*, NPPA
@@ -411,37 +412,37 @@ subroutine carbon_hr (tsoil,f5,evap,laia,cl,cs,hr)
   !     -------------------------
   !     
   f6 = 1.16*10**(-1.4553+0.0014175*(evap*365.0))
-  call critical_value(f6)
+!  call critical_value(f6)
   !     
   !     Soil carbon storage function                                          !Controlled by temperature
   !     ----------------------------
   !     
   f7 = p32**(p10*(tsoil-p11))
-  call critical_value(f7)
+!  call critical_value(f7)
   !     Litterfall (kgC/m2)
   !     ------------------
   !     
   lf = p33*laia
-  call critical_value(lf)
+!  call critical_value(lf)
   !     
   !     Litter carbon (kgC/m2)
   !     ----------------------
   !     
   cl = lf/f6
-  call critical_value(cl)
+!  call critical_value(cl)
   !     
 !     Soil carbon(kgC/m2)
   !     -------------------
   !     
   cs = ((p34*cl)/(p35*f7))*f5
-  call critical_value(cs)
+!  call critical_value(cs)
   !     
   !     Respiration minimum and maximum temperature
   !     -------------------------------------------
   !     
   if ((tsoil.ge.-10.0).and.(tsoil.le.50.0)) then
      hr = p36*(cl*(f6**2)+(cs*f5*evap*(f7**2))) !Litter and Soil respectively
-     call critical_value(hr)
+!     call critical_value(hr)
   else
      hr = 0.0               !Temperature above/below respiration windown
   endif
@@ -542,7 +543,7 @@ subroutine penman (spre,temp,ur,rn,rc2,evap)
      !c evapotranspiracao real
      evap = (delta*rn + (1.20*1004./ra)*delta_e)/(delta+gama2) ! W/m2
      evap = evap*(86400./2.45e6)!mm/dia
-     !evap = amax1(evap,0.) !elimina condensacao
+     evap = amax1(evap,0.) !elimina condensacao
   endif
 end subroutine penman
 
@@ -617,7 +618,7 @@ subroutine evpot2 (spre,temp,ur,rn,evap)
   !c evapotranspiracao potencial sem estresse
   evap = (delta*rn + (1.20*1004./ra)*delta_e)/(delta+gama2) ! W/m2
   evap = evap*(86400./2.45e6)                               ! mm/dia
-  !      evap = amax1(evap,0.) !elimina condensacao
+  evap = amax1(evap,0.) !elimina condensacao
   !c
 end subroutine evpot2
 
@@ -740,7 +741,7 @@ subroutine runoff_c(w, wmax, roff)
   real, intent( in) :: w, wmax
   real, intent(out) :: roff
   
-  roff = 38.*((w/wmax)**11.) ! [Eq. 10]
+!  roff = 38.*((w/wmax)**11.) ! [Eq. 10]
   roff = 11.5*((w/wmax)**6.6) !from NCEP-NCAR Reanalysis data 
 end subroutine runoff_c
 

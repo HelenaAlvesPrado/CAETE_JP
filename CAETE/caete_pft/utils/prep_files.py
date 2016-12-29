@@ -5,11 +5,11 @@ import gdal
 from netCDF4 import Dataset as dt
 
 
-#mask_fpath = './mask12.npy'
+mask_fpath = './mask12.npy'
 NO_DATA = [-9999.0, -9999.0]
-#lsmk = np.load(mask_fpath)
+lsmk = np.load(mask_fpath)
 
-fdir = '../inputs'
+fdir = '../outputs'
 files = glob.glob1(fdir, '*.bin')
 
 
@@ -54,11 +54,9 @@ def read_raster(fpath):
     fpath :: string: complete file path
 
     """
-    ds = gdal.Open(fpath)
-    raw_data = ds.ReadAsArray()
-    ds = None
-    np.place(arr=raw_data, mask=lsmk1, vals=NO_DATA)
-    return raw_data
+    ds = gdal.Open(fpath).ReadAsArray()
+    np.place(arr=ds, mask=lsmk, vals=NO_DATA)
+    return ds
 
 
 def write_CAETE_output(nc_filename, arr, var):
@@ -66,7 +64,7 @@ def write_CAETE_output(nc_filename, arr, var):
     t, la, lo,  = arr.shape
 
     # create netcdf file
-    rootgrp = dt(nc_filename, mode='w', format='NETCDF4')
+    rootgrp = dt(nc_filename, mode='w', format='NETCDF3_CLASSIC')
 
     #dimensions
     rootgrp.createDimension("time", None)
@@ -113,13 +111,13 @@ def write_CAETE_output(nc_filename, arr, var):
     longitude[:] = np.arange(-179.75, 180, 0.5)
     latitude[:] =  np.arange(-89.75, 90, 0.5)
 
-    var_[:,:,:] = np.fliplr(np.ma.masked_array(arr, lsmk1))
+    var_[:,:,:] = np.fliplr(np.ma.masked_array(arr, lsmk))
     rootgrp.close()
 
 for fl in range(len(files)):
     fpath = fdir + os.sep + files[fl]
     varname = files[fl].split('.')[0]
-    caete_name = fdir + os.sep + varname + '_' + 'annual_cycle_mean_CAETE.nc'
+    caete_name = fdir + os.sep + varname + '_pft_' + files[fl].split('.')[1] + '_' + 'annual_cycle_mean_CAETE.nc'
 
     if varname in flt_attrs().keys():
         arr = read_raster(fpath)

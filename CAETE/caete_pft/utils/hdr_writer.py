@@ -95,14 +95,14 @@ def write_header(file_conn, NBANDS, nx=nx, ny=ny, xllcorner=-180,
 
 
 def main():
-    bin_files_path = '../inputs' 
+    bin_files_path = '../outputs' 
 
     raw_list =[ i for i in os.listdir(bin_files_path) if i.split('.')[-1] in FILE_EXT]
     
     for i in raw_list:
         
         path_in = os.path.join(bin_files_path,i)
-        path_out = os.path.join(bin_files_path, (i.split('.')[0] + str('.hdr')))
+        path_out = os.path.join(bin_files_path, (i.split('.')[0] + '.' + i.split('.')[1] + str('.hdr')))
         
         nlayers = catch_nt(path_in, nx, ny, pixel_depht)
         write_header(path_out, nlayers, nx, ny )
