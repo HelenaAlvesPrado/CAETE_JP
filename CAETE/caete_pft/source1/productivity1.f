@@ -75,9 +75,22 @@ c234567
       real f4,f4sun,f4shade     !Scaling-up to canopy level (dimensionless)
 !
 
+c$$$      real aleaf(3)             !npp percentage alocated to leaf compartment
+c$$$      data aleaf /0.40, 0.25, 0.45/
+c$$$      real aawood (3)           !npp percentage alocated to aboveground woody biomass compartment
+c$$$      data aawood /0.35, 0.40, 0.0/
+c$$$      real afroot(3)            !npp percentage alocated to fine roots compartment
+c$$$      data afroot /0.30, 0.25, 0.55/ 
+c$$$      real tleaf(3)             !turnover time of the leaf compartment (yr)
+c$$$      data tleaf /2.0, 0.7, 1.0/ 
+c$$$      real tawood (3)           !turnover time of the aboveground woody biomass compartment (yr)
+c$$$      data tawood /30.0, 3.0, 0.0/
+c$$$      real tfroot(3)            !turnover time of the fine roots compartment
+c$$$      data tfroot /3.0, 2.0, 1.0/
+      
       ! BIANCA ___________________________________________________
       real tleaf(3)             !leaf turnover time (yr)
-      data tleaf /1.0,0.5,1.0/  !leaf turnover time for the 3 PFTs
+      data tleaf /2.0, 0.7, 1.0/ !leaf turnover time for the 3 PFTs
       real sla                  !specific leaf area (m2/kg)
       real cl2                  !leaf compartment's carbon content (kgC/m2)
       real ca2                  !aboveground woody compartment's carbon content (kgC/m2)
@@ -177,23 +190,23 @@ c     HELENA____________________________________________________
       vm = (p21(pft)*p22**(p10*(temp-p11)))/ !Free-range parameter --> 0.0358>vm>840 (micromol)
      &     (1.0+exp(p23*(temp-p24)))
 !
-      call critical_value(vm)
+c      call critical_value(vm)
 !     Photo-respiration compensation point (Pa)
 !     -----------------------------------------
 !     
       mgama = p3/(p8*(p9**(p10*(temp-p11))))
-      call critical_value(mgama)
+c      call critical_value(mgama)
 !     Michaelis-Menton CO2 constant (Pa)
 !     ----------------------------------
 !     
       f2 = p12*(p13**(p10*(temp-p11)))
-      call critical_value(f2)
+c      call critical_value(f2)
 !     
 !     Michaelis-Menton O2 constant (Pa)
 !     ---------------------------------
 !     
       f3 = p14*(p15**(p10*(temp-p11)))
-      call critical_value(f3)
+c      call critical_value(f3)
 !     Saturation partial pressure of water vapour (Pa)                                       
 !     ------------------------------------------------
 !     
@@ -201,41 +214,41 @@ c     HELENA____________________________________________________
 !     
       es2 = es*100.0
       vpd = (((100.0-68.5)/100.0)*(es2))/1000.0 !kPa
-      call critical_value(vpd)
+c      call critical_value(vpd)
 !     Saturated mixing ratio (kg/kg)
 !     ------------------------------
 !     
       rmax = 0.622*(es/(p0-es))
-      call critical_value(rmax)
+c      call critical_value(rmax)
 !     
 !     Moisture deficit at leaf level (kg/kg)
 !     --------------------------------------
 !     
       r = -0.315*rmax
-      call critical_value(r)
+c      call critical_value(r)
 !     
 !     Internal leaf CO2 partial pressure (Pa)
 !     ---------------------------------------
 !     
       ci = p19*(1-(r/p20))*(ca-mgama)+mgama
-      call critical_value(ci)
+c      call critical_value(ci)
 !     Rubisco carboxilation limited photosynthesis rate (molCO2/m2/s)
 !     ---------------------------------------------------------------
 !     
       jc = vm*((ci-mgama)/(ci+(f2*(1+(p3/f3)))))
-      call critical_value(jc)
+c      call critical_value(jc)
 !     
 !     Light limited photosynthesis rate (molCO2/m2/s)
 !     -----------------------------------------------
 !     
       jl = p4*(1.0-p5)*ipar*((ci-mgama)/(ci+(p6*mgama)))
-      call critical_value(jl)
+c      call critical_value(jl)
 !     
 !     Transport limited photosynthesis rate (molCO2/m2/s)
 !     ---------------------------------------------------
 !     
       je = p7*vm
-      call critical_value(je)
+c      call critical_value(je)
 !     
 !     Jp (minimum between jc and jl)
 !     ------------------------------
@@ -244,15 +257,15 @@ c     HELENA____________________________________________________
       b = (-1)*(jc+jl)
       call critical_value(b)
       c = jc*jl
-      call critical_value(c)
+c      call critical_value(c)
       delta = (b**2)-4.0*a*c
-      call critical_value(c)
+c      call critical_value(c)
 !     
       jp1=(-b-(sqrt(delta)))/(2.0*a)
       jp2=(-b+(sqrt(delta)))/(2.0*a)
       jp= amin1(jp1,jp2)
       
-      call critical_value(jp)
+c      call critical_value(jp)
 
 !     1
 !     Leaf level gross photosynthesis (minimum between jc, jl and je)
@@ -299,7 +312,7 @@ c      f5 = 1-(exp(-1*(pt/d)))
 !     
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
          f1 = f1a*f5            !f5:water stress factor
-         call critical_value(f1)
+c         call critical_value(f1)
       else
          f1 = 0.0               !Temperature above/below photosynthesis windown
       endif
@@ -317,18 +330,18 @@ c      if(laia .gt. 0) PRINT*, laia, 'laia'
 !     ------
 !     
       sunlai = (1.0-(exp(-p26*laia)))/p26
-      call critical_value(sunlai)
+c      call critical_value(sunlai)
 !     ShadeLAI
 !     --------
 !     
       shadelai = laia - sunlai
-      call critical_value(shadelai)
+c      call critical_value(shadelai)
 !     
 !     Scaling-up to canopy level (dimensionless)
 !     ------------------------------------------
 !     
       f4 = (1.0-(exp(-p26*laia)))/p26 !Sun 90 degrees in the whole canopy, to be used for respiration
-      call critical_value(f4)
+c      call critical_value(f4)
       
 !     Sun/Shade approach to canopy scaling                                  !Based in de Pury & Farquhar (1997)
 !     ------------------------------------
@@ -336,15 +349,15 @@ c      if(laia .gt. 0) PRINT*, laia, 'laia'
       f4sun = (1.0-(exp(-p26*sunlai)))/p26 !sun 90 degrees
       f4shade = (1.0-(exp(-p27*shadelai)))/p27 !sun ~20 degrees
 !
-      call critical_value(f4sun)
-      call critical_value(f4shade)
+c      call critical_value(f4sun)
+c      call critical_value(f4shade)
 !     Canopy gross photosynthesis (kgC/m2/yr)
 !     =======================================
 !     (0.012 converts molCO2 to kgC)
 !     (31557600 converts seconds to year [with 365.25 days])
 !     
       ph = 0.012*31557600.0*f1*f4sun*f4shade
-      call critical_value(ph)
+c      call critical_value(ph)
 c      PRINT*, PH, 'ph'
 !     Plant respiration
 !     =================
@@ -352,34 +365,34 @@ c      PRINT*, PH, 'ph'
       
       
       csa= 0.05*ca1             !sapwood carbon content (kgC/m2). 5% of woody tissues (Pavlick, 2013)
-      call critical_value(csa)
+c      call critical_value(csa)
       ncl = 0.034               !(gN/gC)
       ncf = 0.034               !(gN/gC)
       ncs = 0.003               !(gN/gC)
       rml = (ncl*cl1)*27*(exp(0.03*temp))
-      call critical_value(rml)
+c      call critical_value(rml)
       rmf = (ncf*cf1)*27*(exp(0.03*tsoil))
-      call critical_value(rmf)
+c      call critical_value(rmf)
       rms = (ncs*csa)*27*(exp(0.03*temp))
-      call critical_value(rms)
+c      call critical_value(rms)
       
       rm = rml + rmf + rms
-      call critical_value(rm)
+c      call critical_value(rm)
 c      print*, rm, 'rm'
       
 c     Growth respiration (KgC/m2/yr)(based in Ryan 1991; Sitch et al. 2003; Levis et al. 2004)         
       
       csai= 0.05*beta_awood
-      call critical_value(csai)
+c      call critical_value(csai)
       rgl = (0.25*((beta_leaf)*365))
-      call critical_value(rgl)
+c      call critical_value(rgl)
       rgf = (0.25*((beta_froot)*365))
-      call critical_value(rgf)
+c      call critical_value(rgf)
       rgs = (0.25*(csai)*365)
-      call critical_value(rgs)
+c      call critical_value(rgs)
       
       rg = rgl + rgf + rgs
-      call critical_value(rg)
+c      call critical_value(rg)
 c      print*, rg, 'rg'
       if (rg.lt.0) then
          rg = 0.
@@ -390,7 +403,7 @@ c      print*, rg, 'rg'
 !     
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
          ar = rm+rg
-         call critical_value(ar)
+c         call critical_value(ar)
 c         if (ar .gt. 0.)PRINT*, AR ,'ar'
       else
          ar = 0.0               !Temperature above/below respiration windown
@@ -404,7 +417,7 @@ c         if (ar .gt. 0.)PRINT*, AR ,'ar'
 !     ===================================
 !     
       nppa = ph-ar
-      call critical_value(nppa)
+c      call critical_value(nppa)
         
 c       if (nppa .gt. 0.) print*, nppa, 'npp'
 c      PRINT*, NPPA

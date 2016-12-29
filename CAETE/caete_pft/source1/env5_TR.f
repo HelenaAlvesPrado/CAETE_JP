@@ -695,14 +695,26 @@ c      real cstoi_aux(nt)
 c      real cotheri_aux(nt)
 c      real crepi_aux(nt)
 
-      
+c$$$      real aleaf(3)             !npp percentage alocated to leaf compartment
+c$$$      data aleaf /0.40, 0.25, 0.45/
+c$$$      real aawood (3)           !npp percentage alocated to aboveground woody biomass compartment
+c$$$      data aawood /0.35, 0.40, 0.0/
+c$$$      real afroot(3)            !npp percentage alocated to fine roots compartment
+c$$$      data afroot /0.30, 0.25, 0.55/ 
+c$$$      real tleaf(3)             !turnover time of the leaf compartment (yr)
+c$$$      data tleaf /2.0, 0.7, 1.0/ 
+c$$$      real tawood (3)           !turnover time of the aboveground woody biomass compartment (yr)
+c$$$      data tawood /30.0, 3.0, 0.0/
+c$$$      real tfroot(3)            !turnover time of the fine roots compartment
+c$$$      data tfroot /3.0, 2.0, 1.0/
+
     
       real aleaf(3)             !npp percentage alocated to leaf compartment
-      data aleaf /0.35,0.35,0.45/
+      data aleaf /0.40,0.25,0.45/
       real aawood (3)           !npp percentage alocated to aboveground woody biomass compartment
-      data aawood /0.40,0.40,0.001/
+      data aawood /0.35,0.40,0.0/
       real afroot(3)            !npp percentage alocated to fine roots compartment
-      data afroot /0.25,0.25,0.55/ 
+      data afroot /0.30,0.25,0.55/ 
 c      real abwood(3)            !npp percentage alocated to belowground woody biomass compartment
 c      data abwood /0.10,0.10,0.001/
 c      real asto(3)              !npp percentage alocated to storage compartment
@@ -713,11 +725,11 @@ c      real aother(3)            !npp percentage alocated to other compartment
 c      data aother /0.05,0.05,0.06/ 
 c 
       real tleaf(3)             !turnover time of the leaf compartment (yr)
-      data tleaf /1.0,0.5,1.0/ 
+      data tleaf /2.0, 0.7, 1.0/ 
       real tawood (3)           !turnover time of the aboveground woody biomass compartment (yr)
-      data tawood /30.0,30.0,30.0/
+      data tawood /30.0, 3.0, 0.0/
       real tfroot(3)            !turnover time of the fine roots compartment
-      data tfroot /1.0,1.0,1.0/
+      data tfroot /3.0,2.0,1.0/
 c      real tbwood (3)           !turnover time of the belowground woody biomass compartment
 c      data tbwood /40.0,40.0,40.0/
 c      real tsto  (3)            !turnover time of the storage compartmentturn
@@ -758,27 +770,34 @@ c               crepi_aux(k) = ((arep(i6)*(nppot))-
 c     &              (crepi_aux(k-1)/(trep(i6)*365))) + crepi_aux(k-1)
                
                kk =  int(k*0.66)
-               if((cfrooti_aux(k)/cfrooti_aux(kk).lt.sensitivity)
-     $              .and.(cleafi_aux(k)/cleafi_aux(kk).lt.sensitivity)
-     $              .and.(cawoodi_aux(k)/cawoodi_aux(kk).lt.
-     $              sensitivity2)) then
-c                    .and.(cbwoodi_aux(k)/cbwoodi_aux(kk)
-c     $              .lt.sensitivity2).and.(cstoi_aux(k)
-c     $              /cstoi_aux(kk).lt.sensitivity).and.(cotheri_aux(k)
-c     $              /cotheri_aux(kk).lt.sensitivity).and.(crepi_aux(k)
-c     $              /crepi_aux(kk).lt.sensitivity))   then
+
+               if(aawood(i6) .gt. 0.0) then
+               
+                  if((cfrooti_aux(k)
+     $               /cfrooti_aux(kk).lt.sensitivity).and.(cleafi_aux(k)
+     $               /cleafi_aux(kk).lt.sensitivity).and.(cawoodi_aux(k)
+     $               /cawoodi_aux(kk).lt.sensitivity2)) then
                   
                   
-                  cleafini(i6) = cleafi_aux(k) ! carbon content (kg m-2) 
-                  cawoodini(i6) = cawoodi_aux(k)
-                  cfrootini(i6) = cfrooti_aux(k)
-c                  cbwoodini(i6) = cbwoodi_aux(k)
-c                  cstoini(i6) = cstoi_aux(k)
-c                  cotherini(i6) = cotheri_aux(k)
-c                  crepini(i6) = crepi_aux(k)
-                  exit
                   
-               endif
+                     cleafini(i6) = cleafi_aux(k) ! carbon content (kg m-2) 
+                     cawoodini(i6) = cawoodi_aux(k)
+                     cfrootini(i6) = cfrooti_aux(k)
+                     exit
+                  endif
+               else
+                  if((cfrooti_aux(k)/cfrooti_aux(kk).lt.
+     $                 sensitivity).and.(cleafi_aux(k)
+     $                 /cleafi_aux(kk).lt.sensitivity)) then
+                     
+                  
+                     
+                     cleafini(i6) = cleafi_aux(k) ! carbon content (kg m-2) 
+                     cawoodini(i6) = 0.0
+                     cfrootini(i6) = cfrooti_aux(k)
+                     exit
+                  endif
+               ENDIF
             endif
          enddo
       enddo
@@ -787,7 +806,7 @@ c                  crepini(i6) = crepi_aux(k)
       return
       end subroutine spinup				   
       
-!
+!     
       subroutine read12(nunit,var)
 !     auxiliar reading routine
       parameter(nx=720,ny=360)

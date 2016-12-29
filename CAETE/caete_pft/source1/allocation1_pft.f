@@ -29,17 +29,17 @@ c
       
       
       real aleaf(3)             !npp percentage alocated to leaf compartment
-      data aleaf /0.35,0.35,0.45/
+      data aleaf /0.40, 0.25, 0.45/
       real aawood (3)           !npp percentage alocated to aboveground woody biomass compartment
-      data aawood /0.40,0.40,0.001/
+      data aawood /0.30, 0.40, 0.0/
       real afroot(3)            !npp percentage alocated to fine roots compartment
-      data afroot /0.25,0.25,0.55/ 
+      data afroot /0.30, 0.25, 0.55/ 
       real tleaf(3)             !turnover time of the leaf compartment (yr)
-      data tleaf /1.0,0.5,1.0/ 
+      data tleaf /2.0, 0.7, 1.0/ 
       real tawood (3)           !turnover time of the aboveground woody biomass compartment (yr)
-      data tawood /30.0,30.0,30.0/
+      data tawood /30.0, 3.0, 0.0/
       real tfroot(3)            !turnover time of the fine roots compartment
-      data tfroot /1.0,1.0,1.0/
+      data tfroot /3.0, 2.0, 1.0/
       
       
       
@@ -55,13 +55,13 @@ c     initialization
       npp_aux = npp/365.0       !transform (KgC/m2/yr) in (KgC/m2/day)
       
       
-      cl2 = ((aleaf(i6)*npp_aux) - 
-     &     (cl1/((tleaf(i6))*365)))+ cl1
-      cf2 = ((afroot(i6)*npp_aux) - 
-     &     (cf1/((tfroot(i6))*365)))+ cf1
-      ca2 = ((aawood(i6)*npp_aux) - 
-     &     (ca1/((tawood(i6))*365)))+ ca1
-      
+      cl2 = ((aleaf(i6)*npp_aux) - (cl1/((tleaf(i6))*365)))+ cl1
+      cf2 = ((afroot(i6)*npp_aux) - (cf1/((tfroot(i6))*365)))+ cf1
+      if(aawood(i6) .gt. 0.0) then
+         ca2 = ((aawood(i6)*npp_aux) - (ca1/((tawood(i6))*365)))+ ca1
+      else
+         ca2 = 0.0
+      endif
       
       
       return

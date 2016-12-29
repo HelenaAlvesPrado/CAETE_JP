@@ -628,9 +628,9 @@ c         if(cl2 .gt. 0.) PRINT*, cl2, 'cl2_ after alloc'
 c         if(ca2 .gt. 0.) PRINT*, ca2, 'ca2_ after alloc'
 c         if(cf2 .gt. 0.) PRINT*, cf2, 'cf2_ after alloc'
 
-         alfa_leaf  = abs(cl2 - cl1) 
-         alfa_awood = abs(ca2 - ca1) 
-         alfa_froot = abs(cf2 - cf1) 
+         alfa_leaf  = cl2 - cl1 
+         alfa_awood = ca2 - ca1 
+         alfa_froot = cf2 - cf1 
          
 
          

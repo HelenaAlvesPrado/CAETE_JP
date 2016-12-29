@@ -1,6 +1,8 @@
-import numpy as np
+#!/usr/bin/env python
+
 import os
 import glob
+import numpy as np
 import gdal
 from netCDF4 import Dataset as dt
 
