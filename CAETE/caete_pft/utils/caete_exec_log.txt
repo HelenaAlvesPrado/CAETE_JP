@@ -1,0 +1,12 @@
+compiling sources from ./source1
+
+running executable
+
+
+	Executando caete- inicio em: <built-in function ctime>
+
+
+
+	Finalizando caete - em: <built-in function ctime>
+
+Tempo de execução: 26 minutos e 22.95 segundos
