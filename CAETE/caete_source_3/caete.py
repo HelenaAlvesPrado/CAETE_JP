@@ -6,7 +6,7 @@ import glob
 import numpy as np
 import gdal
 from netCDF4 import Dataset as dt
-import carbon as C
+import c64 as C
 
 
 class datasets:
