@@ -9,4 +9,4 @@ running executable
 
 	Finalizando caete - em: <built-in function ctime>
 
-Tempo de execução: 26 minutos e 22.95 segundos
+Tempo de execução: 68 minutos e 19.87 segundos

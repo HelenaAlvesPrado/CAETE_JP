@@ -96,21 +96,23 @@ def write_header(file_conn, NBANDS, nx=nx, ny=ny, xllcorner=-180,
 
 
 def main():
-    bin_files_path = '../outputs' 
-
-    raw_list =[ i for i in os.listdir(bin_files_path) if i.split('.')[-1] in FILE_EXT]
+    bin_files_path = ['../outputs', '../outputs_pft' ] 
+    for j in range(len(bin_files_path)):
+        raw_list =[ i for i in os.listdir(bin_files_path[j]) if i.split('.')[-1] in FILE_EXT]
     
-    for i in raw_list:
+        for i in raw_list:
         
-        path_in = os.path.join(bin_files_path,i)
-        path_out = os.path.join(bin_files_path, (i.split('.')[0] + '.' + i.split('.')[1] + str('.hdr')))
+            path_in = os.path.join(bin_files_path[j],i)
+            if len(i.split('.')) == 3:
+                path_out = os.path.join(bin_files_path[j], (i.split('.')[0] + '.' + i.split('.')[1] + str('.hdr')))
+            else:
+                path_out = os.path.join(bin_files_path[j], (i.split('.')[0] + str('.hdr')))
+            nlayers = catch_nt(path_in, nx, ny, pixel_depht)
+            write_header(path_out, nlayers, nx, ny )
         
-        nlayers = catch_nt(path_in, nx, ny, pixel_depht)
-        write_header(path_out, nlayers, nx, ny )
-        
-        print(nlayers)
-        print(path_in)
-        print(path_out, '\n')
+            print(nlayers)
+            print(path_in)
+            print(path_out, '\n')
 
 if __name__ == '__main__':
     main()

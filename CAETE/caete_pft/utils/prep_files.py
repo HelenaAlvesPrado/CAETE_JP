@@ -11,8 +11,8 @@ mask_fpath = './mask12.npy'
 NO_DATA = [-9999.0, -9999.0]
 lsmk = np.load(mask_fpath)
 
-fdir = '../outputs'
-files = glob.glob1(fdir, '*.bin')
+fdir = ['../outputs_pft', '../outputs']
+
 
 
 def flt_attrs():
@@ -116,12 +116,17 @@ def write_CAETE_output(nc_filename, arr, var):
     var_[:,:,:] = np.fliplr(np.ma.masked_array(arr, lsmk))
     rootgrp.close()
 
-for fl in range(len(files)):
-    fpath = fdir + os.sep + files[fl]
-    varname = files[fl].split('.')[0]
-    caete_name = fdir + os.sep + varname + '_pft_' + files[fl].split('.')[1] + '_' + 'annual_cycle_mean_CAETE.nc'
 
-    if varname in flt_attrs().keys():
-        arr = read_raster(fpath)
-        write_CAETE_output(caete_name, arr, varname)
+for folder in range(len(fdir)):
+    files = glob.glob1(fdir[folder], '*.bin')
+    for fl in range(len(files)):
+        fpath = fdir[folder] + os.sep + files[fl]
+        varname = files[fl].split('.')[0]
+        if len(files[fl].split('.'))  == 3:
+            caete_name = fdir[folder] + os.sep + varname + '_pft_' + files[fl].split('.')[1] + '_' + 'annual_cycle_mean_CAETE.nc'
+        else:
+            caete_name = fdir[folder] + os.sep + varname + '_' + 'annual_cycle_mean_CAETE.nc'
+        if varname in flt_attrs().keys():
+            arr = read_raster(fpath)
+            write_CAETE_output(caete_name, arr, varname)
 
