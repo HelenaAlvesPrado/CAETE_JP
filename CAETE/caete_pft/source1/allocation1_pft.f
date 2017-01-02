@@ -53,12 +53,12 @@ c
 c     initialization
       
       npp_aux = npp/365.0       !transform (KgC/m2/yr) in (KgC/m2/day)
+
       
-      
-      cl2 = ((aleaf(i6)*npp_aux) - (cl1/((tleaf(i6))*365)))+ cl1
-      cf2 = ((afroot(i6)*npp_aux) - (cf1/((tfroot(i6))*365)))+ cf1
+      cl2 = ((aleaf(i6)*npp_aux) - (cl1/((tleaf(i6))/365.)))+ cl1
+      cf2 = ((afroot(i6)*npp_aux) - (cf1/((tfroot(i6))/365.)))+ cf1
       if(aawood(i6) .gt. 0.0) then
-         ca2 = ((aawood(i6)*npp_aux) - (ca1/((tawood(i6))*365)))+ ca1
+         ca2 = ((aawood(i6)*npp_aux) - (ca1/((tawood(i6))/365.)))+ ca1
       else
          ca2 = 0.0
       endif

@@ -137,8 +137,8 @@ C     -------END DECLARATION----------------------------------------
      &     form='unformatted',access='direct',recl=4*nx*ny)
       open(13,file='../inputs/rsds.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
-c      open(26,file='../inputs/npp.bin',status='old',
-c     &     form='unformatted',access='direct',recl=4*nx*ny)
+      open(26,file='../inputs/npp.bin',status='old',
+     &     form='unformatted',access='direct',recl=4*nx*ny)
       
       open(21,file='../inputs/cleaf_ini.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
@@ -157,7 +157,7 @@ c     &     form='unformatted',access='direct',recl=4*nx*ny)
        call read12 (11,pr)
        call read12 (12,t)
        call read12 (13,ipar)
-      ! call read12(26,npp_pot)
+      call read12(26,npp_pot)
 
       call read3(21, cleafin)
       call read3(22,cfrootin)
@@ -171,25 +171,25 @@ c     &     form='unformatted',access='direct',recl=4*nx*ny)
        close (11)
        close (12)
        close (13)
-c       close (26)
+       close (26)
        close (21)
        close (22)
        close (23)
 !     
 
 c     fazendo medias da npp
-c$$$       do i =1,nx
-c$$$          do j=1,ny
-c$$$             if(nint(lsmk(i,j)) .ne. 0) then 
-c$$$                aux_npp(i,j) = 0.0
-c$$$                do k = 1,12
-c$$$                   aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
-c$$$                enddo
-c$$$             else
-c$$$                aux_npp(i,j) = no_data
-c$$$             endif
-c$$$          enddo
-c$$$       enddo
+       do i =1,nx
+          do j=1,ny
+             if(nint(lsmk(i,j)) .ne. 0) then 
+                aux_npp(i,j) = 0.0
+                do k = 1,12
+                   aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
+                enddo
+             else
+                aux_npp(i,j) = no_data
+             endif
+          enddo
+       enddo
 c$$$       
 c$$$       open(10,file='../inputs/npp2.bin',
 c$$$     &      status='unknown',form='unformatted',

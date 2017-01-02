@@ -237,7 +237,7 @@ C     NOVAS VARIAVEIS VEG POOLS  tem que declarar
 !     
             if (nint(lsmk(i,j)).ne.0) then
                do k=1,12
-                  spre = p0(i,j,k) !Surface pressure (mbar)==kPa
+                  wg0(i,j,k) = -1.0
                enddo
                
 !     Set some variables
@@ -249,23 +249,8 @@ C     NOVAS VARIAVEIS VEG POOLS  tem que declarar
                   gini(p)  = 0.0   !Soil ice_initial condition (mm)
                   sini(p)  = 0.0   !Overland snow_initial condition (mm)
                enddo
-c     cleaf1_pft  =  cleaf_ini(i,j,p) !inital leaf biomass for each PFT
-c     from spinup (KgC/m2) 
-c     cawood1_pft = cawood_ini(i,j,p)
-c     cfroot1_pft = cfroot_ini(i,j,p)
-!     Initialization
-!     --------------
-!     
-               do k=1,12
-                  wg0(i,j,k) = -1.0
-               enddo
-               
-!     Start integration
-!     -----------------
-!     
-               
-               
-               
+
+               ! START INTEGRATION
                n = 0
  10            continue
                n = n + 1
@@ -276,6 +261,7 @@ c     cfroot1_pft = cfroot_ini(i,j,p)
                k = mod(n,12)
                if (k.eq.0) k = 12
                mes = k
+               spre = p0(i,j,k)
                td = tsoil(i,j,k)
                ta = temp(i,j,k)
                pr = prec(i,j,k)
@@ -285,13 +271,12 @@ c     cfroot1_pft = cfroot_ini(i,j,p)
 !     Monthly water budget
 !     ====================
                
-               call budget (mes,wini,gini,sini,td,ta,pr,spre,ae,ca,
-     &              ipar,cleaf1_pft, cawood1_pft, cfroot1_pft,wfim
-     $              ,gfim, sfim, clfim, cafim,crfim,smes,rmes,emes
-     $              ,epmes,phmes,armes,nppmes,laimes,clmes,csmes
-     $              ,hrmes,rcmes,rmlmes,rmfmes, rmsmes, rmmes, rglmes
-     $              , rgfmes,rgsmes,rgmes, cleafmes, cawoodmes,
-     $              cfrootmes) 
+               call budget (mes,wini,gini,sini,td,ta,pr,spre,ae
+     $              , ca, ipar, cleaf1_pft, cawood1_pft, cfroot1_pft
+     $              ,wfim,gfim, sfim, clfim, cafim,crfim,smes,rmes,emes
+     $              ,epmes,phmes,armes,nppmes,laimes,clmes,csmes,hrmes
+     $              ,rcmes,rmlmes,rmfmes, rmsmes, rmmes, rglmes, rgfmes
+     $              ,rgsmes,rgmes, cleafmes, cawoodmes,cfrootmes) 
 
                do p=1,q
                   emaxm(i,j,k,p) = epmes(p)
@@ -371,11 +356,12 @@ c     finalize nx loop
       
       
       
-      subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar
-     $     ,cl1_pft,ca1_pft,cf1_pft,w2,g2,s2,cl2_pft,ca2_pft,cf2_pft
-     $     ,smavg,ruavg,evavg,epavg,phavg,aravg,nppavg,laiavg,clavg
-     $     ,csavg,hravg,rcavg,rmlavg,rmfavg,rmsavg,rmavg,rglavg,rgfavg
-     $     ,rgsavg,rgavg,cleafavg_pft,cawoodavg_pft,cfrootavg_pft)
+      subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca
+     $     ,ipar,cl1_pft,ca1_pft,cf1_pft,w2,g2,s2,cl2_pft,ca2_pft
+     $     ,cf2_pft,smavg,ruavg,evavg,epavg,phavg,aravg,nppavg,laiavg
+     $     ,clavg,csavg,hravg,rcavg,rmlavg,rmfavg,rmsavg,rmavg,rglavg
+     $     ,rgfavg,rgsavg,rgavg,cleafavg_pft,cawoodavg_pft
+     $     ,cfrootavg_pft)
       
 !     Surface water             !soil moisture, snow and ice budget for a single month
 !
@@ -391,7 +377,7 @@ C     $                 cfrootmes)
 !     INPUTS
       
       integer month,p
-      integer, parameter :: npft = 3                      !Actual month (1-12)
+      integer, parameter :: npft = 3 !Actual month (1-12)
       real w1(npft)                  !Initial (previous month last day) soil moisture storage (mm)
       real g1(npft)                   !Initial soil ice storage (mm)
       real s1(npft)                   !Initial overland snow storage (mm)
@@ -437,8 +423,12 @@ C     $                 cfrootmes)
       real alfa_leaf(npft), alfa_awood(npft), alfa_froot(npft)
       real beta_leaf(npft), beta_awood(npft), beta_froot(npft)
 !     Internal Variables
+      ! RELATED WITH GRIDCELL OCUPATION AND LIGHT LIMITATION
       REAL TOTAL_BIOMASS_PFT(NPFT), OCP_COEFFS(NPFT), TOTAL_BIOMASS
-
+      INTEGER LT(NPFT), MAX_INDEX
+      REAL MAX_VALUE
+      
+      ! WBM COMMUNICATION
       real rh                   !Relative humidity
       real wmax                 !Soil moisture availability (mm)
       real tsnow                !Temperature threshold for snowfall (oC)
@@ -509,7 +499,7 @@ c      REAL darr(ndmonth(month)) ! this vars will store daily values
       
       
       do p = 1,npft
-         
+         LT(P) = 0
          w(p)           = w1(p)
          g(p)           = g1(p)
          s(p)           = s1(p)
@@ -561,7 +551,6 @@ c      REAL darr(ndmonth(month)) ! this vars will store daily values
             f1(p)        = 0.0  !Auxiliar_f1
             vpd(p)       = 0.0
             rc2(p)       = 0.0  !Auxiliar_rc2
-         
             rm(p)  = 0.0
             rml(p)  = 0.0
             rmf(p)  = 0.0
@@ -589,24 +578,26 @@ c      REAL darr(ndmonth(month)) ! this vars will store daily values
                beta_leaf(p)=0.
                beta_awood(p)=0.
                beta_froot(p)=0.
+               LT(P) = 1
             endif
-!     Carbon cycle (photosynthesis, plant respiration and NPP)
+
             
-c     subroutine productivity1 (pft, temp, p0, w, wmax, ca, ipar, tsoil
-c     $     ,cl1, ca1, cf1, beta_leaf, beta_awood, beta_froot, ph,
-c     $     ar, nppa, laia, f5, f1, vpd, rm, rml, rmf, rms, rg, rgl, rgf
-c     $     ,rgs)
-            call productivity1 (p, temp, p0, w(p), wmax, ca, ipar, ts,
-     $           cl1(p), ca1(p), cf1(p), beta_leaf(p), beta_awood(p),
-     $           beta_froot(p), ph(p),ar(p), nppa(p),laia(p), f5(p),
-     $           f1(p), vpd(p), rm(p), rml(p),rmf(p), rms(p), rg(p),
-     $           rgl(p),rgf(p),rgs(p))
+!     Maximum evapotranspiration (emax)
+!     =================================
+            call evpot2 (p0,temp,rh,ae,emax(p))
+  
+
+            call productivity1 (p,LT(P),temp, p0, w(p), wmax, ca, ipar,
+     $           ts,cl1(p), ca1(p), cf1(p), beta_leaf(p), beta_awood(p)
+     $           ,beta_froot(p),emax(p), ph(p),ar(p), nppa(p),laia(p),
+     $           f5(p),f1(p), vpd(p), rm(p), rml(p),rmf(p), rms(p),
+     $           rg(p),rgl(p),rgf(p),rgs(p), rc2(p))
             
 c     if(nppa .gt. 0.) PRINT*, NPPA, 'nppa_ after prod'
             
-            cl1_pft(p) = cl1(p)
-            cf1_pft(p) = cf1(p)
-            ca1_pft(p) = ca1(p)
+!     cl1_pft(p) = cl1(p)
+!     cf1_pft(p) = cf1(p)
+!     ca1_pft(p) = ca1(p)
 !     
 !     carbon allocation (carbon content on each compartment)
             call allocation (p, nppa(p), cl1(p), ca1(p), cf1(p), !input
@@ -623,10 +614,7 @@ c     if(cf2 .gt. 0.) PRINT*, cf2, 'cf2_ after alloc'
             
             
             
-!     Maximum evapotranspiration (emax)
-!     =================================
-            call evpot2 (p0,temp,rh,ae,emax(p))
-  
+
 !     Snow budget
 !     ===========
 !     
@@ -666,7 +654,8 @@ c
 !     Canopy resistance (Based on Medlyn et al.(2011)
 !     (rc2 ; s/m)
 !     
-               call canopy_resistence (p,vpd(p),f1(p),rc2(p))     
+!               call canopy_resistence (p,vpd(p),f1(p),rc2(p))
+               !canopy ressistence agora  chamada dentro da productivity (L 297)
                call runoff (w(p),wmax,roff(p)) !Soil moisture runoff (roff, mm/day)
                call penman (p0,temp,rh,ae,rc2(p),evap(p)) !Actual evapotranspiration (evap, mm/day)
                dw(p) = prain + smelt - evap(p) - roff(p)
@@ -707,30 +696,46 @@ c
                OCP_COEFFS(P) = 0.0
             ELSE
                OCP_COEFFS(P) = TOTAL_BIOMASS_PFT(P) / TOTAL_BIOMASS
-               IF(OCP_COEFFS(P) .LT. 0.0) OCP_COEFFS(P) = 0.0
                CALL CRITICAL_VALUE(OCP_COEFFS(P))
-!     PRINT*, OCP_COEFFS(P)
+               IF(OCP_COEFFS(P) .LT. 0.0) OCP_COEFFS(P) = 0.0
             ENDIF
             
  30      CONTINUE
 
+         ! 
+         MAX_VALUE = 0.0
+         MAX_INDEX = 0
          
+         DO 80 P = 1,NPFT
+            IF(OCP_COEFFS(P) .GT. MAX_VALUE) THEN
+               MAX_INDEX = P
+               MAX_VALUE = OCP_COEFFS(P)
+            ENDIF
+            LT(P) = 0
+ 80      CONTINUE
          
+         IF(MAX_INDEX.GT. O) THEN
+            LT(MAX_INDEX) = 1
+         ELSE
+            DO 90 P = 1,NPFT
+               LT(P) = 1
+ 90         CONTINUE
+         ENDIF
          
-
+            
          DO 40 P = 1,NPFT
             
-            epavg(p) = epavg(p) + emax(p) !mm/day
+            epavg(p) = epavg(p) + emax(p) * OCP_COEFFS(P) !mm/day
             smavg(p) = smavg(p) + smelt
-            ruavg(p) = ruavg(p) + roff(p) !mm/day
-            evavg(p) = evavg(p) + evap(p) !mm/day
+            ruavg(p) = ruavg(p) + roff(p) * OCP_COEFFS(P)!mm/day
+            evavg(p) = evavg(p) + evap(p) * OCP_COEFFS(P)!mm/day
             
-            rcavg(p) = rcavg(p) + rc2(p) !s/m/day
-            phavg(p) = phavg(p) + ph(p) /365.0 !kgC/m2/day
-            aravg(p) = aravg(p) + ar(p) /365.0 !kgC/m2/day
-            nppavg(p) = nppavg(p) + nppa(p) /365.0 !kgC/m2/day
+            rcavg(p) = rcavg(p) + rc2(p) * OCP_COEFFS(P) !s/m/day
+            phavg(p) = phavg(p) + (ph(p) * OCP_COEFFS(P))/365.0 !kgC/m2/day
+            aravg(p) = aravg(p) + (ar(p) * OCP_COEFFS(P))/365.0 !kgC/m2/day
+            nppavg(p) = nppavg(p) + (nppa(p)* OCP_COEFFS(P))/365.0 !kgC/m2/day
      $           
-            laiavg(p) = laiavg(p) + laia(p) /365.0 !m2leaf/m2area/day
+            laiavg(p) = laiavg(p) + laia(p)/365.0 !m2leaf/m2area/day
      $           
             clavg(p) = clavg(p) + (cl(p) * OCP_COEFFS(P))/365.0 !kgC/m2/day
             csavg(p) = csavg(p) + (cs(p) * OCP_COEFFS(P))/365.0 !kgC/m2/day

@@ -11,10 +11,10 @@ c234567
 ! unrealistically drops to a level below those when wsoil is lesser than 0.205 (because of f5)
 !=============================================================================================
 !
-      subroutine productivity1 (pft, temp, p0, w, wmax, ca, ipar, tsoil
-     $     ,cl1, ca1, cf1, beta_leaf, beta_awood, beta_froot, ph,
-     $     ar, nppa, laia, f5, f1, vpd, rm, rml, rmf, rms, rg, rgl, rgf
-     $     ,rgs)
+      subroutine productivity1 (pft,LIGHT_LIMIT, temp, p0, w, wmax, ca,
+     $     ipar, tsoil,cl1, ca1, cf1, beta_leaf, beta_awood, beta_froot,
+     $     emax, ph,ar, nppa, laia, f5, f1, vpd, rm, rml, rmf, rms, rg,
+     $     rgl,rgf,rgs,rc)
 !     implicit none
 !     
 !     Variables
@@ -23,7 +23,7 @@ c234567
 !     Input
 !     -----
 !     
-      integer pft
+      integer pft, LIGHT_LIMIT
       real temp                 !Mean monthly temperature (oC)
       real p0                   !Mean surface pressure (hPa)
       real wa,w,wmax            !Soil moisture (dimensionless)
@@ -57,7 +57,7 @@ c234567
       real rl                   !Leaf respiration (kgC/m2/yr)
       real rp                   !Non-leaf parts respiration (kgC/m2/yr)
       real sunlai,shadelai      !Sunlai/Shadelai
-      real vpd                  !Vapor pressure deficit (kPa)
+      real vpd,rc                  !Vapor pressure deficit (kPa)
 !     
 !     Rubisco, light and transport limited photosynthesis rate
 !     --------------------------------------------------------
@@ -240,8 +240,14 @@ c      call critical_value(jc)
 !     
 !     Light limited photosynthesis rate (molCO2/m2/s)
 !     -----------------------------------------------
-!     
+      if (LIGHT_LIMIT .eq. 0) then
+         aux_ipar = ipar-(ipar*0.2)
+      else
+         aux_ipar= ipar 
+      endif
+      
       jl = p4*(1.0-p5)*ipar*((ci-mgama)/(ci+(p6*mgama)))
+      
 c      call critical_value(jl)
 !     
 !     Transport limited photosynthesis rate (molCO2/m2/s)
@@ -285,27 +291,27 @@ c      PRINT*, F1A, 'f1a'
 !     ==========
 !     
       wa = w/wmax
-!     
+      call canopy_resistence(pft, vpd, f1a, rc)
 !     Water stress response modifier (dimensionless)
 !     ----------------------------------------------
 !     
-      if (wa.gt.0.5) f5 = 1.0   !Not too lower in e.g. Amazonian dry season
-      if ((wa.ge.0.205).and.(wa.le.0.5))
-     &     f5 = (wa-0.205)/(0.5-0.205)
-      if (wa.lt.0.205) f5 = wa  !Below wilting point f5 accompains wa (then Sahara is well represented)
+c      if (wa.gt.0.5) f5 = 1.0   !Not too lower in e.g. Amazonian dry season
+c      if ((wa.ge.0.205).and.(wa.le.0.5))
+c     &     f5 = (wa-0.205)/(0.5-0.205)
+c      if (wa.lt.0.205) f5 = wa  !Below wilting point f5 accompains wa (then Sahara is well represented)
 !     
 !     ...f1
 
-! temos que mudar aqui no futuro... a rc2 nao eh disponivel para a
+!     temos que mudar aqui no futuro... a rc2 nao eh disponivel para a
 !     chamada da productivity, uma vez que ela é calculada pela rotina
 !     canopy_resistence... por enquanto fica a moda antiga mesmo 
-c      csru = 0.5 
-c      pt = csru*(cf1*1000.)*wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
-c      alfm = 1.391
-c      gm = 3.26*86400           !(*86400 transform mm/s to mm/dia)
-c      gc = (1/rc2)*86400000     !*86400000 transfor m/s to mm/dia)
-c      d =(emax*alfm)/(1+gm/gc)  !(based in Gerten et al. 2004)
-c      f5 = 1-(exp(-1*(pt/d)))
+      csru = 0.5 
+      pt = csru*(cf1*1000.)*wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
+      alfm = 1.391
+      gm = 3.26*86400           !(*86400 transform mm/s to mm/dia)
+      gc = (1/rc)*86400000     !*86400000 transfor m/s to mm/dia)
+      d =(emax*alfm)/(1+gm/gc)  !(based in Gerten et al. 2004)
+      f5 = 1-(exp(-1*(pt/d)))
 !     
 !     Photosysthesis minimum and maximum temperature
 !     ----------------------------------------------
@@ -320,12 +326,12 @@ c         call critical_value(f1)
 c      if (f1 .gt. 0.5) PRINT*, f1, 'f1'
 !     Leaf area index (m2 leaf/m2 arEa) bianca
 !     ---------------------------------
-      sla=(0.030*1000.)*((365/(((tleaf(pft))*365)/12))**(-0.46))
+      sla=(0.030*1000.)*((365./(((tleaf(pft))/365.)/12.))**(-0.46))
 c      PRINT*, sla, 'sla'
       laia  = 0.25*exp(2.5*(f1/p25)) !Adjusted after using observed ipar
-c      if(cl1 .gt. 0) print*, cl1, 'cl1'
+c      if(laia .gt. 0) print*, laia, 'laia1'
 c      laia = (cl1*365.*sla)
-c      if(laia .gt. 0) PRINT*, laia, 'laia'
+c      if(laia .gt. 0) PRINT*, laia, 'laia2'
 !     SunLAI
 !     ------
 !     
@@ -430,7 +436,7 @@ c      if (nppa.lt.0.0) nppa = 0.0 !Maybe this is incorrect, but demands retunin
 !     Canopy resistence(s/m)
 !     ======================
 !     
-      subroutine canopy_resistence (m,vpd,f1,rc2)
+      subroutine canopy_resistence (m,vpd_in,f1_in,rc2_in)
 !     
 !     Variables
 !     =========
@@ -439,13 +445,13 @@ c      if (nppa.lt.0.0) nppa = 0.0 !Maybe this is incorrect, but demands retunin
 !     ------
 !     
       integer m
-      real f1                   !Photosynthesis (molCO2/m2/s)
-      real vpd                  !kPa
+      real f1_in                   !Photosynthesis (molCO2/m2/s)
+      real vpd_in                  !kPa
 !     
 !     Outputs
 !     -------
 !     
-      real rc2                  !Canopy resistence (s/m)
+      real rc2_in                  !Canopy resistence (s/m)
 !     
 !     Internal
 !     --------
@@ -461,17 +467,17 @@ c      if (nppa.lt.0.0) nppa = 0.0 !Maybe this is incorrect, but demands retunin
       real rcmax 
 !     
       data g1 /6.0,4.0,2.0/ 
-      f1b = (f1*10e5)           !maior f1b = 13.38
+      f1b = (f1_in*10e5)           !maior f1b = 13.38
       aa = (f1b/363)
       g0 = 0.01
 !     g1 = 4.9
-      D = sqrt(vpd)
+      D = sqrt(vpd_in)
 !     rcmax = 200.0                                                    !A=2.0
       rcmax = 550.0             !A=0.5                             
 !     rcmax = 1800.0                                                   !A=0.1
 !     
-      if (vpd.lt.0.25) gs = 1.5
-      if (vpd.ge.0.25) then 
+      if (vpd_in.lt.0.25) gs = 1.5
+      if (vpd_in.ge.0.25) then 
          gs = g0 + 1.6 * (1 + (g1(m)/D)) * (aa) !Based on Medlyn et al. 2011
 !     gs = g0 + 1.6 * (1 + (g1/D)) * (aa)                               !Based on Medlyn et al. 2011
          call critical_value(gs)
@@ -489,7 +495,7 @@ c      if (nppa.lt.0.0) nppa = 0.0 !Maybe this is incorrect, but demands retunin
 !     print*,print
 !     endif
 !     
-      rc2 = 1/gs2
+      rc2_in = 1/gs2
       call critical_value(rc2)
 !     if (rc2.ge.151.47) rc2 = rcmax                                    !A=2
       if (rc2.ge.545.43) rc2 = rcmax !A=0.5  
