@@ -82,7 +82,8 @@ c     VARIAVEIS HIDROLOGICAS IMPORTANTES
 c variables related to carbon allocation and autothrophic respiration (bianca)
      
       real, dimension(nx,ny,12,q) :: rml_pft,rmf_pft,rms_pft,rm_pft,
-     $rgl_pft,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft
+     $rgl_pft,rgf_pft,rgs_pft,rg_pft
+      real, dimension(nx,ny,q) :: cleaf_pft,cawood_pft,cfroot_pft
 
 
 c     variaveis do spinup
@@ -137,8 +138,8 @@ C     -------END DECLARATION----------------------------------------
      &     form='unformatted',access='direct',recl=4*nx*ny)
       open(13,file='../inputs/rsds.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
-      open(26,file='../inputs/npp.bin',status='old',
-     &     form='unformatted',access='direct',recl=4*nx*ny)
+c      open(26,file='../inputs/npp.bin',status='old',
+c     &     form='unformatted',access='direct',recl=4*nx*ny)
       
       open(21,file='../inputs/cleaf_ini.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
@@ -157,11 +158,11 @@ C     -------END DECLARATION----------------------------------------
        call read12 (11,pr)
        call read12 (12,t)
        call read12 (13,ipar)
-      call read12(26,npp_pot)
+c      call read12(26,npp_pot)
 
-      call read3(21, cleafin)
-      call read3(22,cfrootin)
-      call read3(23,cawoodin)
+       call read3(21, cleafin)
+       call read3(22,cfrootin)
+       call read3(23,cawoodin)
      
 !     Close files
 !     ===========
@@ -171,72 +172,72 @@ C     -------END DECLARATION----------------------------------------
        close (11)
        close (12)
        close (13)
-       close (26)
+c       close (26)
        close (21)
        close (22)
        close (23)
 !     
 
-c     fazendo medias da npp
-       do i =1,nx
-          do j=1,ny
-             if(nint(lsmk(i,j)) .ne. 0) then 
-                aux_npp(i,j) = 0.0
-                do k = 1,12
-                   aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
-                enddo
-             else
-                aux_npp(i,j) = no_data
-             endif
-          enddo
-       enddo
-c$$$       
-c$$$       open(10,file='../inputs/npp2.bin',
-c$$$     &      status='unknown',form='unformatted',
-c$$$     &      access='direct',recl=4*nx*ny)
-c$$$       write(10,rec=1) aux_npp
-c$$$      close(10) 
-c$$$      print*, 'npp_saved'
-c$$$      
-c$$$      
-c$$$!     calling spinup
-c$$$      do i=1,nx
-c$$$         do j=1,ny
-c$$$            if (nint(lsmk(i,j)) .ne. 0) then
-c$$$               npp_sca = aux_npp(i,j)
-c$$$               
-c$$$               do p=1,q   
-c$$$                  aux1(p) = 0.0
-c$$$                  aux2(p) = 0.0
-c$$$                  aux3(p) = 0.0
-c$$$               enddo
-c$$$               
-c$$$               call spinup(npp_sca, aux1, aux2, aux3)
-c$$$
-c$$$               do p=1,q   
-c$$$                  cleafin(i,j,p)  = aux1(p)
-c$$$                  cfrootin(i,j,p) = aux2(p)
-c$$$                  cawoodin(i,j,p) = aux3(p)
-c$$$               enddo
-c$$$            endif
-c$$$         enddo
-c$$$         print*, (real(i)/real(nx))*100.0, '%'
-c$$$      enddo
-c$$$
-c$$$      open(10,file='../inputs/cleaf_ini.bin',
-c$$$     &     status='unknown',form='unformatted',
-c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file3(10, cleafin)
-c$$$
-c$$$      open(10,file='../inputs/cfroot_ini.bin',
-c$$$     &     status='unknown',form='unformatted',
-c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file3(10, cfrootin)
-c$$$
-c$$$      open(10,file='../inputs/cawood_ini.bin',
-c$$$     &     status='unknown',form='unformatted',
-c$$$     &     access='direct',recl=4*nx*ny)
-c$$$      call save_file3(10, cawoodin)
+cc     fazendo medias da npp
+c       do i =1,nx
+c          do j=1,ny
+c             if(nint(lsmk(i,j)) .ne. 0) then 
+c                aux_npp(i,j) = 0.0
+c                do k = 1,12
+c                   aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
+c                enddo
+c             else
+c                aux_npp(i,j) = no_data
+c             endif
+c          enddo
+c       enddo
+c       
+c       open(10,file='../inputs/npp2.bin',
+c     &      status='unknown',form='unformatted',
+c     &      access='direct',recl=4*nx*ny)
+c       write(10,rec=1) aux_npp
+c      close(10) 
+c      print*, 'npp_saved'
+c      
+c      
+c!     calling spinup
+c      do i=1,nx
+c         do j=1,ny
+c            if (nint(lsmk(i,j)) .ne. 0) then
+c               npp_sca = aux_npp(i,j)
+c               
+c               do p=1,q   
+c                  aux1(p) = 0.0
+c                  aux2(p) = 0.0
+c                  aux3(p) = 0.0
+c               enddo
+c               
+c               call spinup(npp_sca, aux1, aux2, aux3)
+c
+c               do p=1,q   
+c                  cleafin(i,j,p)  = aux1(p)
+c                  cfrootin(i,j,p) = aux2(p)
+c                  cawoodin(i,j,p) = aux3(p)
+c               enddo
+c            endif
+c         enddo
+c         print*, (real(i)/real(nx))*100.0, '%'
+c      enddo
+c
+c      open(10,file='../inputs/cleaf_ini.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file3(10, cleafin)
+c
+c      open(10,file='../inputs/cfroot_ini.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file3(10, cfrootin)
+c
+c      open(10,file='../inputs/cawood_ini.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file3(10, cawoodin)
 
 !     ===========
 !     
@@ -280,7 +281,20 @@ c     $     ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft)
      &     evapm_pft,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft
      $     ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft)   
 
+             open(10,file='../outputs/cleaf.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file3(10, cleaf_pft)
 
+      open(10,file='../outputs/cawood.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file3(10, cawood_pft)
+
+      open(10,file='../outputs/cfroot.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file3(10, cfroot_pft)
 
       do i = 1,nx
          do j = 1,ny
@@ -328,9 +342,6 @@ c     $     ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft)
                   rgf(i,j,k)  = no_data
                   rgs(i,j,k)  = no_data
                   rg(i,j,k)  = no_data
-                  cleaf(i,j,k)  = no_data
-                  cawood(i,j,k)  = no_data
-                  cfroot(i,j,k)  = no_data
                endif                     
             enddo
          enddo
@@ -364,11 +375,6 @@ C     preparando o terreno pra salvar as variaveis
                      rgf(i,j,k)  = rgf(i,j,k) + rgf_pft(i,j,k,p)
                      rgs(i,j,k)  = rgs(i,j,k) + rgs_pft(i,j,k,p)
                      rg(i,j,k)  = rg(i,j,k) + rg_pft(i,j,k,p)
-                     cleaf(i,j,k)  = cleaf(i,j,k) + cleaf_pft(i,j,k,p)
-                     cawood(i,j,k)  = cawood(i,j,k) + cawood_pft(i,j,k
-     $                    ,p)
-                     cfroot(i,j,k)  = cfroot(i,j,k) + cfroot_pft(i,j,k
-     $                    ,p)
                      
                   enddo
 c$$$                 print*, npp(i,j,k)
@@ -469,20 +475,6 @@ c$$$
      &     access='direct',recl=4*nx*ny)
       call save_file12(10, rg)
 
-      open(10,file='../outputs/cleaf.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cleaf)
-
-      open(10,file='../outputs/cawood.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cawood)
-
-      open(10,file='../outputs/cfroot.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cfroot)
 
 
 
@@ -506,17 +498,7 @@ c$$$
                   rg2(i,j,k) = rg_pft(i,j,k,2)
                   rg3(i,j,k) = rg_pft(i,j,k,3)
 
-                  cleaf1(i,j,k) = cleaf_pft(i,j,k,1)
-                  cleaf2(i,j,k) = cleaf_pft(i,j,k,2)
-                  cleaf3(i,j,k) = cleaf_pft(i,j,k,3)
 
-                  cfroot1(i,j,k) = cfroot_pft(i,j,k,1)
-                  cfroot2(i,j,k) = cfroot_pft(i,j,k,2)
-                  cfroot3(i,j,k) = cfroot_pft(i,j,k,3)
-                  
-                  cawood1(i,j,k) = cawood_pft(i,j,k,1)
-                  cawood2(i,j,k) = cawood_pft(i,j,k,2)
-                  cawood3(i,j,k) = cawood_pft(i,j,k,3)
                else
                   npp1(i,j,k) = no_data
                   npp2(i,j,k) = no_data
@@ -534,17 +516,6 @@ c$$$
                   rg2(i,j,k) = no_data
                   rg3(i,j,k) = no_data
 
-                  cleaf1(i,j,k) = no_data 
-                  cleaf2(i,j,k) = no_data
-                  cleaf3(i,j,k) = no_data
-
-                  cfroot1(i,j,k) = no_data
-                  cfroot2(i,j,k) = no_data
-                  cfroot3(i,j,k) = no_data
-                  
-                  cawood1(i,j,k) = no_data
-                  cawood2(i,j,k) = no_data
-                  cawood3(i,j,k) = no_data
                endif
             enddo
          enddo
@@ -609,51 +580,6 @@ c$$$
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
       call save_file12(10, rg3)
-
-      open(10,file='../outputs_pft/cleaf.1.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cleaf1)
-
-      open(10,file='../outputs_pft/cleaf.2.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cleaf2)
-
-      open(10,file='../outputs_pft/cleaf.3.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cleaf3)
-
-      open(10,file='../outputs_pft/cawood.1.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cawood1)
-
-      open(10,file='../outputs_pft/cawood.2.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cawood2)
-
-      open(10,file='../outputs_pft/cawood.3.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cawood3)
-
-      open(10,file='../outputs_pft/cfroot.1.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cfroot1)
-
-      open(10,file='../outputs_pft/cfroot.2.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cfroot2)
-
-      open(10,file='../outputs_pft/cfroot.3.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, cfroot3)
 
       stop
       end program env
