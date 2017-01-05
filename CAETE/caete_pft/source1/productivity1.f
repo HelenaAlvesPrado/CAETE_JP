@@ -11,10 +11,10 @@ c234567
 ! unrealistically drops to a level below those when wsoil is lesser than 0.205 (because of f5)
 !=============================================================================================
 !
-      subroutine productivity1 (pft,LIGHT_LIMIT, temp, p0, w, wmax, ca,
-     $    ipar,cl1, ca1, cf1, beta_leaf, beta_awood, beta_froot,
-     $    emax, ph,ar, nppa, laia, f5, f1, vpd, rm, rml, rmf, rms, rg,
-     $    rgl,rgf,rgs,rc)
+      subroutine productivity1 (pft,OCP_PFT,temp, p0, w,
+     &    wmax, ca,ipar,cl1, ca1, cf1, beta_leaf, beta_awood, beta_froot
+     &    ,emax, ph,ar, nppa, laia, f5, f1, vpd, rm, rml, rmf, rms, rg
+     &    ,rgl,rgf,rgs,rc)
 !     implicit none
 !     
 !     Variables
@@ -23,8 +23,9 @@ c234567
 !     Input
 !     -----
 !     
-      integer pft, LIGHT_LIMIT
-      real temp                 !Mean monthly temperature (oC)
+      integer pft
+      LOGICAL LIGHT_LIMIT
+      real ocp_pft,temp                 !Mean monthly temperature (oC)
       real p0                   !Mean surface pressure (hPa)
       real wa,w,wmax            !Soil moisture (dimensionless)
       real ca                   !Atmospheric CO2 concentration (Pa)
@@ -38,7 +39,7 @@ c234567
       real ph,rc                !Canopy gross photosynthesis (kgC/m2/yr)
       real laia                 !Autotrophic respiration (kgC/m2/yr)
       real ar                   !Leaf area index (m2 leaf/m2 area)
-      real nppa, vpd                 !Net primary productivity (kgC/m2/yr)
+      real nppa, vpd            !Net primary productivity (kgC/m2/yr)
       real f5
       real rm, rml, rmf, rms, rg, rgl, rgf, rgs
       
@@ -212,29 +213,30 @@ c      endif
 !     Rubisco maximum carboxylaton rate (molCO2/m2/s)
 !     -----------------------------------------------
 !     
-      data p21 /0.00003,0.000058,0.000067/ !Tropical/Temperate/Boreal
+      data p21 /0.00003,0.00005,0.00004/ !Tropical/Temperate/Boreal
       
       
       
-      vm = (p21(pft)*p22**(p10*(REAL(temp,8)-p11)))/ !Free-range parameter --> 0.0358>vm>840 (micromol)
-     &    (1.0+exp(p23*(REAL(temp,8)-p24)))
+      vm = (p21(pft)*(p22**(p10*(temp-p11))))/ !Free-range parameter --> 0.0358>vm>840 (micromol)
+     &    (1.0+exp(p23*(temp-p24)))
+c      if (vm .gt. 0.00001) print*, vm
 !     
 c     call critical_value(vm)
 !     Photo-respiration compensation point (Pa)
 !     -----------------------------------------
 !     
-      mgama = p3/(p8*(p9**(p10*(REAL(temp,8)-p11))))
+      mgama = p3/(p8*(p9**(p10*(temp-p11))))
 !     call critical_value(mgama)
 !     Michaelis-Menton CO2 constant (Pa)
 !     ----------------------------------
 !     
-      f2 = p12*(p13**(p10*(REAL(temp,8)-p11)))
+      f2 = p12*(p13**(p10*(temp-p11)))
 c     call critical_value(f2)
 !     
 !     Michaelis-Menton O2 constant (Pa)
 !     ---------------------------------
 !     
-      f3 = p14*(p15**(p10*(REAL(temp,8)-p11)))
+      f3 = p14*(p15**(p10*(temp-p11)))
 c     call critical_value(f3)
 !     Saturation partial pressure of water vapour (Pa)
 !     
@@ -243,13 +245,13 @@ c     call critical_value(f3)
       call tetens (temp,es)     !-71.1<temp<+38.2
 !     
       es2 = es*100.0
-      vpd64 = (((100.0-68.5)/100.0)*(REAL(es2,8)))/1000.0 !kPa
+      vpd64 = (((100.0-68.5)/100.0)*(es2))/1000.0 !kPa
       vpd = real(vpd64, 4)
-      call critical_value(vpd)
+C      call critical_value(vpd)
 !     Saturated mixing ratio (kg/kg)
 !     -----------------------------
 !     
-      rmax = 0.622*(REAL(es,8)/(REAL(p0,8)-REAL(es,8)))
+      rmax = 0.622*(es/(p0-es))
 c     call critical_value(rmax)
 !     
 !     Moisture deficit at leaf level (kg/kg)
@@ -261,7 +263,7 @@ c     call critical_value(r)
 !     Internal leaf CO2 partial pressure (Pa)
 !     ---------------------------------------
 !     
-      ci = p19*(1-(r/p20))*(REAL(ca,8)-mgama)+mgama
+      ci = p19* (1-(r/p20)) * (ca-mgama) + mgama
 c     call critical_value(ci)
 !     Rubisco carboxilation limited photosynthesis rate (molCO2/m2/s)
 !     ---------------------------------------------------------------
@@ -271,13 +273,14 @@ c     call critical_value(jc)
 !     
 !     Light limited photosynthesis rate (molCO2/m2/s)
 !     -----------------------------------------------
-      if (LIGHT_LIMIT .eq. 0) then
-         aux_ipar = ipar-(ipar*0.2)
+      if (ocp_pft .gt. 0.8) then
+         aux_ipar= ipar
+      else if (ocp_pft .lt. 0.3) then
+         aux_ipar = ipar - (ipar * ocp_pft)
       else
-         aux_ipar= ipar 
+         aux_ipar = ipar * 0.5
       endif
-      
-      jl = p4*(1.0-p5)*REAL(aux_ipar,8)*((ci-mgama)/(ci+(p6*mgama)))
+      jl = p4*(1.0-p5)*aux_ipar*((ci-mgama)/(ci+(p6*mgama)))
       
 c     call critical_value(jl)
 !     
@@ -302,7 +305,7 @@ c     call critical_value(c)
       jp2=(-b+(sqrt(delta)))/(2.0*a)
       jp= amin1(jp1,jp2)
       
-      call critical_value2(jp)
+C     call critical_value2(jp)
       
 !     1
 !     Leaf level gross photosynthesis (minimum between jc, jl and je)
@@ -316,12 +319,14 @@ c     call critical_value(c)
       j1=(-b2-(sqrt(delta2)))/(2.0*a2)
       j2=(-b2+(sqrt(delta2)))/(2.0*a2)
       f1a = amin1(j1,j2)
-      call critical_value2(f1a)
-c     PRINT*, F1A, 'f1a'
+C     call critical_value2(f1a)
+
+c      if (vm .gt. 1e-5)PRINT*, F1A, 'f1a'
 !     Soil water
 !     ==========
-
-      wa = w/wmax
+      
+      wa = (w/wmax) * ocp_pft
+      
       call canopy_resistence(pft, vpd64, f1a, rc)
 !     Water stress response modifier (dimensionless)
 !     ----------------------------------------------
@@ -355,32 +360,35 @@ c      print*, d, 'd'
       else
          f5 = wa
       endif
-c      print*, f5, 'f5'
+
+
+      
 !     Photosysthesis minimum and maximum temperature
 !     ----------------------------------------------
 !     
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
+c         print*, f5, 'f5'
          f1 = f1a*f5            !f5:water stress factor
-         call critical_value2(f1)
+C         call critical_value2(f1)
       else
          f1 = 0.0               !Temperature above/below photosynthesis windown
       endif
       
-c      if (f1 .gt. 0.0) PRINT*, f1, 'f1'
+c      if (f1 .gt. 0.0) PRINT*, f1, 'f1', f5, 'f5', wa, 'wa'
 !     Leaf area index (m2 leaf/m2 arEa) bianca
 !     ---------------------------------
-      sla=(0.0300*1000.0000)*((365.0000/(((real(tleaf(pft), 8))/365.)
-     &    /12.))**(-0.46))
+      sla=(0.0300*1000.)*((365./(((tleaf(pft))/365.)/12.))**(-0.46))
 c     PRINT*, sla, 'sla'
-c      laia64  = (0.25*exp(2.5*(f1/p25))) !Adjusted after using observed ipar
+c      laia64  = (0.25*exp(2.5*(f1/p25))) !Adjusted after using observed par
 c     if(laia .gt. 0) print*, laia, 'laia1'
-      laia64 = (real(cl1,8) * 365.0000 * sla)
+      laia64 = (cl1 * 365.0000 * sla)
       laia = real(laia64,4)
-c      if(laia .gt. 0) PRINT*, laia, 'laia2'
+c      if(f1 .gt. 0) PRINT*, laia, 'laia2'
+      
 !     SunLAI
 !     ------
-c      laia64 = 0.25*exp(2.5*(f1/p25))
-      sunlai = (1.0-(exp(-p26*laia64)))/p26
+      sunlai = (1.0-(exp(-(0.5 * sin(90.))*laia64))) / 0.5 * sin(90.)
+c      sunlai = (1.0-(exp(-p26*laia64)))/p26
 c     call critical_value(sunlai)
 !     ShadeLAI
 !     --------
@@ -408,19 +416,19 @@ c     call critical_value(f4shade)
 !     (0.012 converts molCO2 to kgC)
 !     (31557600 converts seconds to year [with 365.25 days])
       ph64 = 0.012*31557600.0*f1*f4sun*f4shade
-      ph = real(ph64, 4)
-      call critical_value(ph)
+      ph = real(ph64, 4) * ocp_pft       ! kg m-2 year-1
+C      call critical_value(ph)
 c      if(ph .gt. 0.0)PRINT*, PH, 'ph'
 
 !     Plant respiration
 !     =================
 c      rl = 0.012*31557600.0*p30*vm*f4*f5 !Leaf respiration
-!     
+c!     
 c      rp = p31*rl               !Non-leaf parts respiration
-!     
-!     Respiration minimum and maximum temperature
-!     -------------------------------------------
-!     
+c!     
+c!     Respiration minimum and maximum temperature
+c!     -------------------------------------------
+c!     
 c      if ((temp.ge.-10.0).and.(temp.le.50.0)) then
 c         ar = rl+rp
 c      else
@@ -428,31 +436,31 @@ c         ar = 0.0               !Temperature above/below respiration windown
 c      endif
 !     
 
-c     -===============================----------=============================---
+cc     -===============================----------=============================---
 !     c Maintenance respiration (kgC/m2/yr) (based in Ryan 1991)
       
       
-      csa= 0.05*real(ca1,8)     !sapwood carbon content (kgC/m2). 5% of woody tissues (Pavlick, 2013)
-      call critical_value2(csa)
+      csa= 0.05*ca1     !sapwood carbon content (kgC/m2). 5% of woody tissues (Pavlick, 2013)
+C      call critical_value2(csa)
 c      
       ncl = 0.034               !(gN/gC)
       ncf = 0.034               !(gN/gC)
       ncs = 0.003               !(gN/gC)
 c      
 c      
-      rml64 = (ncl*cl1)*27*(exp(0.03*real(temp,8)))
+      rml64 = (ncl*real(cl1,8))*27*(exp(0.03*real(temp,8)))
       call critical_value2(rml64)
       rml =  real(rml64,4)
       rmf64 = (ncf*real(cf1,8))*27*(exp(0.03*real(temp,8)))
       call critical_value2(rmf64)
-      rmf =  real(rmf64,4) 
+      rmf =  real(rmf64,4)
       rms64 = (ncs*csa)*27*(exp(0.03*real(temp,8)))
       call critical_value2(rms64)
       rms = real(rms64,4)
 c      
       rm64 = rml64 + rmf64 + rms64
       rm = real(rm64, 4)
-      call critical_value(rm)
+c      call critical_value(rm)
 c      print*, rm, 'rm'
 c      
 c     Growth respiration (KgC/m2/yr)(based in Ryan 1991; Sitch et al.
@@ -462,21 +470,21 @@ c
       call critical_value2(csai)
       rgl64 = (0.25*((real(beta_leaf,8))*365.))
       call critical_value2(rgl64)
-      rgl = real(rgl64,4)
+      rgl = real(rgl64,4) 
       rgf64 = (0.25*((real(beta_froot,8))*365.))
       call critical_value2(rgf64)
-      rgf = real(rgf64,4)
+      rgf = real(rgf64,4) 
       rgs64 = (0.25 * csai * 365.)
       call critical_value2(rgs64)
-      rgs = real(rgs64)
+      rgs = real(rgs64,4)
      
       rg64 = rgl64 + rgf64 + rgs64
       rg = real(rg64,4)      
       call critical_value(rg)
-      
-c      if (rg.lt.0) then
-c         rg = 0.
-c      endif
+     
+      if (rg.lt.0) then
+         rg = 0.0
+      endif
       
 !     c Autotrophic (plant) respiration -ar- (kgC/m2/yr)
 !     Respiration minimum and maximum temperature
@@ -485,8 +493,9 @@ c      endif
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
          ar64 = rm64 + rg64
          call critical_value2(ar64)
-         ar = real(ar64,4)
-c      if (ar .gt. 0.)PRINT*, AR ,'ar'!, rm, 'rm', rg, 'rg'
+         ar = real(ar64,4) * ocp_pft
+c
+c         if (ph .gt. 0.)PRINT*, AR ,'ar' , rm, 'rm', rg, 'rg'
       else
          ar = 0.0               !Temperature above/below respiration windown
       endif
@@ -496,18 +505,20 @@ c     --------------------------------------------------------------------------
 !     ============
 !     
 !     Net primary productivity(kgC/m2/yr)
-!     ===================================
-      nppa64  = ph64 - ar64
-      nppa =real(nppa64,4)
+!     1===================================
+!     c nppa64  = ph - ar
+!     nppa =real(nppa64,4)
+      nppa = ph - ar
       if(nppa .lt. 0.0) nppa = 0.0 
       call critical_value(nppa)
       
-c      if (nppa .ne. 0.) print*, nppa, 'npp'
+c      if (nppa .gt. 0.) print*, nppa, 'npp'
+c
 c      if (nppa .ne. 0.) print*, nppa64, 'npp64'
 c     PRINT*, NPPA
 c     if (nppa.lt.0.0) nppa = 0.0 !Maybe this is incorrect, but demands
 c     retuning of every biome limits
- 10   CONTINUE
+C 10   CONTINUE
       return
       end subroutine productivity1
 !     
@@ -561,7 +572,7 @@ c     retuning of every biome limits
          gs = g0 + 1.6 * (1 + (g1(m)/D)) * (aa) !Based on Medlyn et al. 2011
 !     gs = g0 + 1.6 * (1 + (g1/D)) * (aa) !Based on Medlyn et al. 2011
 !     
-         call critical_value2(gs)
+c         call critical_value2(gs)
       endif
 !     
 !     if (gs.le.0.01) gs = 0.0                                        
@@ -571,7 +582,7 @@ c     retuning of every biome limits
 !     endif
 !     
       gs2 = gs/41
-      call critical_value2(gs2)
+c      call critical_value2(gs2)
 !     if (gs2.le.0.00025) gs2 = 0.0
 !     if (gs2.gt.0.0318) then                                         !
 !     -0.00069<gs2<0.0317
@@ -579,10 +590,10 @@ c     retuning of every biome limits
 !     endif
 !     
       rc2_in = real((1./gs2),4)
-      call critical_value(rc2_in)
+c      call critical_value(rc2_in)
 !     if (rc2.ge.151.47) rc2 = rcmax !A=2
 !     
-      if (rc2_in.ge.545.43) rc2_in = rcmax !A=0.5  
+C      if (rc2_in.ge.545.43) rc2_in = rcmax !A=0.5  
 !     if (rc2.ge.1779.97) rc2 = rcmax !A=0.1
 !     
 !     
@@ -653,37 +664,37 @@ c     retuning of every biome limits
 !     -------------------------
 !     
       f6 = 1.16*10**(-1.4553+0.0014175*(evap*365.0))
-      call critical_value(f6)
+C      call critical_value(f6)
 !     
 !     Soil carbon storage function                                          !Controlled by temperature
 !     ----------------------------
 !     
       f7 = p32**(p10*(tsoil-p11))
-      call critical_value(f7)
+C      call critical_value(f7)
 !     Litterfall (kgC/m2)
 !     ------------------
 !     
       lf = p33*laia
-      call critical_value(lf)
+C      call critical_value(lf)
 !     
 !     Litter carbon (kgC/m2)
 !     ----------------------
 !     
       cl = lf/f6
-      call critical_value(cl)
+C      call critical_value(cl)
 !     
 !     Soil carbon(kgC/m2)
 !     -------------------
 !     
       cs = ((p34*cl)/(p35*f7))*f5
-      call critical_value(cs)
+C      call critical_value(cs)
 !     
 !     Respiration minimum and maximum temperature
 !     -------------------------------------------
 !     
       if ((tsoil.ge.-10.0).and.(tsoil.le.50.0)) then
          hr = p36*(cl*(f6**2)+(cs*f5*evap*(f7**2))) !Litter and Soil respectively
-         call critical_value(hr)
+C         call critical_value(hr)
       else
          hr = 0.0               !Temperature above/below respiration windown
       endif
@@ -712,3 +723,51 @@ c     retuning of every biome limits
 
       return
       end subroutine critical_value2
+
+
+c23456
+      SUBROUTINE PFT_AREA_FRAC(CLEAF, CFROOT, CAWOOD, OCP_COEFFS)
+c     esta subrotina calcula a areA DE CADA pft  
+c     a partir do conteudo de carbono nos compartimentos vegetais no 
+c     dia anterior 
+      INTEGER, PARAMETER :: NPFT = 3
+      INTEGER :: P
+      REAL :: CLEAF(NPFT), CFROOT(NPFT), CAWOOD(NPFT)
+      REAL :: TOTAL_BIOMASS_PFT(NPFT), OCP_COEFFS(NPFT)
+      REAL :: TOTAL_BIOMASS
+      
+      TOTAL_BIOMASS = 0.0
+      do p = 1,npft
+         total_biomass_pft(p) = 0.0
+         ocp_coeffs(p) = 0.0
+      enddo
+      
+
+      DO P = 1,NPFT
+         TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P) ! biomassa total no dia i
+         TOTAL_BIOMASS = TOTAL_BIOMASS + TOTAL_BIOMASS_PFT(P)   
+      ENDDO                 ! end p loop
+
+!     Grid cell ocupation coefficients
+      IF(TOTAL_BIOMASS .GT. 0.0) THEN
+         DO P = 1,NPFT   
+            OCP_COEFFS(P) = TOTAL_BIOMASS_PFT(P) / TOTAL_BIOMASS
+            IF(OCP_COEFFS(P) .LT. 0.0) OCP_COEFFS(P) = 0.0
+            CALL CRITICAL_VALUE(OCP_COEFFS(P))
+c            PRINT*, OCP_COEFFS(P), 'ocp'
+         ENDDO
+      ELSE
+         DO P = 1,NPFT
+            OCP_COEFFS(P) = 0.0
+         ENDDO
+      ENDIF
+C23456
+      RETURN
+      END SUBROUTINE PFT_AREA_FRAC
+
+
+
+
+
+
+

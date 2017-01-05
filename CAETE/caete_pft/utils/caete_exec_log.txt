@@ -3,10 +3,10 @@ compiling sources from ./source1
 running executable
 
 
-	Executando caete- inicio em: Tue Jan  3 21:39:54 2017
+	Executando caete- inicio em: Thu Jan  5 19:51:22 2017
 
 
 
-	Finalizando caete - em: Tue Jan  3 22:03:32 2017
+	Finalizando caete - em: Thu Jan  5 20:17:40 2017
 
-Tempo de execução: 23 minutos e 38.31 segundos
+Tempo de execução: 26 minutos e 18.23 segundos

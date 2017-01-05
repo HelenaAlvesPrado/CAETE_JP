@@ -191,15 +191,15 @@ c                aux_npp(i,j) = no_data
 c             endif
 c          enddo
 c       enddo
-c       
-c       open(10,file='../inputs/npp2.bin',
-c     &      status='unknown',form='unformatted',
-c     &      access='direct',recl=4*nx*ny)
-c       write(10,rec=1) aux_npp
-c      close(10) 
-c      print*, 'npp_saved'
-c      
-c      
+cc       
+cc       open(10,file='../inputs/npp2.bin',
+cc     &      status='unknown',form='unformatted',
+cc     &      access='direct',recl=4*nx*ny)
+cc       write(10,rec=1) aux_npp
+cc      close(10) 
+cc      print*, 'npp_saved'
+cc      
+cc      
 c!     calling spinup
 c      do i=1,nx
 c         do j=1,ny

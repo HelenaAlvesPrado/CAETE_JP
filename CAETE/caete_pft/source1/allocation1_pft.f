@@ -1,5 +1,3 @@
-
-c     234567
 c=====================================================================
 c     
 c     subroutine allocation calculates the daily carbon content of each
@@ -76,15 +74,16 @@ c
 c     
 c     
 c     initialization
-      if((scl1 .le. 0.00000001) .or. (scf1 .le. 0.0000001)) then
-        scl2 = 0.0
-        scf2 = 0.0
-        sca2 = 0.0 
-        goto 10
-
+      if((scl1 .lt. 0.0000001) .or. (scf1 .lt. 0.0000001)) then
+         IF(NPP .lt. 0.0000001) THEN
+            scl2 = 0.0
+            scf2 = 0.0
+            sca2 = 0.0 
+            goto 10
+         ENDIF
       endif   
       npp_aux = npp/365.0       !transform (KgC/m2/yr) in (KgC/m2/day)
-      call critical_value(npp_aux)
+c      call critical_value(npp_aux)
       scl2 = scl1 + (aleaf(pft) * npp_aux) -(scl1 /(tleaf(pft)*365.0))
          
       scf2 = scf1 +(afroot(pft) * npp_aux)-(scf1 /(tfroot(pft)*365.0))
@@ -95,12 +94,14 @@ c     initialization
       endif
 
       
-      call critical_value(scl2)
-      call critical_value(scf2)
-      call critical_value(sca2)
+c      call critical_value(scl2)
+c      call critical_value(scf2)
+c      call critical_value(sca2)
+
       if(scl2 .lt. 0.0) scl2 = 0.0
       if(scf2 .lt. 0.0) scf2 = 0.0
       if(sca2 .lt. 0.0) sca2 = 0.0
+      
 C     cb2 = (((abwood(pft))*npp_aux)- (cb1/((tbwood(pft))*365))) + cb1
 C      cs2 = (((asto(pft))*npp_aux) - (cs1/((tsto(pft))*365))) + cs1
 C      cr2 = (((arep(pft))*npp_aux) - (cr1/((trep(pft))*365))) + cr1

@@ -41,12 +41,12 @@ def flt_attrs():
             'rgs'     : ['sapwood rg',                'kg m-2 year-1',            'rgs'],
             'rgf'     : ['fine root rg',              'kg m-2 year-1',            'rgf'],
             'rgl'     : ['leaf rg',                   'kg m-2 year-1',            'rgl'],
-            'cawood'  : ['C in abovewgrownd wood',    'kg m-2 year-1',         'cawood'],
-            'cfroot'  : ['C in fine roots',           'kg m-2 year-1',         'cfroot'],
-            'cleaf'   : ['C in leaves',               'kg m-2 year-1',          'cleaf'],
-          'cawood_ini': ['init C in abovewgrownd wood','kg m-2 year-1',         'cawood'],
-          'cfroot_ini': ['init C in fine roots',       'kg m-2 year-1',         'cfroot'],
-          'cleaf_ini' : ['init C in leaves',           'kg m-2 year-1',          'cleaf']}
+            'cawood'  : ['C in abovewgrownd wood',    'kg m-2',                'cawood'],
+            'cfroot'  : ['C in fine roots',           'kg m-2',                'cfroot'],
+            'cleaf'   : ['C in leaves',               'kg m-2',                 'cleaf'],
+          'cawood_ini': ['init C in abovewgrownd wood','kg m-2',               'cawood'],
+          'cfroot_ini': ['init C in fine roots',       'kg m-2',               'cfroot'],
+          'cleaf_ini' : ['init C in leaves',           'kg m-2 ',               'cleaf']}
 
 def read_raster(fpath):
     """Returns the raster file in fpath as a masked numpy array
@@ -57,14 +57,17 @@ def read_raster(fpath):
 
     """
     ds = gdal.Open(fpath).ReadAsArray()
-    np.place(arr=ds, mask=lsmk, vals=NO_DATA)
+    nlayers = ds.shape[0]
+    lsmk_internal = lsmk[0:nlayers,:,:]
+    np.place(arr=ds, mask=lsmk_internal, vals=NO_DATA)
     return ds
 
 
 def write_CAETE_output(nc_filename, arr, var):
 
     t, la, lo,  = arr.shape
-
+    nlayers = arr.shape[0]
+    lsmk_internal = lsmk[0:nlayers,:,:]
     # create netcdf file
     rootgrp = dt(nc_filename, mode='w', format='NETCDF3_CLASSIC')
 
@@ -113,7 +116,7 @@ def write_CAETE_output(nc_filename, arr, var):
     longitude[:] = np.arange(-179.75, 180, 0.5)
     latitude[:] =  np.arange(-89.75, 90, 0.5)
 
-    var_[:,:,:] = np.fliplr(np.ma.masked_array(arr, lsmk))
+    var_[:,:,:] = np.fliplr(np.ma.masked_array(arr, lsmk_internal))
     rootgrp.close()
 
 
@@ -125,7 +128,7 @@ for folder in range(len(fdir)):
         if len(files[fl].split('.'))  == 3:
             caete_name = fdir[folder] + os.sep + varname + '_pft_' + files[fl].split('.')[1] + '_' + 'annual_cycle_mean_CAETE.nc'
         else:
-            caete_name = fdir[folder] + os.sep + varname + '_' + 'annual_cycle_mean_CAETE.nc'
+            caete_name = fdir[folder] + os.sep + varname + '_' + '1981_2010_annual_cycle_mean_CAETE.nc'
         if varname in flt_attrs().keys():
             arr = read_raster(fpath)
             write_CAETE_output(caete_name, arr, varname)
