@@ -293,13 +293,13 @@ c               print*, 'ending budget--month: ', mes
                   endif
                enddo
                
-c               do m = 1,npft
-c                  do p = 1,npft
-c                     wini(m) = wini(m) + wfim(p)
-c                     gini(m) = gini(m) + gfim(p)
-c                     sini(m) = sini(m) + sfim(p)
-c                  enddo
-c               enddo
+               do m = 1,npft
+                  do p = 1,npft
+                     wini(m) = wini(m) + wfim(p)
+                     gini(m) = gini(m) + gfim(p)
+                     sini(m) = sini(m) + sfim(p)
+                  enddo
+               enddo
                
 !     Check if equilibrium is attained
 !     --------------------------------
@@ -710,3 +710,4 @@ c     Carbon allocation (carbon content on each compartment)
       enddo
       return
       end subroutine budget
+
