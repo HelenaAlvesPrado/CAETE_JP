@@ -309,7 +309,7 @@ c               print*, 'ending budget--month: ', mes
                   gsoilt(i,j,k) = 0.0
                   do p = 1,q
                      wsoilt(i,j,k) = wsoilt(i,j,k) + wsoil_pft(i,j,k,p)
-                     gsoilt(i,j,k) = gsoilt(i,j,k) + gsoil(i,j,k,p)/3.
+                     gsoilt(i,j,k) = gsoilt(i,j,k) + gsoil(i,j,k,p)
 c                     print*, 'checking equilibrium, ',n, wsoilt(i,j,k),
 c     &                   gsoilt(i,j,k)
                   enddo
@@ -685,9 +685,9 @@ c     Carbon allocation (carbon content on each compartment)
 !     monthly values
       do p=1,NPFT
          if (p .eq. 1) epavg = epavg/real(ndmonth(month))
-         w2(p) = w(p) * ocp_coeffs(p)
-         g2(p) = g(p) * ocp_coeffs(p)
-         s2(p) = s(p) * ocp_coeffs(p)
+         w2(p) = w(p) * ocp_mm(p)/real(ndmonth(month))
+         g2(p) = g(p) * ocp_mm(p)/real(ndmonth(month))
+         s2(p) = s(p) * ocp_mm(p)/real(ndmonth(month))
          smavg(p) = smavg(p)/real(ndmonth(month))
          ruavg(p) = ruavg(p)/real(ndmonth(month))
          evavg(p) = evavg(p)/real(ndmonth(month))

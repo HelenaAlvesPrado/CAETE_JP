@@ -893,7 +893,7 @@ C23456
 !     
       subroutine runoff (wa,roff)
       real wa,roff
-      roff = 11.5*((wa)**6.6) !From NCEP-NCAR Reanalysis data
+      roff = 11.5*(wa**6.6) !From NCEP-NCAR Reanalysis data
       return
       end
 !     
