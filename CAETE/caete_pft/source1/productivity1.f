@@ -450,15 +450,15 @@ c
 c      
       rml64 = (ncl*real(cl1,8))*27*(exp(0.03*real(temp,8)))
       call critical_value2(rml64)
-      rml =  real(rml64,4)
+      rml =  real(rml64,4) * ocp_pft
       rmf64 = (ncf*real(cf1,8))*27*(exp(0.03*real(temp,8)))
       call critical_value2(rmf64)
-      rmf =  real(rmf64,4)
+      rmf =  real(rmf64,4) * ocp_pft
       rms64 = (ncs*csa)*27*(exp(0.03*real(temp,8)))
       call critical_value2(rms64)
-      rms = real(rms64,4)
+      rms = real(rms64,4) * ocp_pft
 c      
-      rm64 = rml64 + rmf64 + rms64
+      rm64 = (rml64 + rmf64 + rms64) * ocp_pft
       rm = real(rm64, 4)
 c      call critical_value(rm)
 c      print*, rm, 'rm'
@@ -470,16 +470,16 @@ c
       call critical_value2(csai)
       rgl64 = (0.25*((real(beta_leaf,8))*365.))
       call critical_value2(rgl64)
-      rgl = real(rgl64,4) 
+      rgl = real(rgl64,4) * ocp_pft
       rgf64 = (0.25*((real(beta_froot,8))*365.))
       call critical_value2(rgf64)
-      rgf = real(rgf64,4) 
+      rgf = real(rgf64,4)  * ocp_pft
       rgs64 = (0.25 * csai * 365.)
       call critical_value2(rgs64)
-      rgs = real(rgs64,4)
+      rgs = real(rgs64,4) * ocp_pft
      
-      rg64 = rgl64 + rgf64 + rgs64
-      rg = real(rg64,4)      
+      rg64 = (rgl64 + rgf64 + rgs64) * ocp_pft
+      rg = real(rg64,4)  
       call critical_value(rg)
      
       if (rg.lt.0) then
@@ -493,7 +493,7 @@ c
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
          ar64 = rm64 + rg64
          call critical_value2(ar64)
-         ar = real(ar64,4) * ocp_pft
+         ar = real(ar64,4)
 c
 c         if (ph .gt. 0.)PRINT*, AR ,'ar' , rm, 'rm', rg, 'rg'
       else
@@ -608,7 +608,7 @@ C      if (rc2_in.ge.545.43) rc2_in = rcmax !A=0.5
 !     Microbial (heterotrophic) respiration
 !     =====================================
       
-      subroutine carbon2 (tsoil,f5,evap,laia, !Inputs
+      subroutine carbon2 (tsoil,f5,evap,laia,ocp_pft, !Inputs
      &    cl,cs,hr)             !Outputs
 !     
 !     Variables
@@ -621,14 +621,14 @@ C      if (rc2_in.ge.545.43) rc2_in = rcmax !A=0.5
       real f5                   !Stress response to soil moisture (dimensionless)
       real evap                 !Actual evapotranspiration (mm/day)
       real laia
-!     
+      real ocp_pft              !Area fraction - used only to scale laia
 !     xOutputs 
 !     -------
 !     
       real cl                   !Litter carbon (kgC/m2)
       real cs                   !Soil carbon (kgC/m2)
       real hr                   !Heterotrophic (microbial) respiration (kgC/m2)
-!     
+
 !     Internal
 !     --------
 !     
@@ -674,7 +674,7 @@ C      call critical_value(f7)
 !     Litterfall (kgC/m2)
 !     ------------------
 !     
-      lf = p33*laia
+      lf = p33*(laia * ocp_pft)
 C      call critical_value(lf)
 !     
 !     Litter carbon (kgC/m2)

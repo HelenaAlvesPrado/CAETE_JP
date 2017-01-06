@@ -112,7 +112,8 @@ def write_CAETE_output(nc_filename, arr, var):
     ## WRITING DATA
     times_fill = np.array([15.5, 45., 74.5, 105., 135.5, 166.,
                            196.5, 227.5, 258., 288.5, 319., 349.5])
-    time[:] = times_fill
+    
+    time[:] = times_fill[0:nlayers]
     longitude[:] = np.arange(-179.75, 180, 0.5)
     latitude[:] =  np.arange(-89.75, 90, 0.5)
 
