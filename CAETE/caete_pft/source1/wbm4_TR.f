@@ -278,30 +278,40 @@ c               print*, 'ending budget--month: ', mes
                   rgs_pft   (i,j,k,p) = rgsmes(p)
                   rg_pft    (i,j,k,p) = rgmes(p)
                   
-                  do m = 1,npft   
-                     wini(m) = wini(m) + wfim(p)
-                     gini(p) = gini(m) + gfim(p)
-                     sini(p) = sini(m) + sfim(p)
-                  enddo
+                  wini(p) = 0.0
+                  gini(p) = 0.0
+                  sini(p) = 0.0
                   
                   cleaf1_pft(p)  = cleafmes(p) 
                   cawood1_pft(p) = cawoodmes(p)
                   cfroot1_pft(p) = cfrootmes(p)
+                  
                   if(k .eq. 12) then
                       cleaf_pft (i,j,p) = cleafmes(p)
                       cawood_pft(i,j,p) = cawoodmes(p)
                       cfroot_pft(i,j,p) = cfrootmes(p)
                   endif
                enddo
+               
+c               do m = 1,npft
+c                  do p = 1,npft
+c                     wini(m) = wini(m) + wfim(p)
+c                     gini(m) = gini(m) + gfim(p)
+c                     sini(m) = sini(m) + sfim(p)
+c                  enddo
+c               enddo
+               
 !     Check if equilibrium is attained
 !     --------------------------------
                if (k.eq.12) then
-c                 print*, 'checking equilibrium, ',n
+
                   wsoilt(i,j,k) = 0.0
                   gsoilt(i,j,k) = 0.0
                   do p = 1,q
                      wsoilt(i,j,k) = wsoilt(i,j,k) + wsoil_pft(i,j,k,p)
-                     gsoilt(i,j,k) = gsoilt(i,j,k) + gsoil(i,j,k,p)
+                     gsoilt(i,j,k) = gsoilt(i,j,k) + gsoil(i,j,k,p)/3.
+c                     print*, 'checking equilibrium, ',n, wsoilt(i,j,k),
+c     &                   gsoilt(i,j,k)
                   enddo
                   wmax = 500.
                   nerro = 0
@@ -408,7 +418,7 @@ c     finalize nx loop
       real dw  (npft)
       real roff(npft)           !Total runoff
       real evap(npft)           !Actual evapotranspiration (mm/day)
-      real emax                 !Maximum evapotranspiration
+      real emax, wapft          !Maximum evapotranspiration
       
       integer ndmonth(12)       !Number of months
       data ndmonth /31,28,31,30,31,30,31,31,30,31,30,31/ !Number of days for each month
@@ -489,9 +499,6 @@ c     Carbon Cycle
          rgsavg(p)  = 0.0
          rgavg(p)   = 0.0
          ocp_mm(p)  = 0.0 
-c         cleafavg_pft(p)  = 0.0 ! leaf biomass for all  PFTs
-c         cawoodavg_pft(p) = 0.0 ! aboveground wood biomass for all PFTs
-c         cfrootavg_pft(p) = 0.0 ! fine root biomass for all PFTs
       enddo
       
 !     Numerical integration
@@ -528,9 +535,9 @@ c         cfrootavg_pft(p) = 0.0 ! fine root biomass for all PFTs
             rgs(p)   = 0.0
 
             if ((i.eq.1).and.(month.eq.1)) then    
-               beta_leaf(p) = 0.0000001
-               beta_awood(p) = 0.0000001
-               beta_froot(p)= 0.0000001
+               beta_leaf(p) = 0.00001
+               beta_awood(p) = 0.00001
+               beta_froot(p)= 0.00001
             endif
          enddo
          
@@ -545,7 +552,7 @@ c         cfrootavg_pft(p) = 0.0 ! fine root biomass for all PFTs
 
          
          do p = 1,npft    
-!     Productivity (ph, aresp, vpd, rc2) for each PFT
+!     Productivity (ph, aresp, vpd, rc2 & etc.) for each PFT
 !     ================================= 
             
             call productivity1 (p,ocp_coeffs(p),temp,p0,w(p)
@@ -622,8 +629,8 @@ c     Carbon allocation (carbon content on each compartment)
 !     
 !     call canopy_resistence (p,vpd(p),f1(p),rc2(p))
 !     canopy_resistence now called inside productivity (L 297)
-               
-               call runoff (w(p),wmax,roff(p)) !Soil moisture runoff (roff, mm/day)
+               wapft = (w(p)/wmax)
+               call runoff (wapft,roff(p))       !Soil moisture runoff (roff, mm/day)
                call penman (p0,temp,rh,ae,rc2(p),evap(p)) !Actual evapotranspiration (evap, mm/day)
                dw(p) = prain + smelt(p) - evap(p) - roff(p)
                w(p) = w(p) + dw(p)
@@ -640,18 +647,16 @@ c     Carbon allocation (carbon content on each compartment)
                call carbon2 (ts,f5(p),evap(p),laia(p), ocp_coeffs(p)
      &             ,cl(p),cs(p),hr(p))   
             endif
-         
-c        CALL PFT_AREA_FRAC(CL2, CF2, CA2, OCP_COEFFS)
-         
+
 !     Accumulate daily budgets weighted by occupation coefficients
 
-            ocp_mm(p) = ocp_mm(p) + ocp_coeffs(p) 
+            ocp_mm(p) = ocp_mm(p) + ocp_coeffs(p)
+            
             if(p .eq. 1) epavg = epavg + emax !mm/day
             smavg(p) = smavg(p) + smelt(p)
-            
-            ruavg(p) = ruavg(p) + roff(p) * ocp_coeffs(p) ! mm day-1
-            evavg(p) = evavg(p) + evap(p) * ocp_coeffs(p)! mm day-1
-            rcavg(p) = rcavg(p) + rc2(p)  * ocp_coeffs(p)! s m -1
+            ruavg(p) = ruavg(p) + roff(p)  ! mm day-1
+            evavg(p) = evavg(p) + evap(p)  ! mm day-1
+            rcavg(p) = rcavg(p) + rc2(p)   ! s m -1
             
             phavg(p) = phavg(p) +   ph(p) /365.0 !kgC/m2/day
             aravg(p) = aravg(p) +   ar(p) /365.0 !kgC/m2/day
@@ -680,9 +685,9 @@ c        CALL PFT_AREA_FRAC(CL2, CF2, CA2, OCP_COEFFS)
 !     monthly values
       do p=1,NPFT
          if (p .eq. 1) epavg = epavg/real(ndmonth(month))
-         w2(p) = w(p) * (ocp_mm(p)/real(ndmonth(month)))
-         g2(p) = g(p) * (ocp_mm(p)/real(ndmonth(month)))
-         s2(p) = s(p) * (ocp_mm(p)/real(ndmonth(month)))
+         w2(p) = w(p) * ocp_coeffs(p)
+         g2(p) = g(p) * ocp_coeffs(p)
+         s2(p) = s(p) * ocp_coeffs(p)
          smavg(p) = smavg(p)/real(ndmonth(month))
          ruavg(p) = ruavg(p)/real(ndmonth(month))
          evavg(p) = evavg(p)/real(ndmonth(month))
@@ -702,150 +707,6 @@ c        CALL PFT_AREA_FRAC(CL2, CF2, CA2, OCP_COEFFS)
          rgfavg(p) = rgfavg(p) * 12.0 
          rgsavg(p) = rgsavg(p) * 12.0 
          rgavg(p) = rgavg(p) * 12.0
-c         IF(NPPAVG(P) .GT. 0.0)print*, nppavg(p), 'nppavg', p
       enddo
       return
       end subroutine budget
-!     
-!     =========================================================
-!     
-      subroutine penman (spre,temp,ur,rn,rc2,evap)
-!     
-!     Inputs
-!     ------
-!     
-      real spre                 !Surface pressure (mb)
-      real temp                 !Temperature (oC)
-      real ur                   !Relative humidity (0-1,dimensionless)
-      real rn                   !Radiation balance (W/m2)
-      real rc2                  !Canopy resistence (s/m)
-!     
-!     
-!     Output
-!     ------
-!     
-      real evap                 !Evapotranspiration (mm/day)
-!     
-!     Parameters
-!     ----------
-!     
-      ra = 100                  !s/m
-      h5 = 0.0275               !mb-1
-!     
-!     Delta
-!     -----
-!     
-      t1 = temp + 1.
-      t2 = temp - 1.
-      call tetens(t1,es1)       !Saturation partial pressure of water vapour at temperature T
-      call tetens(t2,es2)
-      delta = (es1-es2)/(t1-t2) !mb/oC
-!     
-!     Delta_e
-!     -------
-!     
-      call tetens (temp,es)
-      delta_e = es*(1. - ur)    !mb
-!     
-      if ((delta_e.ge.(1./h5)-0.5).or.(rc2.ge.4500)) evap = 0.
-      if ((delta_e.lt.(1./h5)-0.5).or.(rc2.lt.4500)) then
-!     
-!     Gama and gama2
-!     --------------
-!     
-         gama  = spre*(1004.)/(2.45e6*0.622)
-         gama2 = gama*(ra + rc2)/ra
-!     
-!     Real evapotranspiration
-!     -----------------------
-!     
-         evap = (delta*rn + (1.20*1004./ra)*delta_e)/(delta+gama2) !W/m2
-         evap = evap*(86400./2.45e6) !mm/day
-         evap = amax1(evap,0.)  !Eliminates condensation
-      endif
-!     
-      return
-      end
-!     
-!     ============================================
-!     
-      subroutine evpot2 (spre,temp,ur,rn,evap) 
-!     
-!     Inputs
-!     ------
-!     
-      real spre                 !Surface pressure (mb)
-      real temp                 !Temperature (oC)
-      real ur                   !Relative humidity (0-1,dimensionless)
-      real rn                   !Irradiation balance (W/m2)
-!     
-!     Output
-!     ------
-!     
-      real evap                 !Potencial evapotranspiration without stress (mm/day)
-!     
-!     Parameters
-!     ----------
-!     
-      ra      = 100.            !s/m
-      rcmin   = 100.            !s/m
-!     
-!     Delta
-!     -----
-!     
-      t1 = temp + 1.
-      t2 = temp - 1.
-      call tetens(t1,es1)
-      call tetens(t2,es2)
-      delta = (es1-es2)/(t1-t2) !mb/oC
-!     
-!     Delta_e
-!     -------
-!     
-      call tetens (temp,es)
-      delta_e = es*(1. - ur)    !mb
-!     
-!     Stomatal Conductance
-!     --------------------
-!     
-      rc = rcmin
-!     
-!     Gama and gama2
-!     --------------
-!     
-      gama  = spre*(1004.)/(2.45e6*0.622)
-      gama2 = gama*(ra + rc)/ra
-!     
-!     Potencial evapotranspiration (without stress)
-!     ---------------------------------------------
-!     
-      evap = (delta*rn + (1.20*1004./ra)*delta_e)/(delta+gama2) !W/m2
-      evap = evap*(86400./2.45e6) !mm/day
-      evap = amax1(evap,0.)     !Eliminates condensation
-!     
-      return
-      end
-!     
-!     =================================================================
-!     ===
-!     
-      subroutine runoff (w,wmax,roff)
-      real w,roff
-      roff = 11.5*((w/wmax)**6.6) !From NCEP-NCAR Reanalysis data
-      return
-      end
-!     
-!     =================================================================
-!     ====
-!     
-      subroutine tetens (t,es)  !SVP (kpa)!
-      real t,es
-      if (t.ge.0.) then
-         es = 6.1078*exp((7.5*t/(237.3+t))*log(10.))
-      else
-         es = 6.1078*exp((9.5*t/(265.5+t))*log(10.))
-      endif                                                             
-!     
-      return
-      end        
-!     =============================================================

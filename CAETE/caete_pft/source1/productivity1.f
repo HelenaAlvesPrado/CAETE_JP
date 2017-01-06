@@ -323,11 +323,10 @@ C     call critical_value2(f1a)
 
 c      if (vm .gt. 1e-5)PRINT*, F1A, 'f1a'
 !     Soil water
-!     ==========
-      
+!     ==========      
       wa = (w/wmax) * ocp_pft
       
-      call canopy_resistence(pft, vpd64, f1a, rc)
+      call canopy_resistence(pft,vpd64, f1a, ocp_pft, rc)
 !     Water stress response modifier (dimensionless)
 !     ----------------------------------------------
       !     
@@ -440,7 +439,7 @@ cc     -===============================----------=============================--
 !     c Maintenance respiration (kgC/m2/yr) (based in Ryan 1991)
       
       
-      csa= 0.05*ca1     !sapwood carbon content (kgC/m2). 5% of woody tissues (Pavlick, 2013)
+      csa= 0.05*ca1*ocp_pft     !sapwood carbon content (kgC/m2). 5% of woody tissues (Pavlick, 2013)
 C      call critical_value2(csa)
 c      
       ncl = 0.034               !(gN/gC)
@@ -466,7 +465,7 @@ c
 c     Growth respiration (KgC/m2/yr)(based in Ryan 1991; Sitch et al.
 c     2003; Levis et al. 2004)         
 c      
-      csai= 0.05*real(beta_awood,8)
+      csai= real(beta_awood,8) * ocp_pft        ! precisa mesmo multiplicar por 0.05?
       call critical_value2(csai)
       rgl64 = (0.25*((real(beta_leaf,8))*365.))
       call critical_value2(rgl64)
@@ -491,7 +490,7 @@ c
 !     -------------------------------------------
 !     
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
-         ar64 = rm64 + rg64
+         ar64 = (rm64 + rg64) ! * 0.8 ! gambiarra para diminuir a ar
          call critical_value2(ar64)
          ar = real(ar64,4)
 c
@@ -526,7 +525,7 @@ C 10   CONTINUE
 !     Canopy resistence(s/m)
 !     ======================
 !     
-      subroutine canopy_resistence (m,vpd_in,f1_in,rc2_in)
+      subroutine canopy_resistence (m,vpd_in,f1_in,ocp_pft_in,rc2_in)
 !     
 !     Variables
 !     =========
@@ -540,7 +539,7 @@ C 10   CONTINUE
 !     
 !     Outputs
 !     -------
-!     
+      real ocp_pft_in
       real rc2_in               !Canopy resistence (s/m)
 !     
 !     Internal
@@ -556,7 +555,7 @@ C 10   CONTINUE
       real rcmax 
 !     
       data g1 /6.0,4.0,2.0/ 
-      f1b = (f1_in*10e5)        !maior f1b = 13.38
+      f1b = (f1_in*10e5)*ocp_pft_in        !maior f1b = 13.38
       aa = (f1b/363.)
       g0 = 0.01
 !     g1 = 4.9
@@ -770,4 +769,146 @@ C23456
 
 
 
+!     =========================================================
+!     
+      subroutine penman (spre,temp,ur,rn,rc2,evap)
+!     
+!     Inputs
+!     ------
+!     
+      real spre                 !Surface pressure (mb)
+      real temp                 !Temperature (oC)
+      real ur                   !Relative humidity (0-1,dimensionless)
+      real rn                   !Radiation balance (W/m2)
+      real rc2                  !Canopy resistence (s/m)
+!     
+!     
+!     Output
+!     ------
+!     
+      real evap                 !Evapotranspiration (mm/day)
+!     
+!     Parameters
+!     ----------
+!     
+      ra = 100                  !s/m
+      h5 = 0.0275               !mb-1
+!     
+!     Delta
+!     -----
+!     
+      t1 = temp + 1.
+      t2 = temp - 1.
+      call tetens(t1,es1)       !Saturation partial pressure of water vapour at temperature T
+      call tetens(t2,es2)
+      delta = (es1-es2)/(t1-t2) !mb/oC
+!     
+!     Delta_e
+!     -------
+!     
+      call tetens (temp,es)
+      delta_e = es*(1. - ur)    !mb
+!     
+      if ((delta_e.ge.(1./h5)-0.5).or.(rc2.ge.4500)) evap = 0.
+      if ((delta_e.lt.(1./h5)-0.5).or.(rc2.lt.4500)) then
+!     
+!     Gama and gama2
+!     --------------
+!     
+         gama  = spre*(1004.)/(2.45e6*0.622)
+         gama2 = gama*(ra + rc2)/ra
+!     
+!     Real evapotranspiration
+!     -----------------------
+!     
+         evap = (delta*rn + (1.20*1004./ra)*delta_e)/(delta+gama2) !W/m2
+         evap = evap*(86400./2.45e6) !mm/day
+         evap = amax1(evap,0.)  !Eliminates condensation
+      endif
+!     
+      return
+      end
+!     
+!     ============================================
+!     
+      subroutine evpot2 (spre,temp,ur,rn,evap) 
+!     
+!     Inputs
+!     ------
+!     
+      real spre                 !Surface pressure (mb)
+      real temp                 !Temperature (oC)
+      real ur                   !Relative humidity (0-1,dimensionless)
+      real rn                   !Irradiation balance (W/m2)
+!     
+!     Output
+!     ------
+!     
+      real evap                 !Potencial evapotranspiration without stress (mm/day)
+!     
+!     Parameters
+!     ----------
+!     
+      ra      = 100.            !s/m
+      rcmin   = 100.            !s/m
+!     
+!     Delta
+!     -----
+!     
+      t1 = temp + 1.
+      t2 = temp - 1.
+      call tetens(t1,es1)
+      call tetens(t2,es2)
+      delta = (es1-es2)/(t1-t2) !mb/oC
+!     
+!     Delta_e
+!     -------
+!     
+      call tetens (temp,es)
+      delta_e = es*(1. - ur)    !mb
+!     
+!     Stomatal Conductance
+!     --------------------
+!     
+      rc = rcmin
+!     
+!     Gama and gama2
+!     --------------
+!     
+      gama  = spre*(1004.)/(2.45e6*0.622)
+      gama2 = gama*(ra + rc)/ra
+!     
+!     Potencial evapotranspiration (without stress)
+!     ---------------------------------------------
+!     
+      evap = (delta*rn + (1.20*1004./ra)*delta_e)/(delta+gama2) !W/m2
+      evap = evap*(86400./2.45e6) !mm/day
+      evap = amax1(evap,0.)     !Eliminates condensation
+!     
+      return
+      end
+!     
+!     =================================================================
+!     ===
+!     
+      subroutine runoff (wa,roff)
+      real wa,roff
+      roff = 11.5*((wa)**6.6) !From NCEP-NCAR Reanalysis data
+      return
+      end
+!     
+!     =================================================================
+!     ====
+!     
+      subroutine tetens (t,es)  !SVP (kpa)!
+      real t,es
+      if (t.ge.0.) then
+         es = 6.1078*exp((7.5*t/(237.3+t))*log(10.))
+      else
+         es = 6.1078*exp((9.5*t/(265.5+t))*log(10.))
+      endif                                                             
+!     
+      return
+      end        
+!     =============================================================
 
