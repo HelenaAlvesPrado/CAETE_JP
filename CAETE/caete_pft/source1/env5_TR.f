@@ -247,7 +247,7 @@ c      call save_file3(10, cawoodin)
 !     Photosynthetically active radiation (IPAR:Ein/m2/s)
 !     Observed data from ISLSCP2
                
-               par(i,j,k) = (ipar(i,j,k)/(2.18e5)) !Converting to Ein/m2/s
+               par(i,j,k) = ipar(i,j,k)/2.18e5 !Converting to Ein/m2/s
                temp(i,j,k) = t(i,j,k) !+ant(i,j,k) !uncomment to use future anomalies
                p0(i,j,k) = ps(i,j,k) * 0.01 ! transforamando de pascal pra mbar (kPa)
                prec(i,j,k) = pr(i,j,k) !+anpr(i,j,k) !+pr(i,j,k)*0.2 !uncomment to use future anomalies
@@ -279,7 +279,7 @@ c     $     ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft)
      &     emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,
      &     clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,
      &     evapm_pft,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft
-     $     ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft)   
+     $     ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft, cfroot_pft)   
 
              open(10,file='../outputs/cleaf.bin',
      &     status='unknown',form='unformatted',
@@ -764,6 +764,24 @@ c     &              (crepi_aux(k-1)/(trep(i6)*365))) + crepi_aux(k-1)
       enddo
       return
       end
+!     ================================
+      subroutine readx(nunit,var,x)
+!     auxiliar reading routine
+      integer,parameter :: nx=720,ny=360
+      integer nunit,x
+      real var(nx,ny,x)
+      real aux(nx,ny)
+      do k=1,x
+         read(nunit,rec=k) aux
+         do i=1,nx
+            do j=1,ny
+               var(i,j,k) = aux(i,j)
+            enddo
+         enddo
+      enddo
+      return
+      end
+
 
       subroutine save_file12(nunit, var)
       parameter(nx = 720, ny = 360, nt = 12)
@@ -800,3 +818,21 @@ c     &              (crepi_aux(k-1)/(trep(i6)*365))) + crepi_aux(k-1)
       close(nunit)
       return
       end subroutine save_file3
+
+
+      subroutine savex(nunit, var,x)
+      integer, parameter :: nx=720,ny=360
+      integer i, j, k, x
+      real var(nx,ny,x)
+      real waux(nx,ny)
+      do k=1,x
+         do i=1,nx
+            do j=1,ny
+               waux(i,j) = var(i,j,k)
+            enddo
+         enddo
+         write(nunit,rec=k) waux
+      enddo
+      close(nunit)
+      return
+      end subroutine savex

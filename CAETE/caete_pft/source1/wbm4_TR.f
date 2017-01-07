@@ -41,8 +41,8 @@ C     ASSIM ESTES DOIS PROCESSOS (CALCULO DE F5 E LAIA CONTINUAM COMO CARBON2)
 !     Variables
 !     =========
 !     
-      integer,parameter :: nx=720,ny=360,q=3
-      real,parameter :: no_data = -9999.0
+      integer ,parameter :: nx=720,ny=360,q=3
+      real ,parameter :: no_data = -9999.0
       
 !     
 c     --------------------------I N P U T S----------------------------
@@ -69,38 +69,37 @@ c     -------------------------O U T P U T S---------------------------
       real lai_pft  (nx,ny,12,q) !Monthly leaf area index
       real clit_pft (nx,ny,12,q) !Monthly litter carbon
       real csoil_pft(nx,ny,12,q) !Monthly soil carbon
-      real hresp_pft(nx,ny,12,q) !Monthly het resp          (kgC/m2)
+      real hresp_pft(nx,ny,12,q) !Monthly het resp  (kgC/m2)
       real rcm_pft  (nx,ny,12,q) 
 
-      real emaxm    (nx,ny,12) !Maximum evapotranspiration (kg m-2 day-1)
+      real emaxm    (nx,ny,12) !Max.evapotranspiration (kg m-2 day-1)
       real runom_pft(nx,ny,12,q) !Runoff 
       real evapm_pft(nx,ny,12,q) !Actual evapotranspiration        
       real wsoil_pft(nx,ny,12,q) !Soil moisture (mm)
       
 c     NOVOS OUTPUTS DA BIANCA
-      real rml_pft  (nx,ny,12,q)
+      real rml_pft  (nx,ny,12,q) ! Maintenance respiration 
       real rmf_pft  (nx,ny,12,q)
       real rms_pft  (nx,ny,12,q)
       real rm_pft   (nx,ny,12,q)
       
-      real rgl_pft  (nx,ny,12,q)
+      real rgl_pft  (nx,ny,12,q) ! Growth respiration
       real rgf_pft  (nx,ny,12,q)
       real rgs_pft  (nx,ny,12,q)
       real rg_pft   (nx,ny,12,q)
       
-      real cleaf_pft (nx,ny,q) !monthly  leaf biomass (KgC/m2)
-      real cawood_pft(nx,ny,q) !monthly aboveground biomass (KgC/m2)
-      real cfroot_pft(nx,ny,q) !monthly fine root
-      
-      
-c     --------------------------------E N D--------------------------------
-c     ------------------------- internal variables-------------------------
+      real cleaf_pft (nx,ny,q) ! leaf biomass (KgC/m2)
+      real cawood_pft(nx,ny,q) ! aboveground wood biomass (KgC/m2)
+      real cfroot_pft(nx,ny,q) ! fine root biomass
+c     --------------------------------E N D----------------------------
+
+c     ------------------------- internal variables---------------------
 
       integer i, j, k, kk, n, mes, nerro, p
       
-      real wg0  (nx,ny,12)      !Moisture of the previous year
-      real wsoilt(nx,ny,12)     !soil water (used to check wbm equilibrium)
-      real gsoilt(nx,ny,12)     !soil ice   (used to check wbm equilibrium)
+      real wg0  (nx,ny,12)      !Previous year soil moisture
+      real wsoilt(nx,ny,12)     !soil water (check wbm equilibrium)
+      real gsoilt(nx,ny,12)     !soil ice   (check wbm equilibrium)
       real gsoil(nx,ny,12,q)    !Soil ice 
       real ssoil(nx,ny,12,q)    !Soil snow
       real snowm(nx,ny,12,q)    !Snowmelt
@@ -113,7 +112,7 @@ c     ------------------------- internal variables-------------------------
       real cawood1_pft(q)
       real cfroot1_pft(q)
       
-!     outputs de budget
+!     outputs for budget
       real epmes ! equal for all pfts - Maximum evapotranspiration (mm day-1)
       real rmes(q),phmes(q),smes(q),rcmes(q),hrmes(q)
       real nppmes(q),laimes(q), armes(q),clmes(q),csmes(q)
@@ -134,14 +133,15 @@ c     ------------------------- internal variables-------------------------
       
             
 
-      
+!     ================      
 !     Soil temperature
 !     ================
-      
+
 !     For all grid points
 !     -------------------
       do i=1,nx
          do j=1,ny
+
 !     Initialize soil temperature
 !     ---------------------------
             do k=1,12
@@ -159,17 +159,16 @@ c     ------------------------- internal variables-------------------------
                   tsoil(i,j,k) = (t0 + t1)/2.0
                   t0 = t1
                enddo
-            endif
-!     
+            endif     
          enddo
       enddo
+
 !     ============
 !     Water budget
 !     ============
 !     
 !     For all grid points
-!     -------------------
-!     
+!     -------------------     
       do i=1,nx
          do j=1,ny
             do p = 1,q   
@@ -180,9 +179,11 @@ c     ------------------------- internal variables-------------------------
                cawood_pft(i,j,p) = no_data ! aboveground biomass (KgC/m2)
                cfroot_pft(i,j,p) = no_data ! fine root biomass (KgC/m2)
             enddo
+
 c     Write to track program execution     
             if ((mod(j,ny).eq.0).and.(mod(i,10).eq.0))
-     &          write(*,*) 'working:',i           
+     &          write(*,*) 'working: ', (real(i)/real(nx))*100.0, '%' 
+          
 !     Initialize variables
             do k=1,12
                wg0  (i,j,k) = no_data !Soil water content in preceeding year integration
@@ -201,24 +202,24 @@ c     Write to track program execution
                   runom_pft(i,j,k,p)  = no_data !Runoff
                   evapm_pft(i,j,k,p)  = no_data !Actual evapotranspiration        
                   wsoil_pft(i,j,k,p)  = no_data !Soil moisture (mm)
-C     NOVAS VARIAVEIS VEG POOLS
-                  rml_pft(i,j,k,p)    = no_data
+                  rml_pft(i,j,k,p)    = no_data !MAINTENANCE ARESP
                   rmf_pft(i,j,k,p)    = no_data
                   rms_pft(i,j,k,p)    = no_data
                   rm_pft(i,j,k,p)     = no_data
-                  rgl_pft(i,j,k,p)    = no_data
+                  rgl_pft(i,j,k,p)    = no_data !GROWTH RESPIRATION 
                   rgf_pft(i,j,k,p)    = no_data
                   rgs_pft(i,j,k,p)    = no_data
                   rg_pft(i,j,k,p)     = no_data
                enddo              
             enddo
-!     
+     
 !     Only for land grid points
 !     -------------------------
             if (nint(lsmk(i,j)).ne.0) then
                do k=1,12
-                  wg0(i,j,k) = -1.0 ! initialize previous year water in soil (w + g)
+                  wg0(i,j,k) = -1.0 
                enddo
+
 !     Set some variables
 !     ------------------
                do p = 1,q
@@ -226,12 +227,16 @@ C     NOVAS VARIAVEIS VEG POOLS
                   gini(p)  = 0.0   !Soil ice_initial condition (mm)
                   sini(p)  = 0.0   !Overland snow_initial condition (mm)
                enddo
+
+!     =================
 !     START INTEGRATION
+!     =================
                n = 0
+
  10            continue
+
                n = n + 1
-!     Pre-processing
-!     --------------
+
                k = mod(n,12)
                if (k.eq.0) k = 12
                mes = k
@@ -244,14 +249,13 @@ C     NOVAS VARIAVEIS VEG POOLS
 !     
 !     Monthly water budget
 !     ====================
-c               print*, 'calling budget--month: ', mes
+
                call budget (mes,wini,gini,sini,td,ta,pr,spre,ae
-     $              , ca, ipar, cleaf1_pft, cawood1_pft, cfroot1_pft
-     $             ,wfim,gfim, sfim,smes,rmes,emes,epmes,phmes,armes
-     &             ,nppmes,laimes,clmes,csmes,hrmes,rcmes,rmlmes,rmfmes,
-     &             rmsmes, rmmes, rglmes, rgfmes,rgsmes,rgmes, cleafmes,
-     &             cawoodmes,cfrootmes)
-c               print*, 'ending budget--month: ', mes
+     &             ,ca,ipar,cleaf1_pft,cawood1_pft,cfroot1_pft
+     &             ,wfim,gfim, sfim,smes,rmes,emes,epmes,phmes,armes
+     &             ,nppmes,laimes,clmes,csmes,hrmes,rcmes,rmlmes,rmfmes
+     &             ,rmsmes,rmmes,rglmes,rgfmes,rgsmes,rgmes,cleafmes
+     &             ,cawoodmes,cfrootmes)
 
                do p=1,q
                   if(p .eq. 1) emaxm(i,j,k) = epmes
@@ -278,9 +282,9 @@ c               print*, 'ending budget--month: ', mes
                   rgs_pft   (i,j,k,p) = rgsmes(p)
                   rg_pft    (i,j,k,p) = rgmes(p)
                   
-                  wini(p) = 0.0
-                  gini(p) = 0.0
-                  sini(p) = 0.0
+                  wini(p) = wfim(p)
+                  gini(p) = gfim(p)
+                  sini(p) = sfim(p)
                   
                   cleaf1_pft(p)  = cleafmes(p) 
                   cawood1_pft(p) = cawoodmes(p)
@@ -293,41 +297,47 @@ c               print*, 'ending budget--month: ', mes
                   endif
                enddo
                
-               do m = 1,npft
-                  do p = 1,npft
-                     wini(m) = wini(m) + wfim(p)
-                     gini(m) = gini(m) + gfim(p)
-                     sini(m) = sini(m) + sfim(p)
-                  enddo
-               enddo
-               
+c               wini(1) = wfim(1) + wfim(2) + wfim(3)
+c               gini(1) = gfim(1) + gfim(2) + gfim(3)
+c               sini(1) = sfim(1) + sfim(2) + sfim(3)
+c               wini(2) = wini(1)
+c               wini(3) = wini(1)
+c               gini(2) = gini(1)
+c               gini(3) = gini(1)
+c               sini(2) = sini(1)
+c               sini(3) = sini(1)
+
 !     Check if equilibrium is attained
 !     --------------------------------
                if (k.eq.12) then
-
                   wsoilt(i,j,k) = 0.0
                   gsoilt(i,j,k) = 0.0
+
                   do p = 1,q
                      wsoilt(i,j,k) = wsoilt(i,j,k) + wsoil_pft(i,j,k,p)
                      gsoilt(i,j,k) = gsoilt(i,j,k) + gsoil(i,j,k,p)
-c                     print*, 'checking equilibrium, ',n, wsoilt(i,j,k),
-c     &                   gsoilt(i,j,k)
                   enddo
+
                   wmax = 500.
                   nerro = 0
+
                   do kk=1,12
-                     wsaux1 = wsoilt(i,j,kk) + gsoilt(i,j,kk)
-                     
+                     wsaux1 = wsoilt(i,j,kk) + gsoilt(i,j,kk)                     
                      dwww = (wsaux1 - wg0(i,j,kk)) / wmax
-                     if (abs(dwww).gt.0.001) nerro = nerro + 1
+                     if (abs(dwww).gt.0.01) nerro = nerro + 1
                   enddo
+
                   if (nerro.ne.0) then
+
                      do kk=1,12
                         wg0(i,j,kk) = wsoilt(i,j,kk) + gsoilt(i,j,kk)
                      enddo
+
                   else
                      goto 100
+
                   endif
+
                endif
                goto 10               
  100           continue
@@ -350,8 +360,9 @@ c     finalize nx loop
 
 
       integer, parameter :: npft = 3
-!     INPUTS
-      
+
+!     ----------------------------INPUTS-------------------------------
+!        
       integer month             !Actual month (1-12)
       real w1(npft)             !Initial (previous month last day) soil moisture storage (mm)
       real g1(npft)             !Initial soil ice storage (mm)
@@ -366,10 +377,8 @@ c     finalize nx loop
       real ae                   !Available energy (W/m2)
       real ca                   !Atmospheric carbon
       real ipar                 !Incident photosynthetic active radiation
-!     
-!     Output
-!     ------
-!     
+
+!     ----------------------------OUTPUTS------------------------------
       real w2(npft)             !Final (last day) soil moisture storage (mm)
       real g2(npft)             !Final soil ice storage (mm)
       real s2(npft)             !Final overland snow storage (mm)
@@ -389,11 +398,11 @@ c     finalize nx loop
       real rmsavg(npft),rmavg(npft)  
       real rglavg(npft),rgfavg(npft)
       real rgsavg(npft),rgavg(npft)
-
-!     FINAL carbon content in each veg_pool
-      real cleafavg_pft(npft),cawoodavg_pft(npft),cfrootavg_pft(npft) ! vegetal carbon pools
+      real cleafavg_pft(npft) ! Carbon in plant tissues
+      real cawoodavg_pft(npft) 
+      real cfrootavg_pft(npft)
       
-!     Internal Variables
+!     -----------------------Internal Variables------------------------
       integer p
       
       real alfa_leaf(npft), alfa_awood(npft), alfa_froot(npft)
@@ -424,7 +433,6 @@ c     finalize nx loop
       data ndmonth /31,28,31,30,31,30,31,31,30,31,30,31/ !Number of days for each month
       
 c     Carbon Cycle
-      
       real ph  (npft)           !Canopy gross photosynthesis (kgC/m2/yr)
       real ar  (npft)           !Autotrophic respiration (kgC/m2/yr)
       real nppa(npft)           !Net primary productivity / auxiliar
@@ -439,13 +447,10 @@ c     Carbon Cycle
       real vpd (npft)
       real rm(npft),rml(npft),rmf(npft),rms(npft)
       real rg(npft),rgl(npft),rgf(npft),rgs(npft)
-      
       real cl1(npft), cf1(npft), ca1(npft)
       real cl2(npft),cf2(npft), ca2(npft)
       
-!     AUXILIAR
-      LOGICAL au1
-      REAL   au2      
+
 !     Initialize Canopy Resistence Parameters
 !     ---------------------------------------
       do p = 1,npft
@@ -502,13 +507,10 @@ c     Carbon Cycle
       enddo
       
 !     Numerical integration
-!     --------------------
-
+!     ---------------------
       do i=1,ndmonth(month)
-!     iniciando variaveis de loop diario
          emax  = 0.0
          do p=1,npft
-            
             cl1(p) = cl1_pft(p)
             ca1(p) = ca1_pft(p)
             cf1(p) = cf1_pft(p)
@@ -550,17 +552,15 @@ c     Carbon Cycle
          call evpot2 (p0,temp,rh,ae,emax)
          call critical_value(emax)
 
-         
          do p = 1,npft    
 !     Productivity (ph, aresp, vpd, rc2 & etc.) for each PFT
 !     ================================= 
             
             call productivity1 (p,ocp_coeffs(p),temp,p0,w(p)
-     &          ,wmax,ca,ipar,cl1(p),ca1(p),cf1(p),beta_leaf(p),
-     &          beta_awood(p),beta_froot(p),emax,ph(p),ar(p),
-     &          nppa(p),laia(p),f5(p),f1(p),vpd(p),rm(p),rml(p)
+     &          ,wmax,ca,ipar,cl1(p),ca1(p),cf1(p),beta_leaf(p)
+     &          ,beta_awood(p),beta_froot(p),emax,ph(p),ar(p)
+     &          ,nppa(p),laia(p),f5(p),f1(p),vpd(p),rm(p),rml(p)
      &          ,rmf(p),rms(p),rg(p),rgl(p),rgf(p),rgs(p),rc2(p))
-
 
             call critical_value(ph(p))
             call critical_value(ar(p))
@@ -578,7 +578,6 @@ c     Carbon Cycle
             call critical_value(rgf(p))
             call critical_value(rgs(p))
             call critical_value(rc2(p))
-
             
 c     Carbon allocation (carbon content on each compartment)
 !     =====================================================
@@ -588,11 +587,11 @@ c     Carbon allocation (carbon content on each compartment)
             call critical_value(cl2(p))
             call critical_value(ca2(p))
             call critical_value(cf2(p))
-            alfa_leaf(p)  = cl2(p) - cl1(p) 
-            alfa_awood(p) = ca2(p) - ca1(p) 
-            alfa_froot(p) = cf2(p) - cf1(p)
-            
 
+            alfa_leaf(p)  = max((cl2(p) - cl1(p)), 0.00001) 
+            alfa_awood(p) = max((ca2(p) - ca1(p)), 0.00001)
+            alfa_froot(p) = max((cf2(p) - cf1(p)), 0.00001)
+            
 !     Snow budget
 !     ===========     
             smelt(p) = 2.63 + 2.55*temp + 0.0912*temp*prain !Snowmelt (mm/day)
@@ -624,11 +623,6 @@ c     Carbon allocation (carbon content on each compartment)
                   w(p) = wmax
                endif
      
-!     Canopy resistance (Based on Medlyn et al.(2011)
-!     (rc2 ; s/m)
-!     
-!     call canopy_resistence (p,vpd(p),f1(p),rc2(p))
-!     canopy_resistence now called inside productivity (L 297)
                wapft = (w(p)/wmax)
                call runoff (wapft,roff(p))       !Soil moisture runoff (roff, mm/day)
                call penman (p0,temp,rh,ae,rc2(p),evap(p)) !Actual evapotranspiration (evap, mm/day)
@@ -663,9 +657,9 @@ c     Carbon allocation (carbon content on each compartment)
             nppavg(p) = nppavg(p) + nppa(p) /365.0 !kgC/m2/day
             
             laiavg(p) = laiavg(p) + (laia(p) * OCP_COEFFS(P))/365.0 
-            clavg(p) = clavg(p) + cl(p) /365.0 !kgC/m2/day
-            csavg(p) = csavg(p) + cs(p) /365.0 !kgC/m2/day
-            hravg(p) = hravg(p) + hr(p) /365.0 !kgC/m2/day
+            clavg(p) = clavg(p) + (cl(p) * OCP_COEFFS(P))/365.0 !kgC/m2/day
+            csavg(p) = csavg(p) + (cs(p) * OCP_COEFFS(P))/365.0 !kgC/m2/day
+            hravg(p) = hravg(p) + (hr(p) * OCP_COEFFS(P))/365.0 !kgC/m2/day
             rmlavg(p) = rmlavg(p) + rml(p)/365.
             rmfavg(p) = rmfavg(p) + rmf(p)/365.
             rmsavg(p) = rmsavg(p) + rms(p)/365.
