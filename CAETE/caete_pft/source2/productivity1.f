@@ -263,12 +263,12 @@ c     call critical_value(r)
 !     Internal leaf CO2 partial pressure (Pa)
 !     ---------------------------------------
 !     
-      ci = p19* (1.-(r/p20)) * (ca-mgama) + mgama
+      ci = p19* (1-(r/p20)) * (ca-mgama) + mgama
 c     call critical_value(ci)
 !     Rubisco carboxilation limited photosynthesis rate (molCO2/m2/s)
 !     ---------------------------------------------------------------
 !     
-      jc = vm*((ci-mgama)/(ci+(f2*(1.+(p3/f3)))))
+      jc = vm*((ci-mgama)/(ci+(f2*(1+(p3/f3)))))
 c     call critical_value(jc)
 !     
 !     Light limited photosynthesis rate (molCO2/m2/s)
@@ -294,7 +294,7 @@ c     call critical_value(je)
 !     ------------------------------
 !     
       a = 0.83
-      b = (-1.)*(jc+jl)
+      b = (-1)*(jc+jl)
 C     call critical_value(b)
       c = jc*jl
 c     call critical_value(c)
@@ -312,7 +312,7 @@ C     call critical_value2(jp)
 !     ---------------------------------------------------------------
 !     
       a2 = 0.93
-      b2 = (-1.)*(jp+je)
+      b2 = (-1)*(jp+je)
       c2 = jp*je
       delta2 = (b2**2)-4.0*a2*c2
 !     
@@ -340,7 +340,7 @@ c      if (wa.lt.0.205) f5 = wa  !Below wilting point f5 accompains wa (then Sah
       pt = csru * cf1 * 1000. * wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
 c      print*,pt, 'pt'
       alfm = 1.391
-      gm = 3.26*86400.           !(*86400 transform mm/s to mm/dia)
+      gm = 3.26*86400           !(*86400 transform mm/s to mm/dia)
       
       if(rc .gt. 0.0) then
          gc = (real(1,8)/real(rc,8))*real(86400000,8) !*86400000 transfor m/s to mm/dia)
@@ -355,7 +355,7 @@ c      print*, gc, 'gc'
       endif
 c      print*, d, 'd'
       if(d .gt. 0.0) then
-         f5 = 1.-(exp(-1.*(pt/d)))
+         f5 = 1-(exp(-1*(pt/d)))
       else
          f5 = wa
       endif
@@ -447,13 +447,13 @@ c
       ncs = 0.003               !(gN/gC)
 c      
 c      
-      rml64 = (ncl*real(cl1,8))*27.*(exp(0.03*real(temp,8)))
+      rml64 = (ncl*real(cl1,8))*27*(exp(0.03*real(temp,8)))
       call critical_value2(rml64)
       rml =  real(rml64,4) * ocp_pft
-      rmf64 = (ncf*real(cf1,8))*27.*(exp(0.03*real(temp,8)))
+      rmf64 = (ncf*real(cf1,8))*27*(exp(0.03*real(temp,8)))
       call critical_value2(rmf64)
       rmf =  real(rmf64,4) * ocp_pft
-      rms64 = (ncs*csa)*27.*(exp(0.03*real(temp,8)))
+      rms64 = (ncs*csa)*27*(exp(0.03*real(temp,8)))
       call critical_value2(rms64)
       rms = real(rms64,4) * ocp_pft
 c      
@@ -568,7 +568,7 @@ C 10   CONTINUE
 !     
       if (vpd_in.lt.0.25) gs = 1.5
       if (vpd_in.ge.0.25) then 
-         gs = g0 + 1.6 * (1. + (g1(m)/D)) * (aa) !Based on Medlyn et al. 2011
+         gs = g0 + 1.6 * (1 + (g1(m)/D)) * (aa) !Based on Medlyn et al. 2011
 !     gs = g0 + 1.6 * (1 + (g1/D)) * (aa) !Based on Medlyn et al. 2011
 !     
 c         call critical_value2(gs)
