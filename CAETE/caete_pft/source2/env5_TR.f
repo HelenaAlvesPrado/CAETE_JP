@@ -8,17 +8,16 @@ c234567
 !     CPTEC-PVM2
 !     Adapted from env4.f.
 !     Code written by David Lapola and Helena Alves do Prado e Bianca Rius
-c     Reviewed by jpdarela  dec/2016
+c     Reviewed by jpdarela  jan/2017
 
-!     Last update: Dec/2016
+!     Last update: jan/2017
 !     
-!     Compile with: g95 (or gfortran) env5TR.f wbm4TR.f productivity1.f allocation1.f -o a.exe
+!     Compile with: g95 (or gfortran) env5TR.f wbm4TR.f productivity1.f 
 !     Execute with ./a.exe
 !     =======================================================================
-!     COMENTARIOS:
-C     NOTEM QUE EU SALVEI NA MINHA PASTA INPUTS OS VALORES INICIAIS DE ALOCAÇÃO DE NPP (L 218-231)
-C     PARA NAO TER QUE RODAR A SPINUP TODA VEZ QUE FOR RODAR O MODELO. (L 143-148)
-C     A PARTE DO CALCULO DO SPINUP ESTA COMENTADA NESTE CODIGO (L 180-216) - JP
+
+
+
 !     Parameters and variables
 !     ------------------------
 !     
@@ -52,7 +51,7 @@ C     A PARTE DO CALCULO DO SPINUP ESTA COMENTADA NESTE CODIGO (L 180-216) - JP
 c     Vou declarar aqui os outputas para a wbm, note que estas varia-
 c     eis recebem os mesmos nomes das variaveis declaradas na definicao da wbm
 c     porem, elas nao sao as mesmas variveis-- todas as variaveis da wbm sao
-c     secretas para o env5.f, exceto aquelas que são outputs na chamada.
+c     secretas para o env5.f.
       
       
 c     -------------------------O U T P U T S--P A R A--W B M ------------
@@ -141,12 +140,12 @@ C     -------END DECLARATION----------------------------------------
       open(26,file='../inputs/npp.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
       
-      open(21,file='../inputs/cleaf_ini.bin',status='old',
-     &     form='unformatted',access='direct',recl=4*nx*ny)
-      open(22,file='../inputs/cfroot_ini.bin',status='old',
-     &     form='unformatted',access='direct',recl=4*nx*ny)
-      open(23,file='../inputs/cawood_ini.bin',status='old',
-     &     form='unformatted',access='direct',recl=4*nx*ny)
+c      open(21,file='../inputs/cleaf_ini.bin',status='old',
+c     &     form='unformatted',access='direct',recl=4*nx*ny)
+c      open(22,file='../inputs/cfroot_ini.bin',status='old',
+c     &     form='unformatted',access='direct',recl=4*nx*ny)
+c      open(23,file='../inputs/cawood_ini.bin',status='old',
+c     &     form='unformatted',access='direct',recl=4*nx*ny)
       
 
       
@@ -617,23 +616,23 @@ c      call save_file12(10, rg3)
 !     
       if(par .eq. 1 ) then      ! g1
 !     PFT         1       2       3       4       5       6       7 
-         data dt1 /3.04,   2.67,   2.0,    3.0,    1.4,    2.05,   1.95/
+        data dt1 /3.04,   2.67,   2.0,    3.0,    1.4,    2.05,   1.95/
          dt(:) = dt1(:)
       else if(par .eq. 2) then  ! p21
          data dt2 /3.2e-5, 3.1e-5, 3.0e-5, 3.3e-5, 2.8e-5, 5.0e-5, 4.0e
      &       -5/
          dt(:) = dt2(:)
       else if(par .eq. 3) then
-         data dt3 /0.30,   0.38,   0.36,   0.45,   0.55,   0.35,   0.55/
+        data dt3 /0.30,   0.38,   0.36,   0.45,   0.55,   0.35,   0.55/
          dt(:) = dt3(:)
       else if(par .eq. 4) then  ! awood
-         data dt4 /0.28,   0.30,   0.27,   0.10,   0.0,    0.40,   0.12/
+        data dt4 /0.28,   0.30,   0.27,   0.10,   0.0,    0.40,   0.12/
          dt(:) = dt4(:)
       else if(par .eq. 5) then  ! afroot
-         data dt5 /0.42,   0.32,   0.37,   0.55,   0.45,   0.25,   0.23/
+        data dt5 /0.42,   0.32,   0.37,   0.55,   0.45,   0.25,   0.23/
          dt(:) = dt5(:)
       else if(par .eq. 6) then  ! tleaf
-         data dt6 /7.0,    2.0,    1.0,    2.0,    1.0,    1.0,    2.0 /
+        data dt6 /7.0,    2.0,    1.0,    2.0,    1.0,    1.0,    2.0 /
          dt(:) = dt6(:)
       else if(par .eq. 7) then  ! tawood
          data dt7 /35.0,   30.0,   25.0,   2.0,    0.0,    32.0,   2.5/
