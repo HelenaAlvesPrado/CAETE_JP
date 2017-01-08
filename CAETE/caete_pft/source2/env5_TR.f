@@ -23,7 +23,7 @@ C     A PARTE DO CALCULO DO SPINUP ESTA COMENTADA NESTE CODIGO (L 180-216) - JP
 !     ------------------------
 !     
       integer i,j,k,p
-      integer, parameter :: nx=720,ny=360,q=3
+      integer, parameter :: nx=720,ny=360,q=7
       real,parameter :: no_data = -9999.0
 !     
 !     Inputs
@@ -96,31 +96,31 @@ c     -----FIM DA DEFINICAO DE VARIAVEIS PARA RODAR O MODELO--
 C     
       
 C     THESE WILL RECEIVE MEANS BETWEEN q PFTs and for each pft (ex. ph to mean; ph1 to pft 1)
-      real, dimension(nx,ny,12) :: ph, ph1, ph2, ph3
-      real, dimension(nx,ny,12) :: ar, ar1, ar2, ar3
-      real, dimension(nx,ny,12) :: npp, npp1, npp2, npp3
-      real, dimension(nx,ny,12) :: lai, lai1, lai2, lai3
-      real, dimension(nx,ny,12) :: clit, clit1, clit2, clit3
-      real, dimension(nx,ny,12) :: csoil, csoil1, csoil2, csoil3
-      real, dimension(nx,ny,12) :: hr, hr1, hr2, hr3
-      real, dimension(nx,ny,12) :: rcm, rcm1, rcm2, rcm3
-      real, dimension(nx,ny,12) :: runom, runom1, runom2, runom3
-      real, dimension(nx,ny,12) :: evaptr, evaptr1, evaptr2, evaptr3
-      real, dimension(nx,ny,12) :: wsoil, wsoil1, wsoil2, wsoil3
+      real, dimension(nx,ny,12) :: ph!, ph1, ph2, ph3
+      real, dimension(nx,ny,12) :: ar!, ar1, ar2, ar3
+      real, dimension(nx,ny,12) :: npp!, npp1, npp2, npp3
+      real, dimension(nx,ny,12) :: lai!, lai1, lai2, lai3
+      real, dimension(nx,ny,12) :: clit!, clit1, clit2, clit3
+      real, dimension(nx,ny,12) :: csoil!, csoil1, csoil2, csoil3
+      real, dimension(nx,ny,12) :: hr!, hr1, hr2, hr3
+      real, dimension(nx,ny,12) :: rcm!, rcm1, rcm2, rcm3
+      real, dimension(nx,ny,12) :: runom!, runom1, runom2, runom3
+      real, dimension(nx,ny,12) :: evaptr!, evaptr1, evaptr2, evaptr3
+      real, dimension(nx,ny,12) :: wsoil!, wsoil1, wsoil2, wsoil3
       
 C     NEW OUTPUTS (AUTOTRF RESPIRATION, ALLOCATION)
       
-      real, dimension(nx,ny,12) :: rml, rml1, rml2, rml3
-      real, dimension(nx,ny,12) :: rmf, rmf1, rmf2, rmf3 
-      real, dimension(nx,ny,12) :: rms, rms1, rms2, rms3
-      real, dimension(nx,ny,12) :: rm,  rm1,  rm2,  rm3
-      real, dimension(nx,ny,12) :: rgl, rgl1, rgl2, rgl3
-      real, dimension(nx,ny,12) :: rgf, rgf1, rgf2, rgf3
-      real, dimension(nx,ny,12) :: rgs, rgs1, rgs2, rgs3
-      real, dimension(nx,ny,12) :: rg,  rg1,  rg2,  rg3 
-      real, dimension(nx,ny,12) :: cleaf,  cleaf1,  cleaf2,  cleaf3
-      real, dimension(nx,ny,12) :: cawood, cawood1, cawood2, cawood3
-      real, dimension(nx,ny,12) :: cfroot, cfroot1, cfroot2, cfroot3
+      real, dimension(nx,ny,12) :: rml!, rml1, rml2, rml3
+      real, dimension(nx,ny,12) :: rmf!, rmf1, rmf2, rmf3 
+      real, dimension(nx,ny,12) :: rms!, rms1, rms2, rms3
+      real, dimension(nx,ny,12) :: rm!,  rm1,  rm2,  rm3
+      real, dimension(nx,ny,12) :: rgl!, rgl1, rgl2, rgl3
+      real, dimension(nx,ny,12) :: rgf!, rgf1, rgf2, rgf3
+      real, dimension(nx,ny,12) :: rgs!, rgs1, rgs2, rgs3
+      real, dimension(nx,ny,12) :: rg!,  rg1,  rg2,  rg3 
+      real, dimension(nx,ny,12) :: cleaf!,  cleaf1,  cleaf2,  cleaf3
+      real, dimension(nx,ny,12) :: cawood!, cawood1, cawood2, cawood3
+      real, dimension(nx,ny,12) :: cfroot!, cfroot1, cfroot2, cfroot3
 
       
 C     -------END DECLARATION----------------------------------------
@@ -138,8 +138,8 @@ C     -------END DECLARATION----------------------------------------
      &     form='unformatted',access='direct',recl=4*nx*ny)
       open(13,file='../inputs/rsds.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
-c      open(26,file='../inputs/npp.bin',status='old',
-c     &     form='unformatted',access='direct',recl=4*nx*ny)
+      open(26,file='../inputs/npp.bin',status='old',
+     &     form='unformatted',access='direct',recl=4*nx*ny)
       
       open(21,file='../inputs/cleaf_ini.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
@@ -158,11 +158,11 @@ c     &     form='unformatted',access='direct',recl=4*nx*ny)
        call read12 (11,pr)
        call read12 (12,t)
        call read12 (13,ipar)
-c      call read12(26,npp_pot)
+       call read12(26,npp_pot)
 
-       call read3(21, cleafin)
-       call read3(22,cfrootin)
-       call read3(23,cawoodin)
+c       call read3(21, cleafin)
+c       call read3(22,cfrootin)
+c       call read3(23,cawoodin)
      
 !     Close files
 !     ===========
@@ -172,25 +172,25 @@ c      call read12(26,npp_pot)
        close (11)
        close (12)
        close (13)
-c       close (26)
-       close (21)
-       close (22)
-       close (23)
+       close (26)
+c       close (21)
+c       close (22)
+c       close (23)
 !     
 
-cc     fazendo medias da npp
-c       do i =1,nx
-c          do j=1,ny
-c             if(nint(lsmk(i,j)) .ne. 0) then 
-c                aux_npp(i,j) = 0.0
-c                do k = 1,12
-c                   aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
-c                enddo
-c             else
-c                aux_npp(i,j) = no_data
-c             endif
-c          enddo
-c       enddo
+c     fazendo medias da npp
+       do i =1,nx
+          do j=1,ny
+             if(nint(lsmk(i,j)) .ne. 0) then 
+                aux_npp(i,j) = 0.0
+                do k = 1,12
+                   aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
+                enddo
+             else
+                aux_npp(i,j) = no_data
+             endif
+          enddo
+       enddo
 cc       
 cc       open(10,file='../inputs/npp2.bin',
 cc     &      status='unknown',form='unformatted',
@@ -200,29 +200,29 @@ cc      close(10)
 cc      print*, 'npp_saved'
 cc      
 cc      
-c!     calling spinup
-c      do i=1,nx
-c         do j=1,ny
-c            if (nint(lsmk(i,j)) .ne. 0) then
-c               npp_sca = aux_npp(i,j)
-c               
-c               do p=1,q   
-c                  aux1(p) = 0.0
-c                  aux2(p) = 0.0
-c                  aux3(p) = 0.0
-c               enddo
-c               
-c               call spinup(npp_sca, aux1, aux2, aux3)
-c
-c               do p=1,q   
-c                  cleafin(i,j,p)  = aux1(p)
-c                  cfrootin(i,j,p) = aux2(p)
-c                  cawoodin(i,j,p) = aux3(p)
-c               enddo
-c            endif
-c         enddo
-c         print*, (real(i)/real(nx))*100.0, '%'
-c      enddo
+!     calling spinup
+      do i=1,nx
+         do j=1,ny
+            if (nint(lsmk(i,j)) .ne. 0) then
+               npp_sca = aux_npp(i,j)
+               
+               do p=1,q   
+                  aux1(p) = 0.0
+                  aux2(p) = 0.0
+                  aux3(p) = 0.0
+               enddo
+               
+               call spinup(npp_sca, aux1, aux2, aux3)
+
+               do p=1,q   
+                  cleafin(i,j,p)  = aux1(p)
+                  cfrootin(i,j,p) = aux2(p)
+                  cawoodin(i,j,p) = aux3(p)
+               enddo
+            endif
+         enddo
+         print*, (real(i)/real(nx))*100.0, '%'
+      enddo
 c
 c      open(10,file='../inputs/cleaf_ini.bin',
 c     &     status='unknown',form='unformatted',
@@ -475,116 +475,180 @@ c$$$
      &     access='direct',recl=4*nx*ny)
       call save_file12(10, rg)
 
-
-
-
-      do i=1,nx
-         do j=1,ny
-            do k=1,12
-               if(nint(lsmk(i,j)) .ne. 0) then
-                  npp1(i,j,k) = npp_pft(i,j,k,1)
-                  npp2(i,j,k) = npp_pft(i,j,k,2)
-                  npp3(i,j,k) = npp_pft(i,j,k,3)
-                  
-                  rcm1(i,j,k) = rcm_pft(i,j,k,1)
-                  rcm2(i,j,k) = rcm_pft(i,j,k,2)
-                  rcm3(i,j,k) = rcm_pft(i,j,k,3)
-
-                  rm1(i,j,k) =rm_pft(i,j,k,1)
-                  rm2(i,j,k) = rm_pft(i,j,k,2)
-                  rm3(i,j,k) = rm_pft(i,j,k,3)
-
-                  rg1(i,j,k) = rg_pft(i,j,k,1)
-                  rg2(i,j,k) = rg_pft(i,j,k,2)
-                  rg3(i,j,k) = rg_pft(i,j,k,3)
-
-
-               else
-                  npp1(i,j,k) = no_data
-                  npp2(i,j,k) = no_data
-                  npp3(i,j,k) = no_data
-                  
-                  rcm1(i,j,k) = no_data
-                  rcm2(i,j,k) = no_data
-                  rcm3(i,j,k) = no_data
-                  
-                  rm1(i,j,k) = no_data
-                  rm2(i,j,k) = no_data
-                  rm3(i,j,k) = no_data
-
-                  rg1(i,j,k) = no_data
-                  rg2(i,j,k) = no_data
-                  rg3(i,j,k) = no_data
-
-               endif
-            enddo
-         enddo
-      enddo
-      
-      open(10,file='../outputs_pft/npp.1.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, npp1)
-
-      open(10,file='../outputs_pft/npp.2.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, npp2)
-
-      open(10,file='../outputs_pft/npp.3.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, npp3)
-
-      open(10,file='../outputs_pft/rcm.1.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rcm1)
-
-      open(10,file='../outputs_pft/rcm.2.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rcm2)
-
-      open(10,file='../outputs_pft/rcm.3.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rcm3)
-
-      open(10,file='../outputs_pft/rm.1.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rm1)
-
-      open(10,file='../outputs_pft/rm.2.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rm2)
-
-      open(10,file='../outputs_pft/rm.3.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rm3)
-
-      open(10,file='../outputs_pft/rg.1.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rg1)
-
-      open(10,file='../outputs_pft/rg.2.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rg2)
-
-      open(10,file='../outputs_pft/rg.3.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rg3)
+c
+c
+c
+c      do i=1,nx
+c         do j=1,ny
+c            do k=1,12
+c               if(nint(lsmk(i,j)) .ne. 0) then
+c                  npp1(i,j,k) = npp_pft(i,j,k,1)
+c                  npp2(i,j,k) = npp_pft(i,j,k,2)
+c                  npp3(i,j,k) = npp_pft(i,j,k,3)
+c                  
+c                  rcm1(i,j,k) = rcm_pft(i,j,k,1)
+c                  rcm2(i,j,k) = rcm_pft(i,j,k,2)
+c                  rcm3(i,j,k) = rcm_pft(i,j,k,3)
+c
+c                  rm1(i,j,k) =rm_pft(i,j,k,1)
+c                  rm2(i,j,k) = rm_pft(i,j,k,2)
+c                  rm3(i,j,k) = rm_pft(i,j,k,3)
+c
+c                  rg1(i,j,k) = rg_pft(i,j,k,1)
+c                  rg2(i,j,k) = rg_pft(i,j,k,2)
+c                  rg3(i,j,k) = rg_pft(i,j,k,3)
+c
+c
+c               else
+c                  npp1(i,j,k) = no_data
+c                  npp2(i,j,k) = no_data
+c                  npp3(i,j,k) = no_data
+c                  
+c                  rcm1(i,j,k) = no_data
+c                  rcm2(i,j,k) = no_data
+c                  rcm3(i,j,k) = no_data
+c                  
+c                  rm1(i,j,k) = no_data
+c                  rm2(i,j,k) = no_data
+c                  rm3(i,j,k) = no_data
+c
+c                  rg1(i,j,k) = no_data
+c                  rg2(i,j,k) = no_data
+c                  rg3(i,j,k) = no_data
+c
+c               endif
+c            enddo
+c         enddo
+c      enddo
+c      
+c      open(10,file='../outputs_pft/npp.1.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file12(10, npp1)
+c
+c      open(10,file='../outputs_pft/npp.2.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file12(10, npp2)
+c
+c      open(10,file='../outputs_pft/npp.3.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file12(10, npp3)
+c
+c      open(10,file='../outputs_pft/rcm.1.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file12(10, rcm1)
+c
+c      open(10,file='../outputs_pft/rcm.2.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file12(10, rcm2)
+c
+c      open(10,file='../outputs_pft/rcm.3.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file12(10, rcm3)
+c
+c      open(10,file='../outputs_pft/rm.1.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file12(10, rm1)
+c
+c      open(10,file='../outputs_pft/rm.2.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file12(10, rm2)
+c
+c      open(10,file='../outputs_pft/rm.3.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file12(10, rm3)
+c
+c      open(10,file='../outputs_pft/rg.1.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file12(10, rg1)
+c
+c      open(10,file='../outputs_pft/rg.2.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file12(10, rg2)
+c
+c      open(10,file='../outputs_pft/rg.3.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call save_file12(10, rg3)
 
       stop
       end program env
-      
 
+!     ==================================================
+
+      
+      subroutine pft_par(par, dt)
+      
+!     input
+      integer, parameter :: vars = 7 
+      integer :: par            ! parameter number 
+      real, dimension(vars) :: dt,dt1,dt2,dt3,dt4,dt5,dt6,dt7,dt8
+      
+      
+!     1 = g1
+!     2 = p21 
+!     3 = aleaf
+!     4 = aawood
+!     5 = afroot
+!     6 = tleaf
+!     7 = tawood
+!     8 = tfroot
+      
+!     PFTS
+      
+!     1 = tropical evergreen tree
+!     2 = tropical deciduous-forest-tree
+!     3 = tropical deciduous-savana-tree
+!     4 = tropical herb
+!     5 = tropical grass
+!     6 = temperate tree
+!     7 = temperate herb
+      
+!     
+      if(par .eq. 1 ) then      ! g1
+!     PFT         1       2       3       4       5       6       7 
+         data dt1 /3.04,   2.67,   2.0,    3.0,    1.4,    2.05,   1.95/
+         dt(:) = dt1(:)
+      else if(par .eq. 2) then  ! p21
+         data dt2 /3.2e-5, 3.1e-5, 3.0e-5, 3.3e-5, 2.8e-5, 5.0e-5, 4.0e
+     &       -5/
+         dt(:) = dt2(:)
+      else if(par .eq. 3) then
+         data dt3 /0.30,   0.38,   0.36,   0.45,   0.55,   0.35,   0.55/
+         dt(:) = dt3(:)
+      else if(par .eq. 4) then  ! awood
+         data dt4 /0.28,   0.30,   0.27,   0.10,   0.0,    0.40,   0.12/
+         dt(:) = dt4(:)
+      else if(par .eq. 5) then  ! afroot
+         data dt5 /0.42,   0.32,   0.37,   0.55,   0.45,   0.25,   0.23/
+         dt(:) = dt5(:)
+      else if(par .eq. 6) then  ! tleaf
+         data dt6 /7.0,    2.0,    1.0,    2.0,    1.0,    1.0,    2.0 /
+         dt(:) = dt6(:)
+      else if(par .eq. 7) then  ! tawood
+         data dt7 /35.0,   30.0,   25.0,   2.0,    0.0,    32.0,   2.5/
+         dt(:) = dt7(:)
+      else if(par .eq. 8) then  ! tfroot
+         data dt8 /4.0,    3.5,    3.8,    1.5,    1.0,    3.8,    2.2/ 
+         dt(:) = dt8(:)
+      else
+         print*, "your search failed"
+      endif
+      
+      return
+      end subroutine pft_par
+      
+c     ==================================================
       subroutine spinup(nppot,
      &     cleafini,cfrootini,cawoodini)
 c     &     cbwoodini,cstoini,cotherini,crepini) 
@@ -592,81 +656,44 @@ c     &     cbwoodini,cstoini,cotherini,crepini)
       IMPLICIT NONE
 
       integer, parameter :: nt=5000
-      integer, parameter :: npft=3
+      integer, parameter :: npfts=7
+      
 c     inputs
       integer i6, kk, k
       
       real :: nppot
       real :: sensitivity,sensitivity2
 
-      
 c     outputs
-      real :: cleafini(npft)
-      real :: cawoodini(npft)
-c      real :: cbwoodini(npft)
-      real :: cfrootini(npft)
-c      real :: cstoini(npft)
-c      real :: cotherini(npft)
-c      real :: crepini(npft)
-
-c     internal vars
+      real :: cleafini(npfts)
+      real :: cawoodini(npfts)
+      real :: cfrootini(npfts)
 
       real cleafi_aux(nt)
       real cfrooti_aux(nt)
       real cawoodi_aux(nt)
-c      real cbwoodi_aux(nt)
-c      real cstoi_aux(nt)
-c      real cotheri_aux(nt)
-c      real crepi_aux(nt)
-
-c$$$      real aleaf(3)             !npp percentage alocated to leaf compartment
-c$$$      data aleaf /0.40, 0.25, 0.45/
-c$$$      real aawood (3)           !npp percentage alocated to aboveground woody biomass compartment
-c$$$      data aawood /0.35, 0.40, 0.0/
-c$$$      real afroot(3)            !npp percentage alocated to fine roots compartment
-c$$$      data afroot /0.30, 0.25, 0.55/ 
-c$$$      real tleaf(3)             !turnover time of the leaf compartment (yr)
-c$$$      data tleaf /2.0, 0.7, 1.0/ 
-c$$$      real tawood (3)           !turnover time of the aboveground woody biomass compartment (yr)
-c$$$      data tawood /30.0, 3.0, 0.0/
-c$$$      real tfroot(3)            !turnover time of the fine roots compartment
-c$$$      data tfroot /3.0, 2.0, 1.0/
 
     
-      real aleaf(3)             !npp percentage alocated to leaf compartment
-      data aleaf /0.40,0.25,0.45/
-      real aawood (3)           !npp percentage alocated to aboveground woody biomass compartment
-      data aawood /0.35,0.40,0.0/
-      real afroot(3)            !npp percentage alocated to fine roots compartment
-      data afroot /0.30,0.25,0.55/ 
-c      real abwood(3)            !npp percentage alocated to belowground woody biomass compartment
-c      data abwood /0.10,0.10,0.001/
-c      real asto(3)              !npp percentage alocated to storage compartment
-c      data asto /0.10,0.10,0.10/
-c      real arep(3)              !npp percentage alocated to reproduction compartment
-c      data arep /0.15,0.15,0.10/
-c      real aother(3)            !npp percentage alocated to other compartment
-c      data aother /0.05,0.05,0.06/ 
-c 
-      real tleaf(3)             !turnover time of the leaf compartment (yr)
-      data tleaf /2.0, 0.7, 1.0/ 
-      real tawood (3)           !turnover time of the aboveground woody biomass compartment (yr)
-      data tawood /30.0, 3.0, 0.0/
-      real tfroot(3)            !turnover time of the fine roots compartment
-      data tfroot /3.0,2.0,1.0/
-c      real tbwood (3)           !turnover time of the belowground woody biomass compartment
-c      data tbwood /40.0,40.0,40.0/
-c      real tsto  (3)            !turnover time of the storage compartmentturn
-c      data tsto /5.0,5.0,5.0/ 
-c      real trep (3)             !turnover time of the reproduction compartment
-c      data trep /0.25,0.25,0.25/ 
-c      real tother (3)           !turnover time of the other compartment
-c      data tother /0.12,0.12,0.12/
+      real aleaf(npfts)             !npp percentage alocated to leaf compartment
+      real aawood (npfts)           !npp percentage alocated to aboveground woody biomass compartment
+      real afroot(npfts)            !npp percentage alocated to fine roots compartmentc 
+      real tleaf(npfts)             !turnover time of the leaf compartment (yr)
+      real tawood (npfts)           !turnover time of the aboveground woody biomass compartment (yr)
+      real tfroot(npfts)            !turnover time of the fine roots compartment
 
+
+      call pft_par(3, aleaf)
+      call pft_par(4, aawood)
+      call pft_par(5, afroot)
+      call pft_par(6, tleaf)
+      call pft_par(7, tawood)
+      call pft_par(8, tfroot)
+
+      
       sensitivity = 1.10
       sensitivity2 = 1.40
 
-      do i6=1,npft
+      do i6=1,npfts
          do k=1,nt
             if (k.eq.1) then
                cleafi_aux(k) = aleaf(i6)*(nppot)

@@ -41,7 +41,7 @@ C     ASSIM ESTES DOIS PROCESSOS (CALCULO DE F5 E LAIA CONTINUAM COMO CARBON2)
 !     Variables
 !     =========
 !     
-      integer ,parameter :: nx=720,ny=360,q=3
+      integer ,parameter :: nx=720,ny=360,q=7
       real ,parameter :: no_data = -9999.0
       
 !     
@@ -343,7 +343,7 @@ c     finalize nx loop
      &    ,cleafavg_pft,cawoodavg_pft,cfrootavg_pft)
 
 
-      integer, parameter :: npft = 3
+      integer, parameter :: npft = 7
 
 !     ----------------------------INPUTS-------------------------------
 !        

@@ -24,7 +24,6 @@ c234567
 !     -----
 !     
       integer pft
-      LOGICAL LIGHT_LIMIT
       real ocp_pft,temp                 !Mean monthly temperature (oC)
       real p0                   !Mean surface pressure (hPa)
       real wa,w,wmax            !Soil moisture (dimensionless)
@@ -75,30 +74,10 @@ c234567
       double precision f2       !Michaelis-Menton CO2 constant (Pa)
       double precision f3       !Michaelis-Menton O2 constant (Pa)
       double precision f4,f4sun,f4shade !Scaling-up to canopy level (dimensionless)
-!     
-      
-c$$$  real aleaf(3)             !npp percentage alocated to leaf
-c$$$  compartment
-c$$$  data aleaf /0.40, 0.25, 0.45/
-c$$$  real aawood (3)           !npp percentage alocated to aboveground
-c$$$  woody biomass compartment
-c$$$  data aawood /0.35, 0.40, 0.0/
-c$$$  real afroot(3)            !npp percentage alocated to fine roots
-c$$$  compartment
-c$$$  data afroot /0.30, 0.25, 0.55/ 
-c$$$  real tleaf(3)             !turnover time of the leaf compartment
-c$$$  (yr)
-c$$$  data tleaf /2.0, 0.7, 1.0/ 
-c$$$  real tawood (3)           !turnover time of the aboveground woody
-c$$$  biomass compartment (yr)
-c$$$  data tawood /30.0, 3.0, 0.0/
-c$$$  real tfroot(3)            !turnover time of the fine roots
-c$$$  compartment
-c$$$  data tfroot /3.0, 2.0, 1.0/
       
 ! BIANCA ___________________________________________________
-      real tleaf(3)             !leaf turnover time (yr)
-      data tleaf /2.0, 0.7, 1.0/ !leaf turnover time for the 3 PFTs
+      real tleaf(7)             !leaf turnover time (yr)
+      real p21(7)
       double precision sla      !specific leaf area (m2/kg)
       real cl2                  !leaf compartment's carbon content (kgC/m2)
       real ca2                  !aboveground woody compartment's carbon content (kgC/m2)
@@ -126,7 +105,7 @@ c     HELENA____________________________________________________
 !     
       DOUBLE PRECISION p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14
      &    ,p15,p19,p20,p22,p23,p24,p25,p26,p27,p28,p29,p30,p31
-      double precision p21(3)
+
 !     
       a   = 0.8300              !Photosynthesis co-limitation coefficient
       a2  = 0.930               !Photosynthesis co-limitation coefficient
@@ -213,9 +192,9 @@ c      endif
 !     Rubisco maximum carboxylaton rate (molCO2/m2/s)
 !     -----------------------------------------------
 !     
-      data p21 /0.00003,0.00005,0.00004/ !Tropical/Temperate/Boreal
-      
-      
+!     data p21 /0.00003,0.00005,0.00004/ !Tropical/Temperate/Boreal
+      call pft_par(2, p21)
+      call pft_par(6, tleaf)
       
       vm = (p21(pft)*(p22**(p10*(temp-p11))))/ !Free-range parameter --> 0.0358>vm>840 (micromol)
      &    (1.0+exp(p23*(temp-p24)))
@@ -263,12 +242,12 @@ c     call critical_value(r)
 !     Internal leaf CO2 partial pressure (Pa)
 !     ---------------------------------------
 !     
-      ci = p19* (1-(r/p20)) * (ca-mgama) + mgama
+      ci = p19* (1.-(r/p20)) * (ca-mgama) + mgama
 c     call critical_value(ci)
 !     Rubisco carboxilation limited photosynthesis rate (molCO2/m2/s)
 !     ---------------------------------------------------------------
 !     
-      jc = vm*((ci-mgama)/(ci+(f2*(1+(p3/f3)))))
+      jc = vm*((ci-mgama)/(ci+(f2*(1.+(p3/f3)))))
 c     call critical_value(jc)
 !     
 !     Light limited photosynthesis rate (molCO2/m2/s)
@@ -294,7 +273,7 @@ c     call critical_value(je)
 !     ------------------------------
 !     
       a = 0.83
-      b = (-1)*(jc+jl)
+      b = (-1.)*(jc+jl)
 C     call critical_value(b)
       c = jc*jl
 c     call critical_value(c)
@@ -312,7 +291,7 @@ C     call critical_value2(jp)
 !     ---------------------------------------------------------------
 !     
       a2 = 0.93
-      b2 = (-1)*(jp+je)
+      b2 = (-1.)*(jp+je)
       c2 = jp*je
       delta2 = (b2**2)-4.0*a2*c2
 !     
@@ -340,7 +319,7 @@ c      if (wa.lt.0.205) f5 = wa  !Below wilting point f5 accompains wa (then Sah
       pt = csru * cf1 * 1000. * wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
 c      print*,pt, 'pt'
       alfm = 1.391
-      gm = 3.26*86400           !(*86400 transform mm/s to mm/dia)
+      gm = 3.26*86400.           !(*86400 transform mm/s to mm/dia)
       
       if(rc .gt. 0.0) then
          gc = (real(1,8)/real(rc,8))*real(86400000,8) !*86400000 transfor m/s to mm/dia)
@@ -355,7 +334,7 @@ c      print*, gc, 'gc'
       endif
 c      print*, d, 'd'
       if(d .gt. 0.0) then
-         f5 = 1-(exp(-1*(pt/d)))
+         f5 = 1.-(exp(-1.*(pt/d)))
       else
          f5 = wa
       endif
@@ -549,12 +528,13 @@ C 10   CONTINUE
       DOUBLE PRECISION gs2      !Canopy conductance (m/s)
       DOUBLE PRECISION gs       !Canopy conductance (molCO2/m2/s)
       DOUBLE PRECISION g0       !Residual stomatance conductance
-      DOUBLE PRECISION g1(3)    !3.00 (boreal) / 2.05 (temperate) / 3.02 (tropical)
+      DOUBLE PRECISION g1(7)    !3.00 (boreal) / 2.05 (temperate) / 3.02 (tropical)
       DOUBLE PRECISION D        !kPA
       DOUBLE PRECISION aa
       real rcmax 
 !     
-      data g1 /6.0,4.0,2.0/ 
+      call pft_par(1, g1)
+      
       f1b = (f1_in*10e5)*ocp_pft_in        !maior f1b = 13.38
       aa = (f1b/363.)
       g0 = 0.01
@@ -568,7 +548,7 @@ C 10   CONTINUE
 !     
       if (vpd_in.lt.0.25) gs = 1.5
       if (vpd_in.ge.0.25) then 
-         gs = g0 + 1.6 * (1 + (g1(m)/D)) * (aa) !Based on Medlyn et al. 2011
+         gs = g0 + 1.6 * (1. + (g1(m)/D)) * (aa) !Based on Medlyn et al. 2011
 !     gs = g0 + 1.6 * (1 + (g1/D)) * (aa) !Based on Medlyn et al. 2011
 !     
 c         call critical_value2(gs)
@@ -580,7 +560,7 @@ c         call critical_value2(gs)
 !     print*,gs
 !     endif
 !     
-      gs2 = gs/41
+      gs2 = gs/41.
 c      call critical_value2(gs2)
 !     if (gs2.le.0.00025) gs2 = 0.0
 !     if (gs2.gt.0.0318) then                                         !
@@ -662,7 +642,7 @@ C      if (rc2_in.ge.545.43) rc2_in = rcmax !A=0.5
 !     Litter decayment function                                             !Controlled by annual evapotranspiration
 !     -------------------------
 !     
-      f6 = 1.16*10**(-1.4553+0.0014175*(evap*365.0))
+      f6 = 1.16*10.**(-1.4553+0.0014175*(evap*365.0))
 C      call critical_value(f6)
 !     
 !     Soil carbon storage function                                          !Controlled by temperature
@@ -729,7 +709,7 @@ c23456
 c     esta subrotina calcula a areA DE CADA pft  
 c     a partir do conteudo de carbono nos compartimentos vegetais no 
 c     dia anterior 
-      INTEGER, PARAMETER :: NPFT = 3
+      INTEGER, PARAMETER :: NPFT = 7
       INTEGER :: P
       REAL :: CLEAF(NPFT), CFROOT(NPFT), CAWOOD(NPFT)
       REAL :: TOTAL_BIOMASS_PFT(NPFT), OCP_COEFFS(NPFT)
@@ -790,8 +770,9 @@ C23456
 !     
 !     Parameters
 !     ----------
-!     
-      ra = 100                  !s/m
+      real ra, h5, t1, t2, es, es1, es2, delta_e
+      real gama, gama2
+      ra = 100.                  !s/m
       h5 = 0.0275               !mb-1
 !     
 !     Delta
@@ -848,6 +829,8 @@ C23456
 !     
 !     Parameters
 !     ----------
+      real ra, rcmin, t1, t2, es, es1, es2, delta_e
+      real gama, gama2
 !     
       ra      = 100.            !s/m
       rcmin   = 100.            !s/m
@@ -911,4 +894,84 @@ C23456
       return
       end        
 !     =============================================================
+c=====================================================================
+c     
+c     subroutine allocation calculates the daily carbon content of each
+c     compartment
+c     
+c     code written by Bianca Rius & David Lapola (27.Ago.2015)
+c     
+c=====================================================================
+      
+      subroutine allocation (pft, npp ,scl1,sca1,scf1,
+     &    scl2,sca2,scf2)          !output
+c     
+c     
+!     variables
+      integer, parameter :: npfts = 7
+      integer pft   
+      real npp                  !potential npp (KgC/m2/yr)
+      real npp_aux              !auxiliary variable to calculate potential npp in KgC/m2/day
+      real scl1                  !previous day carbon content on leaf compartment (KgC/m2)
+      real scl2                  !final carbon content on leaf compartment (KgC/m2)
+      real sca1                  !previous day carbon content on aboveground woody biomass compartment(KgC/m2)
+      real sca2                  !final carbon content on aboveground woody biomass compartment (KgC/m2)
+      real scf1                  !previous day carbon content on fine roots compartment (KgC/m2)
+      real scf2                  !final carbon content on fine roots compartment (KgC/m2)      
+      
+      real aleaf(npfts)             !npp percentage allocated compartment
+      real aawood(npfts)
+      real afroot(npfts)
+      real tleaf(npfts)             !turnover time (yr)
+      real tawood(npfts)
+      real tfroot(npfts)            
 
+      call pft_par(3, aleaf)
+      call pft_par(4, aawood)
+      call pft_par(5, afroot)
+      call pft_par(6, tleaf)
+      call pft_par(7, tawood)
+      call pft_par(8, tfroot)
+    
+!     Carbon content of each compartment(KgC/m2)
+c     
+c     
+c     initialization
+      if((scl1 .lt. 0.0000001) .or. (scf1 .lt. 0.0000001)) then
+         IF(NPP .lt. 0.0000001) THEN
+            scl2 = 0.0
+            scf2 = 0.0
+            sca2 = 0.0 
+            goto 10
+         ENDIF
+      endif   
+      npp_aux = npp/365.0       !transform (KgC/m2/yr) in (KgC/m2/day)
+c      call critical_value(npp_aux)
+      scl2 = scl1 + (aleaf(pft) * npp_aux) -(scl1 /(tleaf(pft)*365.0))
+         
+      scf2 = scf1 +(afroot(pft) * npp_aux)-(scf1 /(tfroot(pft)*365.0))
+      if(aawood(pft) .gt. 0.0) then
+         sca2 = sca1 +(aawood(pft)*npp_aux)-(sca1/(tawood(pft)*365.0))
+      else
+         sca2 = 0.0
+      endif
+
+      
+c      call critical_value(scl2)
+c      call critical_value(scf2)
+c      call critical_value(sca2)
+
+      if(scl2 .lt. 0.0) scl2 = 0.0
+      if(scf2 .lt. 0.0) scf2 = 0.0
+      if(sca2 .lt. 0.0) sca2 = 0.0
+      
+C     cb2 = (((abwood(pft))*npp_aux)- (cb1/((tbwood(pft))*365))) + cb1
+C      cs2 = (((asto(pft))*npp_aux) - (cs1/((tsto(pft))*365))) + cs1
+C      cr2 = (((arep(pft))*npp_aux) - (cr1/((trep(pft))*365))) + cr1
+C      co2 = (((aother(pft))*npp_aux)- (co1/((tother(pft))*365))) + co1
+      
+c      if(cl2 .gt. 0) print*, cl2, cf2, ca2, 'carbon final'
+ 10   continue
+      return
+      end
+c     
