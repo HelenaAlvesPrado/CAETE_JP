@@ -1,3 +1,0 @@
-<?xml version="1.0"?>
-<!--<!DOCTYPE metadata SYSTEM "http://www.esri.com/metadata/esriprof80.dtd">-->
-<metadata xml:lang="pt"><Esri><MetaID>{5452346E-E272-410E-A45B-EE6C481A62BF}</MetaID><CreaDate>20160914</CreaDate><CreaTime>23463200</CreaTime><SyncOnce>TRUE</SyncOnce><DataProperties><lineage><Process ToolSource="C:\Program Files\ArcGIS\ArcToolbox\Toolboxes\Conversion Tools.tbx\FloatToRaster" Date="20160914" Time="234632">FloatToRaster C:\Users\dr\Desktop\CAETE_JP\CAETE\outputs\ambientais4\ambientais4_LAYER1.flt C:\Users\dr\Desktop\CAETE_JP\CAETE\outputs\ambientais4\FloatTo_ambi1</Process></lineage></DataProperties></Esri></metadata>

@@ -1,3 +1,0 @@
-<?xml version="1.0"?>
-<!--<!DOCTYPE metadata SYSTEM "http://www.esri.com/metadata/esriprof80.dtd">-->
-<metadata xml:lang="pt"><Esri><MetaID>{0FA31D8C-22C8-4764-88BE-8F3F502112FC}</MetaID><CreaDate>20160914</CreaDate><CreaTime>23455500</CreaTime><SyncOnce>TRUE</SyncOnce><DataProperties><lineage><Process ToolSource="C:\Program Files\ArcGIS\ArcToolbox\Toolboxes\Conversion Tools.tbx\FloatToRaster" Date="20160914" Time="234555">FloatToRaster C:\Users\dr\Desktop\CAETE_JP\CAETE\outputs\aresp.flt C:\Users\dr\Desktop\CAETE_JP\CAETE\outputs\FloatTo_ares1</Process></lineage></DataProperties></Esri></metadata>
