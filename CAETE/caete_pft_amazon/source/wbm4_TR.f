@@ -622,7 +622,7 @@ c     Carbon allocation (carbon content on each compartment)
                
 !     Carbon cycle (Microbial respiration, litter and soil carbon)
 !     ============================================================     
-               call carbon2 (ts,f5(p),evap(p),laia(p), ocp_coeffs(p)
+               call carbon2 (ts,f5(p),evap(p),laia(p)
      &             ,cl(p),cs(p),hr(p))   
             endif
 
@@ -640,7 +640,7 @@ c     Carbon allocation (carbon content on each compartment)
             aravg(p) = aravg(p) +   ar(p) /365.0 !kgC/m2/day
             nppavg(p) = nppavg(p) + nppa(p) /365.0 !kgC/m2/day
             
-            laiavg(p) = laiavg(p) + (laia(p) * OCP_COEFFS(P))/365.0 
+            laiavg(p) = laiavg(p) + laia(p)  /365.0 
             clavg(p) = clavg(p) + (cl(p) * OCP_COEFFS(P))/365.0 !kgC/m2/day
             csavg(p) = csavg(p) + (cs(p) * OCP_COEFFS(P))/365.0 !kgC/m2/day
             hravg(p) = hravg(p) + (hr(p) * OCP_COEFFS(P))/365.0 !kgC/m2/day

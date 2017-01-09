@@ -78,10 +78,7 @@ c234567
 ! BIANCA ___________________________________________________
       real tleaf(7)             !leaf turnover time (yr)
       real p21(7)
-      double precision sla      !specific leaf area (m2/kg)
-      real cl2                  !leaf compartment's carbon content (kgC/m2)
-      real ca2                  !aboveground woody compartment's carbon content (kgC/m2)
-      real cf2                  !fineroots compartment's carbon content (kgC/m2)
+      double precision sla      !specific leaf area (m2/kg)      real cl2                  !leaf compartment's carbon content (kgC/m2)
       double precision csa      !sapwood compartment´s carbon content (5% of woody tissues) (kgC/m2)
       double precision ncl      !leaf N:C ratio (gN/gC)
       double precision ncf      !fine roots N:C ratio (gN/gC)
@@ -90,12 +87,11 @@ c234567
       double precision pt                   !taxa potencial de fornecimento para
 c     transpiração (mm/dia)
       double precision csru    !Specific root water uptake (0.5 mm/gC/dia; based in Pavlick et al (2013))
-      double precision ad       !atmospheric demand for transpiration (mm/dia;based in Gerten et al. 2004)
       real emax                 !potential evapotranspiration (mm/dia)
       double precision alfm     !maximum Priestley-Taylor coefficient (based in Gerten et al. 2004; used to calculate ad)
       double precision gm       !scaling conductance (mm/dia)(based in Gerten et al. 2004; used to calculate ad)
       double precision gc       !Canopy conductance (mm/dia)(based in Gerten et al. 2004; used to calculate ad)
-      double precision nppa64,laia64, ph64, ar64, rm64, rms64, rml64
+      double precision laia64, ph64, ar64, rm64, rms64, rml64
       double precision rmf64
       double precision rg64, rgf64, rgs64, rgl64
       
@@ -103,7 +99,7 @@ c     HELENA____________________________________________________
 !     Parameters 
 !     ----------
 !     
-      DOUBLE PRECISION p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14
+      DOUBLE PRECISION p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14
      &    ,p15,p19,p20,p22,p23,p24,p25,p26,p27,p28,p29,p30,p31
 
 !     
@@ -293,25 +289,25 @@ c     &     f5 = (wa-0.205)/(0.5-0.205)
 c      if (wa.lt.0.205) f5 = wa  !Below wilting point f5 accompains wa (then Sahara is well represented)
      
 
-      csru = 0.5 * ocp_pft 
-      pt = csru * (cf1 * ocp_pft) * 1000. * wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
+      csru = 0.5 
+      pt = csru * (cf1 * ocp_pft * 1000.) * wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
       alfm = 1.391
-      gm = 3.26 * 86400. * ocp_pft           !(*86400 transform mm/s to mm/dia)
+      gm = 3.26 * 86400.           !(*86400 transform mm/s to mm/dia)
       
       if(rc .gt. 0.0) then
-         gc = (rc) * 86400000. !*86400000 transfor m/s to mm/dia)
+         gc = (1./rc) * 86400000. !*86400000 transfor m/s to mm/dia)
       else
          gc = 0.0
       endif
 
       if(gc .gt. 0.0) then
-         d =(emax*alfm)/((1. + gm)/gc) !(based in Gerten et al. 2004)
+         d =(emax*alfm)/(1. + gm/gc) !(based in Gerten et al. 2004)
       else
          d = 0.0
       endif
 
       if(d .gt. 0.0) then
-         f5 = 1.-(exp(-1.*(pt/d)))
+         f5 = real((1.-(exp(-1.*(pt/d)))), 4)
       else
          f5 = wa
       endif
@@ -403,13 +399,15 @@ c
       ncs = 0.003               !(gN/gC)
 c      
 c      
-      rml64 = (ncl*real(cl1,8))*27.*(exp(0.03*real(temp,8)))
+      rml64 = (ncl * cl1 * ocp_pft) * 27. * exp(0.03*temp)
       call critical_value2(rml64)
-      rml =  real(rml64,4) * ocp_pft
-      rmf64 = (ncf*real(cf1,8))*27.*(exp(0.03*real(temp,8)))
+      rml =  real(rml64,4)
+
+      rmf64 = (ncf * cf1 * ocp_pft) * 27. * exp(0.03*temp)
       call critical_value2(rmf64)
       rmf =  real(rmf64,4) * ocp_pft
-      rms64 = (ncs*csa)*27.*(exp(0.03*real(temp,8)))
+
+      rms64 = (ncs * csa) * 27. * exp(0.03*temp)
       call critical_value2(rms64)
       rms = real(rms64,4)
 c      
@@ -421,14 +419,17 @@ c
 c     Growth respiration (KgC/m2/yr)(based in Ryan 1991; Sitch et al.
 c     2003; Levis et al. 2004)         
 c      
-      csai= real(beta_awood,8) * ocp_pft        ! precisa mesmo multiplicar por 0.05?
+      csai= 0.05 * beta_awood        ! precisa mesmo multiplicar por 0.05?
       call critical_value2(csai)
-      rgl64 = (0.25*((real(beta_leaf,8))*365.))
+
+      rgl64 = 0.25 *  beta_leaf * 365.
       call critical_value2(rgl64)
-      rgl = real(rgl64,4) * ocp_pft
-      rgf64 = (0.25*((real(beta_froot,8))*365.))
+      rgl = real(rgl64,4)
+
+      rgf64 =  0.25* beta_froot * 365.
       call critical_value2(rgf64)
-      rgf = real(rgf64,4)  * ocp_pft
+      rgf = real(rgf64,4)
+
       rgs64 = (0.25 * csai * 365.)
       call critical_value2(rgs64)
       rgs = real(rgs64,4)
@@ -563,7 +564,7 @@ C      if (rc2_in.ge.545.43) rc2_in = rcmax !A=0.5
 !     Microbial (heterotrophic) respiration
 !     =====================================
       
-      subroutine carbon2 (tsoil,f5,evap,laia,ocp_pft, !Inputs
+      subroutine carbon2 (tsoil,f5,evap,laia, !Inputs
      &    cl,cs,hr)             !Outputs
 !     
 !     Variables
@@ -629,7 +630,7 @@ C      call critical_value(f7)
 !     Litterfall (kgC/m2)
 !     ------------------
 !     
-      lf = p33*(laia * ocp_pft)
+      lf = p33 * laia
 C      call critical_value(lf)
 !     
 !     Litter carbon (kgC/m2)

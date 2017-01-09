@@ -709,7 +709,7 @@ c     &              (crepi_aux(k-1)/(trep(i6)*365))) + crepi_aux(k-1)
       
       
       return
-      end subroutine spinup				   
+      end subroutine spinup
 !     ================================
 
       subroutine readx(nunit,var,x)
