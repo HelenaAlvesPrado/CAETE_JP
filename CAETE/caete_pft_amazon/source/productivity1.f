@@ -287,7 +287,8 @@ c      if (wa.gt.0.5) f5 = 1.0   !Not too lower in e.g. Amazonian dry season
 c      if ((wa.ge.0.205).and.(wa.le.0.5))
 c     &     f5 = (wa-0.205)/(0.5-0.205)
 c      if (wa.lt.0.205) f5 = wa  !Below wilting point f5 accompains wa (then Sahara is well represented)
-     
+
+      rc = rc * ocp_pft
 
       csru = 0.5 
       pt = csru * (cf1 * ocp_pft * 1000.) * wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
@@ -329,63 +330,36 @@ c      if (f1 .gt. 0.0) PRINT*, f1, 'f1', f5, 'f5', wa, 'wa'
 !     Leaf area index (m2 leaf/m2 arEa) bianca
 !     ---------------------------------
       sla=(0.0300*1000.)*((365./(((tleaf(pft))/365.)/12.))**(-0.46))
-c     PRINT*, sla, 'sla'
-c      laia64  = (0.25*exp(2.5*(f1/p25))) !Adjusted after using observed par
-c     if(laia .gt. 0) print*, laia, 'laia1'
       laia64 = (cl1 * 365.0000 * sla) * ocp_pft
       laia = real(laia64,4)
-c      if(f1 .gt. 0) PRINT*, laia, 'laia2'
       
 !     SunLAI
 !     ------
-      sunlai = (1.0-(exp(-(0.5 * sin(90.))*laia64))) / 0.5 * sin(90.)
-c      sunlai = (1.0-(exp(-p26*laia64)))/p26
+      sunlai = (1.0-(exp(-p26*laia64)))/p26
 c     call critical_value(sunlai)
-!     ShadeLAI
 !     --------
-!     
       shadelai = laia64 - sunlai
 c     call critical_value(shadelai)
-!     
+!
+      
 !     Scaling-up to canopy level (dimensionless)
 !     ------------------------------------------
-!     
       f4 = (1.0-(exp(-p26*laia64)))/p26 !Sun 90 degrees in the whole canopy, to be used for respiration
-c     call critical_value(f4)
+
       
 !     Sun/Shade approach to canopy scaling !Based in de Pury & Farquhar (1997)
 !     
-!     ------------------------------------
-!     
+!     -----------------------------------     
       f4sun = (1.0-(exp(-p26*sunlai)))/p26 !sun 90 degrees
       f4shade = (1.0-(exp(-p27*shadelai)))/p27 !sun ~20 degrees
-!     
-c     call critical_value(f4sun)
-c     call critical_value(f4shade)
+
+      
 !     Canopy gross photosynthesis (kgC/m2/yr)
 !     =======================================
 !     (0.012 converts molCO2 to kgC)
 !     (31557600 converts seconds to year [with 365.25 days])
       ph64 = 0.012*31557600.0*f1*f4sun*f4shade
       ph = real(ph64, 4)       ! kg m-2 year-1
-C      call critical_value(ph)
-c      if(ph .gt. 0.0)PRINT*, PH, 'ph'
-
-!     Plant respiration
-!     =================
-c      rl = 0.012*31557600.0*p30*vm*f4*f5 !Leaf respiration
-c!     
-c      rp = p31*rl               !Non-leaf parts respiration
-c!     
-c!     Respiration minimum and maximum temperature
-c!     -------------------------------------------
-c!     
-c      if ((temp.ge.-10.0).and.(temp.le.50.0)) then
-c         ar = rl+rp
-c      else
-c         ar = 0.0               !Temperature above/below respiration windown
-c      endif
-!     
 
 cc     -===============================----------=============================---
 !     c Maintenance respiration (kgC/m2/yr) (based in Ryan 1991)

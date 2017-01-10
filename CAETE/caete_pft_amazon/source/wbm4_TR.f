@@ -23,20 +23,6 @@ C       passagem tranquila-JP
 C     MODIFIED BY BR AND JPDF 27-12-2016 -- ADAPTING TO CAETE BIANCA + TROIA
 C       
 !     =================================================================
-!     ! COMENTARIOS: (27-12-2016)
-
-C     ALGUNS PROCESSOS IMPLEMENTADOS PELA BIANCA (F5 A APARTIR DE RC2 EM CARBON2
-C     E LAIA A PARTIR DE SLA) NAO PODEM AINDA SER IMPLEMENTADOS NESTA VERSAO POR PROBLEMAS 
-C     PARCIALMENTE DESCONHECIDOS. JP
-C     1 - RC2 SO EH CALCULADA DEPÓIS DA CHAMADA DE PRODUCTIVITY1 (ANTIGA CARBON2) 
-C     BIA VC ESTAVA USANDO RC2 DENTRO DA PRODUCTIVITY (COMO DENOMINADOR EM UMA DIVISAO)
-C     PRECISAMOS REVER A ORDEM DA BUDGET PRA IMPLEMENTAR ISSO.
-C     2 - NAO SEI O QUE ESTA HAVENDO COM O CALCULO DE LAIA A PARTIR DA SLA- DA ERRO-NAO SEI   
-C     ASSIM ESTES DOIS PROCESSOS (CALCULO DE F5 E LAIA CONTINUAM COMO CARBON2)
-
-      
-!     ! COMENTARIOS:
-
 
 !     Variables
 !     =========
@@ -44,7 +30,6 @@ C     ASSIM ESTES DOIS PROCESSOS (CALCULO DE F5 E LAIA CONTINUAM COMO CARBON2)
       integer ,parameter :: nx=120,ny=160,q=7
       real ,parameter :: no_data = -9999.0
       
-!     
 c     --------------------------I N P U T S----------------------------
       real ca                   !CO2 atmospheric concentration (ppmv)
       real p0(nx,ny,12)         !Atmospheric pressure (mb)
@@ -392,7 +377,8 @@ c     finalize nx loop
       real alfa_leaf(npft), alfa_awood(npft), alfa_froot(npft)
       real beta_leaf(npft), beta_awood(npft), beta_froot(npft)
 
-      ! RELATED WITH GRIDCELL OCUPATION AND LIGHT LIMITATION
+!     RELATED WITH GRIDCELL OCUPATION
+      
       REAL OCP_COEFFS(NPFT), ocp_mm(npft)
       
 !     WBM COMMUNICATION (water balance)
@@ -421,18 +407,18 @@ c     Carbon Cycle
       real ar  (npft)           !Autotrophic respiration (kgC/m2/yr)
       real nppa(npft)           !Net primary productivity / auxiliar
       real laia(npft)           !Leaf area index (m2 leaf/m2 area)
-      real cl  (npft)           !Litter carbon (kgC/m2) ---- anual?
-      real cs  (npft)           !Soil carbon (kgC/m2) ---- anual?
+      real cl  (npft)           !Litter carbon (kgC/m2)
+      real cs  (npft)           !Soil carbon (kgC/m2) 
       real hr  (npft)           !Heterotrophic (microbial) respiration (kgC/m2/yr)
       real rc2 (npft)           !Canopy resistence (s/m)
-      real f1  (npft)
+      real f1  (npft)           !
       real f5  (npft)           !Photosynthesis (mol/m2/s)
-      real f1b (npft)           !Photosynthesis (micromol/m2/s)
-      real vpd (npft)
-      real rm(npft),rml(npft),rmf(npft),rms(npft)
+c      real f1b (npft)           !Photosynthesis (micromol/m2/s)
+      real vpd (npft)           !Vapor Pressure deficit
+      real rm(npft),rml(npft),rmf(npft),rms(npft) ! maintenance & growth a.resp
       real rg(npft),rgl(npft),rgf(npft),rgs(npft)
-      real cl1(npft), cf1(npft), ca1(npft)
-      real cl2(npft),cf2(npft), ca2(npft)
+      real cl1(npft),cf1(npft),ca1(npft) ! carbon pre-allocation 
+      real cl2(npft),cf2(npft),ca2(npft) ! carbon pos-allocation
       
 
 !     Initialize Canopy Resistence Parameters
@@ -440,7 +426,7 @@ c     Carbon Cycle
       do p = 1,npft
          rc2(p) = 0.0
          f1(p)  = 0.0
-         f1b(p) = 0.0
+c         f1b(p) = 0.0
          f5(p) = 0.0
       enddo
       
@@ -521,9 +507,9 @@ c     Carbon Cycle
             rgs(p)   = 0.0
 
             if ((i.eq.1).and.(month.eq.1)) then    
-               beta_leaf(p) = 0.00001
-               beta_awood(p) = 0.00001
-               beta_froot(p)= 0.00001
+               beta_leaf(p) = 0.0000001
+               beta_awood(p) = 0.0000001
+               beta_froot(p)= 0.0000001
             endif
          enddo
          
@@ -572,9 +558,9 @@ c     Carbon allocation (carbon content on each compartment)
             call critical_value(ca2(p))
             call critical_value(cf2(p))
 
-            alfa_leaf(p)  = max((cl2(p) - cl1(p)), 0.00001) 
-            alfa_awood(p) = max((ca2(p) - ca1(p)), 0.00001)
-            alfa_froot(p) = max((cf2(p) - cf1(p)), 0.00001)
+            alfa_leaf(p)  = max((cl2(p) - cl1(p)), 0.0000001) 
+            alfa_awood(p) = max((ca2(p) - ca1(p)), 0.0000001)
+            alfa_froot(p) = max((cf2(p) - cf1(p)), 0.0000001)
             
 !     Snow budget
 !     ===========     
