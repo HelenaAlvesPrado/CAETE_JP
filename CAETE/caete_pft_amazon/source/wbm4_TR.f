@@ -1,9 +1,12 @@
 C23456
-      subroutine wbm (prec,temp,lsmk,p0,ca,par,cleaf_ini, cawood_ini
+      subroutine wbm (prec,temp,lsmk,p0,ca,par,rhs,cleaf_ini, cawood_ini
      &    ,cfroot_ini,emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft
      &    ,clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,evapm_pft
      &    ,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft,rgf_pft
-     &    ,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft)
+     &    ,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft,grid_area)
+      
+
+      
 !     implicit none
 
 
@@ -37,6 +40,7 @@ c     --------------------------I N P U T S----------------------------
       real prec(nx,ny,12)       !Precipitation (mm/month)
       real temp(nx,ny,12)       !Temperature (oC)
       real par(nx,ny,12)        !IPAR (Ein/m2/s)
+      real rhs(nx,ny,12)        !Relative humidity
 
       real  cleaf_ini(nx,ny,q)  ! Initial carbon content in leaves (kg m-2)
       real  cawood_ini(nx,ny,q) ! Initial carbon content in aboveground wood (kg m-2)
@@ -75,7 +79,9 @@ c     NOVOS OUTPUTS DA BIANCA
       
       real cleaf_pft (nx,ny,q) ! leaf biomass (KgC/m2)
       real cawood_pft(nx,ny,q) ! aboveground wood biomass (KgC/m2)
-      real cfroot_pft(nx,ny,q) ! fine root biomass
+      real cfroot_pft(nx,ny,q)  ! fine root biomass
+      
+      real grid_area(nx,ny,q)! gridcell area fraction of pfts!
 c     --------------------------------E N D----------------------------
 
 c     ------------------------- internal variables---------------------
@@ -103,13 +109,13 @@ c     ------------------------- internal variables---------------------
       real nppmes(q),laimes(q), armes(q),clmes(q),csmes(q)
       real emes(q),rmlmes(q),rmfmes(q),rmsmes(q)
       real rmmes(q),rglmes(q),rgfmes(q),rgsmes(q),rgmes(q)
-      real cleafmes(q),cawoodmes(q),cfrootmes(q)
+      real cleafmes(q),cawoodmes(q),cfrootmes(q), gridocpmes(q)
 
       
       real t0,t1                !Soil temperature aux variables 
       real wsaux1,dwww,wmax     !auxiliar to equilibrium check
       real ae                   !Available energy     
-      real pr,spre,ta,td,ipar
+      real pr,spre,ta,td,ipar,ru
       
       real, parameter :: H = 1.0 !Soil layer(m) 
       real, parameter :: diffu = 4.e-7*(30.*86400.0) !Soil thermal diffusivity (m2/month)
@@ -163,6 +169,7 @@ c     ------------------------- internal variables---------------------
                cleaf_pft(i,j,p)  = no_data ! leaf biomass (KgC/m2)
                cawood_pft(i,j,p) = no_data ! aboveground biomass (KgC/m2)
                cfroot_pft(i,j,p) = no_data ! fine root biomass (KgC/m2)
+               grid_area(i,j,p) = no_data ! gridcell area fraction of pfts(%)
             enddo
 
 c     Write to track program execution     
@@ -230,17 +237,18 @@ c     Write to track program execution
                ta = temp(i,j,k)
                pr = prec(i,j,k)
                ipar = par(i,j,k)
+               ru = rhs(i,j,k)
                ae = 2.895*ta+52.326 !Available energy (W/m2) - From NCEP-NCAR reanalysis data
 !     
 !     Monthly water budget
 !     ====================
 
                call budget (mes,wini,gini,sini,td,ta,pr,spre,ae
-     &             ,ca,ipar,cleaf1_pft,cawood1_pft,cfroot1_pft
+     &             ,ca,ipar,ru,cleaf1_pft,cawood1_pft,cfroot1_pft
      &             ,wfim,gfim, sfim,smes,rmes,emes,epmes,phmes,armes
      &             ,nppmes,laimes,clmes,csmes,hrmes,rcmes,rmlmes,rmfmes
      &             ,rmsmes,rmmes,rglmes,rgfmes,rgsmes,rgmes,cleafmes
-     &             ,cawoodmes,cfrootmes)
+     &             ,cawoodmes,cfrootmes, gridocpmes)
 
                do p=1,q
                   if(p .eq. 1) emaxm(i,j,k) = epmes
@@ -279,6 +287,7 @@ c     Write to track program execution
                       cleaf_pft (i,j,p) = cleafmes(p)
                       cawood_pft(i,j,p) = cawoodmes(p)
                       cfroot_pft(i,j,p) = cfrootmes(p)
+                      grid_area(i,j,p) = gridocpmes(p)
                   endif
                enddo
                
@@ -321,11 +330,13 @@ c     finalize nx loop
       return
       end subroutine wbm
 
+      
+
       subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca
-     $    ,ipar,cl1_pft,ca1_pft,cf1_pft,w2,g2,s2,smavg,ruavg,evavg
+     $    ,ipar,rh,cl1_pft,ca1_pft,cf1_pft,w2,g2,s2,smavg,ruavg,evavg
      &    ,epavg,phavg,aravg,nppavg,laiavg,clavg,csavg,hravg,rcavg
      &    ,rmlavg,rmfavg,rmsavg,rmavg,rglavg,rgfavg,rgsavg,rgavg
-     &    ,cleafavg_pft,cawoodavg_pft,cfrootavg_pft)
+     &    ,cleafavg_pft,cawoodavg_pft,cfrootavg_pft, ocpavg)
 
 
       integer, parameter :: npft = 7
@@ -346,6 +357,7 @@ c     finalize nx loop
       real ae                   !Available energy (W/m2)
       real ca                   !Atmospheric carbon
       real ipar                 !Incident photosynthetic active radiation
+      real rh                   !Relative humidity
 
 !     ----------------------------OUTPUTS------------------------------
       real w2(npft)             !Final (last day) soil moisture storage (mm)
@@ -370,7 +382,7 @@ c     finalize nx loop
       real cleafavg_pft(npft) ! Carbon in plant tissues
       real cawoodavg_pft(npft) 
       real cfrootavg_pft(npft)
-      
+      real ocpavg(npft)
 !     -----------------------Internal Variables------------------------
       integer p
       
@@ -380,9 +392,9 @@ c     finalize nx loop
 !     RELATED WITH GRIDCELL OCUPATION
       
       REAL OCP_COEFFS(NPFT), ocp_mm(npft)
+      LOGICAL OCP_WOOD(NPFT)
       
 !     WBM COMMUNICATION (water balance)
-      real rh                   !Relative humidity
       real wmax                 !Soil moisture availability (mm)
       real tsnow                !Temperature threshold for snowfall (oC)
       real tice                 !Temperature threshold for soil freezing (oC)
@@ -432,7 +444,7 @@ c         f1b(p) = 0.0
       
 !     Parameters
 !     ----------
-      rh    = 0.685
+c      rh    = 0.685
       wmax  = 500.0
       tsnow = -1.0
       tice  = -2.5
@@ -515,7 +527,7 @@ c         f1b(p) = 0.0
          
 !     Grid cell area fraction (%) ocp_coeffs(pft(1), pft(2), ...,pft(p))
 !     =================================================================     
-         CALL PFT_AREA_FRAC(CL1, CF1, CA1, OCP_COEFFS) ! def in productivity1.f
+         CALL PFT_AREA_FRAC(CL1, CF1, CA1, OCP_COEFFS, OCP_WOOD) ! def in productivity1.f
          
 !     Maximum evapotranspiration   (emax)
 !     ================================= 
@@ -526,7 +538,7 @@ c         f1b(p) = 0.0
 !     Productivity (ph, aresp, vpd, rc2 & etc.) for each PFT
 !     ================================= 
             
-            call productivity1 (p,ocp_coeffs(p),temp,p0,w(p)
+            call productivity1 (p,ocp_coeffs(p),OCP_WOOD(P),temp,p0,w(p)
      &          ,wmax,ca,ipar,cl1(p),ca1(p),cf1(p),beta_leaf(p)
      &          ,beta_awood(p),beta_froot(p),emax,ph(p),ar(p)
      &          ,nppa(p),laia(p),f5(p),f1(p),vpd(p),rm(p),rml(p)
@@ -671,6 +683,7 @@ c     Carbon allocation (carbon content on each compartment)
          rgfavg(p) = rgfavg(p) * 12.0 
          rgsavg(p) = rgsavg(p) * 12.0 
          rgavg(p) = rgavg(p) * 12.0
+         ocpavg(p) = (ocp_mm(p)/real(ndmonth(month))) * 100.
       enddo
       return
       end subroutine budget

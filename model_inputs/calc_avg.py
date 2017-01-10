@@ -136,7 +136,7 @@ def main():
     # loop over datasets and make things happen
     npy_files = []
     for el in vr_set:
-        if el in ['rhs', 'huss', 'tasmax', 'tasmin', 'rlds', 'hurs']:
+        if el in [ 'huss', 'tas','ps','pr','rsds','tasmax', 'tasmin', 'rlds', 'rhs']:
             continue
         fls=[el1 for el1 in fl_set if el == el1.split(dir_sep)[-1].split('_')[0]]
         # criando aux_array
@@ -161,7 +161,7 @@ def main():
             del(media_mensal)
 
     # npy done
-    out_dir = 'new_inputs_caete3'
+    out_dir = 'new_inputs_caete1'
     out_path = os.getcwd() + os.path.sep + out_dir
     if os.path.exists(out_path):
         pass
@@ -171,7 +171,8 @@ def main():
     txt_files = []
     for npy in npy_files:
         txt_files.append(npy.split('.')[0] + '.txt')
-        month_arr = np.load(npy)
+        month_arr = np.load(npy)      
+
         month = 1
         bin_filename = out_path + os.path.sep + npy.split('.')[0] + '.txt'
         with open(bin_filename, mode='a') as fh:

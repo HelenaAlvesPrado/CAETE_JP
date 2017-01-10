@@ -11,7 +11,7 @@ c234567
 ! unrealistically drops to a level below those when wsoil is lesser than 0.205 (because of f5)
 !=============================================================================================
 !
-      subroutine productivity1 (pft,ocp_pft,temp, p0, w,
+      subroutine productivity1 (pft,ocp_pft,LIGTH_LIMIT,temp, p0, w,
      &    wmax, ca,ipar,cl1, ca1, cf1, beta_leaf, beta_awood, beta_froot
      &    ,emax, ph,ar, nppa, laia, f5, f1, vpd, rm, rml, rmf, rms, rg
      &    ,rgl,rgf,rgs,rc)
@@ -31,7 +31,7 @@ c234567
       real ipar                 !Incident photosynthetic active radiation (w/m2)'
       real cl1, cf1, ca1
       real beta_leaf, beta_awood, beta_froot
-      
+      LOGICAL LIGTH_LIMIT
 !     Output
 !     ------
 !     
@@ -227,13 +227,12 @@ c     call critical_value(jc)
 !     
 !     Light limited photosynthesis rate (molCO2/m2/s)
 !     -----------------------------------------------
-      if (ocp_pft .gt. 0.8) then
-         aux_ipar= ipar
-      else if (ocp_pft .lt. 0.3) then
-         aux_ipar = ipar - (ipar * ocp_pft)
+      if (LIGTH_LIMIT) then
+         aux_ipar= ipar   
       else
-         aux_ipar = ipar * 0.5
+         aux_ipar = ipar - (ipar * 0.25)
       endif
+      
       jl = p4*(1.0-p5)*aux_ipar*((ci-mgama)/(ci+(p6*mgama)))
       
 c     call critical_value(jl)
@@ -280,7 +279,7 @@ c      if (vm .gt. 1e-5)PRINT*, F1A, 'f1a'
 !     ==========      
       wa = (w/wmax) * ocp_pft
       
-      call canopy_resistence(pft,vpd64, f1a, rc)
+      call canopy_resistence(pft,vpd64, f1a, ocp_pft,rc)
 !     Water stress response modifier (dimensionless)
 !     ----------------------------------------------     
 c      if (wa.gt.0.5) f5 = 1.0   !Not too lower in e.g. Amazonian dry season
@@ -288,10 +287,9 @@ c      if ((wa.ge.0.205).and.(wa.le.0.5))
 c     &     f5 = (wa-0.205)/(0.5-0.205)
 c      if (wa.lt.0.205) f5 = wa  !Below wilting point f5 accompains wa (then Sahara is well represented)
 
-      rc = rc * ocp_pft
 
       csru = 0.5 
-      pt = csru * (cf1 * ocp_pft * 1000.) * wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
+      pt = csru * (cf1 * 1000.) * wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
       alfm = 1.391
       gm = 3.26 * 86400.           !(*86400 transform mm/s to mm/dia)
       
@@ -329,8 +327,9 @@ C         call critical_value2(f1)
 c      if (f1 .gt. 0.0) PRINT*, f1, 'f1', f5, 'f5', wa, 'wa'
 !     Leaf area index (m2 leaf/m2 arEa) bianca
 !     ---------------------------------
-      sla=(0.0300*1000.)*((365./(((tleaf(pft))/365.)/12.))**(-0.46))
-      laia64 = (cl1 * 365.0000 * sla) * ocp_pft
+      sla=((0.0300*1000.)*((365./(((tleaf(pft))/365.)/12.))**(-0.46)))*
+     &    ocp_pft
+      laia64 = (cl1 * 365.0 * sla)
       laia = real(laia64,4)
       
 !     SunLAI
@@ -350,8 +349,8 @@ c     call critical_value(shadelai)
 !     Sun/Shade approach to canopy scaling !Based in de Pury & Farquhar (1997)
 !     
 !     -----------------------------------     
-      f4sun = (1.0-(exp(-p26*sunlai)))/p26 !sun 90 degrees
-      f4shade = (1.0-(exp(-p27*shadelai)))/p27 !sun ~20 degrees
+      f4sun = ((1.0-(exp(-p26*sunlai)))/p26) !sun 90 degrees
+      f4shade = ((1.0-(exp(-p27*shadelai)))/p27) !sun ~20 degrees
 
       
 !     Canopy gross photosynthesis (kgC/m2/yr)
@@ -365,7 +364,7 @@ cc     -===============================----------=============================--
 !     c Maintenance respiration (kgC/m2/yr) (based in Ryan 1991)
       
       
-      csa= 0.05*(ca1*ocp_pft)     !sapwood carbon content (kgC/m2). 5% of woody tissues (Pavlick, 2013)
+      csa= 0.05 * ca1   !sapwood carbon content (kgC/m2). 5% of woody tissues (Pavlick, 2013)
 C      call critical_value2(csa)
 c      
       ncl = 0.034               !(gN/gC)
@@ -373,17 +372,17 @@ c
       ncs = 0.003               !(gN/gC)
 c      
 c      
-      rml64 = (ncl * cl1 * ocp_pft) * 27. * exp(0.03*temp)
+      rml64 = (ncl * cl1) * 27. * exp(0.03*temp)
       call critical_value2(rml64)
       rml =  real(rml64,4)
 
-      rmf64 = (ncf * cf1 * ocp_pft) * 27. * exp(0.03*temp)
+      rmf64 = (ncf * cf1) * 27. * exp(0.03*temp)
       call critical_value2(rmf64)
-      rmf =  real(rmf64,4) * ocp_pft
+      rmf =  real(rmf64,4)
 
       rms64 = (ncs * csa) * 27. * exp(0.03*temp)
       call critical_value2(rms64)
-      rms = real(rms64,4)
+      rms = real(rms64,4) 
 c      
       rm64 = (rml64 + rmf64 + rms64)
       rm = real(rm64, 4)
@@ -393,10 +392,10 @@ c
 c     Growth respiration (KgC/m2/yr)(based in Ryan 1991; Sitch et al.
 c     2003; Levis et al. 2004)         
 c      
-      csai= 0.05 * beta_awood        ! precisa mesmo multiplicar por 0.05?
+      csai =  beta_awood
       call critical_value2(csai)
 
-      rgl64 = 0.25 *  beta_leaf * 365.
+      rgl64 = 0.25 * beta_leaf * 365.
       call critical_value2(rgl64)
       rgl = real(rgl64,4)
 
@@ -421,9 +420,9 @@ c
 !     -------------------------------------------
 !     
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
-         ar64 = (rm64 + rg64) ! * 0.8 ! gambiarra para diminuir a ar
+         ar64 = ((rm64* ocp_pft) + rg64) ! * 0.8 ! gambiarra para diminuir a ar
          call critical_value2(ar64)
-         ar = real(ar64,4)
+         ar = real(ar64,4) 
 c
 c         if (ph .gt. 0.)PRINT*, AR ,'ar' , rm, 'rm', rg, 'rg'
       else
@@ -456,7 +455,7 @@ C 10   CONTINUE
 !     Canopy resistence(s/m)
 !     ======================
 !     
-      subroutine canopy_resistence (m,vpd_in,f1_in,rc2_in)
+      subroutine canopy_resistence (m,vpd_in,f1_in,ocp_pft1,rc2_in)
 !     
 !     Variables
 !     =========
@@ -467,7 +466,7 @@ C 10   CONTINUE
       integer m
       DOUBLE PRECISION f1_in    !Photosynthesis (molCO2/m2/s)
       DOUBLE PRECISION vpd_in   !kPa
-!     
+      real ocp_pft1 
 !     Outputs
 !     -------
       real rc2_in               !Canopy resistence (s/m)
@@ -480,7 +479,7 @@ C 10   CONTINUE
       DOUBLE PRECISION gs       !Canopy conductance (molCO2/m2/s)
       DOUBLE PRECISION g0       !Residual stomatance conductance
       DOUBLE PRECISION g1(7)    !3.00 (boreal) / 2.05 (temperate) / 3.02 (tropical)
-      DOUBLE PRECISION D        !kPA
+      DOUBLE PRECISION D1        !kPA
       DOUBLE PRECISION aa
       real rcmax 
 !     
@@ -490,7 +489,7 @@ C 10   CONTINUE
       aa = (f1b/363.)
       g0 = 0.01
 !     g1 = 4.9
-      D = sqrt(vpd_in)
+      D1 = sqrt(vpd_in)
 !     rcmax = 200.0             !A=2.0
 !     
       rcmax = 550.0             !A=0.5                             
@@ -499,7 +498,7 @@ C 10   CONTINUE
 !     
       if (vpd_in.lt.0.25) gs = 1.5
       if (vpd_in.ge.0.25) then 
-         gs = g0 + 1.6 * (1. + (g1(m)/D)) * (aa) !Based on Medlyn et al. 2011
+         gs = g0 + 1.6 * (1. + (g1(m)/D1)) * (aa) !Based on Medlyn et al. 2011
 !     gs = g0 + 1.6 * (1 + (g1/D)) * (aa) !Based on Medlyn et al. 2011
 !     
 c         call critical_value2(gs)
@@ -519,7 +518,7 @@ c      call critical_value2(gs2)
 !     print*,print
 !     endif
 !     
-      rc2_in = real((1./gs2),4)
+      rc2_in = real((1./gs2),4) * ocp_pft1
 c      call critical_value(rc2_in)
 !     if (rc2.ge.151.47) rc2 = rcmax !A=2
 !     
@@ -551,7 +550,7 @@ C      if (rc2_in.ge.545.43) rc2_in = rcmax !A=0.5
       real f5                   !Stress response to soil moisture (dimensionless)
       real evap                 !Actual evapotranspiration (mm/day)
       real laia
-      real ocp_pft              !Area fraction - used only to scale laia
+
 !     xOutputs 
 !     -------
 !     
@@ -656,29 +655,36 @@ C         call critical_value(hr)
 
 
 c23456
-      SUBROUTINE PFT_AREA_FRAC(CLEAF, CFROOT, CAWOOD, OCP_COEFFS)
+      SUBROUTINE PFT_AREA_FRAC(CLEAF, CFROOT, CAWOOD, OCP_COEFFS,
+     &    OCP_WOOD)
 c     esta subrotina calcula a areA DE CADA pft  
 c     a partir do conteudo de carbono nos compartimentos vegetais no 
 c     dia anterior 
       INTEGER, PARAMETER :: NPFT = 7
-      INTEGER :: P
+      INTEGER :: P, MAX_INDEX(1)
       REAL :: CLEAF(NPFT), CFROOT(NPFT), CAWOOD(NPFT)
-      REAL :: TOTAL_BIOMASS_PFT(NPFT), OCP_COEFFS(NPFT)
-      REAL :: TOTAL_BIOMASS
+      REAL :: TOTAL_BIOMASS_PFT(NPFT),OCP_COEFFS(NPFT)
+      REAL :: TOTAL_BIOMASS, TOTAL_WOOD, TOTAL_W_PFT(NPFT)
+      LOGICAL :: OCP_WOOD(NPFT)
       
       TOTAL_BIOMASS = 0.0
+      TOTAL_WOOD = 0.0
       do p = 1,npft
-         total_biomass_pft(p) = 0.0
-         ocp_coeffs(p) = 0.0
+         TOTAL_W_PFT(P) = 0.0
+         TOTAL_BIOMASS_PFT(P) = 0.0
+         OCP_COEFFS(P) = 0.0
+         OCP_WOOD(P) = .FALSE.
       enddo
       
 
       DO P = 1,NPFT
          TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P) ! biomassa total no dia i
-         TOTAL_BIOMASS = TOTAL_BIOMASS + TOTAL_BIOMASS_PFT(P)   
+         TOTAL_BIOMASS = TOTAL_BIOMASS + TOTAL_BIOMASS_PFT(P)
+         TOTAL_WOOD = TOTAL_WOOD + CAWOOD(P)
+         TOTAL_W_PFT(P) = CAWOOD(P)
       ENDDO                 ! end p loop
 
-!     Grid cell ocupation coefficients
+!     GRID CELL OCCUPATION COEFFICIENTS
       IF(TOTAL_BIOMASS .GT. 0.0) THEN
          DO P = 1,NPFT   
             OCP_COEFFS(P) = TOTAL_BIOMASS_PFT(P) / TOTAL_BIOMASS
@@ -691,6 +697,14 @@ c            PRINT*, OCP_COEFFS(P), 'ocp'
             OCP_COEFFS(P) = 0.0
          ENDDO
       ENDIF
+
+!     GRIDCELL PFT LIGTH LIMITATION BY WOOD CONTENT 
+      IF(TOTAL_WOOD .GT. 0.0) THEN
+         MAX_INDEX = MAXLOC(TOTAL_W_PFT)
+         I = MAX_INDEX(1)
+         OCP_WOOD(I) = .TRUE.
+      ENDIF
+      
 C23456
       RETURN
       END SUBROUTINE PFT_AREA_FRAC
@@ -889,12 +903,12 @@ c
 c     
 c     initialization
       if((scl1 .lt. 0.0000001) .or. (scf1 .lt. 0.0000001)) then
-         IF(NPP .lt. 0.0000001) THEN
+c         IF(NPP .lt. 0.0000001) THEN
             scl2 = 0.0
             scf2 = 0.0
             sca2 = 0.0 
             goto 10
-         ENDIF
+c         ENDIF
       endif   
       npp_aux = npp/365.0       !transform (KgC/m2/yr) in (KgC/m2/day)
 c      call critical_value(npp_aux)

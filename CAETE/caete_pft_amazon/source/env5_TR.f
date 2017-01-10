@@ -38,7 +38,8 @@ c     Reviewed by jpdarela  jan/2017
       real t(nx,ny,12)          !Auxiliar_temperature (oC)
       real par(nx,ny,12)        !Incident photosynthetic active radiation (Ein/m2/s)
       real ipar(nx,ny,12)       !Auxiliar_incident photosynthetic active radiation (w/m2)
-      
+      real rhs(nx,ny,12)        !Relative humidity
+      real rhaux(nx,ny,12)      !RHS auxiliar
       real, dimension(nx,ny,q) :: cleafin = no_data
      $                          ,cawoodin = no_data
      $                          ,cfrootin = no_data
@@ -77,14 +78,18 @@ c     VARIAVEIS HIDROLOGICAS IMPORTANTES
       real runom_pft(nx,ny,12,q) !Runoff
       real evapm_pft(nx,ny,12,q) !Actual evapotranspiration        
       real wsoil_pft(nx,ny,12,q) !Soil moisture (mm)
-
-c variables related to carbon allocation and autothrophic respiration (bianca)
-     
+      
+c     variables related to carbon allocation and autothrophic respiration (bianca)
       real, dimension(nx,ny,12,q) :: rml_pft,rmf_pft,rms_pft,rm_pft,
      $rgl_pft,rgf_pft,rgs_pft,rg_pft
       real, dimension(nx,ny,q) :: cleaf_pft,cawood_pft,cfroot_pft
 
 
+C      WARNING - NEW VARIABLE ---
+      
+      real gridcell_ocp(nx,ny,q) !  final grid cell occupation for each pft (percentage of area)
+
+      
 c     variaveis do spinup
       real, dimension(q) :: aux1, aux2, aux3
       real npp_pot(nx,ny,12)
@@ -135,6 +140,8 @@ C     -------END DECLARATION----------------------------------------
      &     form='unformatted',access='direct',recl=4*nx*ny)
       open(13,file='../inputs/rsds_sa.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
+      open(14,file='../inputs/hurs_sa.bin',status='old',
+     &     form='unformatted',access='direct',recl=4*nx*ny)
       open(26,file='../inputs/npp_sa.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
       
@@ -147,17 +154,19 @@ C     -------END DECLARATION----------------------------------------
        call readx(11,pr,12)
        call readx(12,t,12)
        call readx(13,ipar,12)
+       call readx(14,rhaux,12)
        call readx(26,npp_pot,12)
      
 !     Close files
 !     ===========
 !     
-       close ( 9)
-       close (10)
-       close (11)
-       close (12)
-       close (13)
-       close (26)
+       close( 9)
+       close(10)
+       close(11)
+       close(12)
+       close(13)
+       close(14)
+       close(26)
 
 c      Calculating annual npp
        do i =1,nx
@@ -205,7 +214,7 @@ c      Calculating annual npp
             do k=1,12
 !     Photosynthetically active radiation (IPAR:Ein/m2/s)
 !     Observed data from ISLSCP2
-               
+               rhs(i,j,k) = rhaux(i,j,k) / 100.0
                par(i,j,k) = ipar(i,j,k)/2.18e5 !Converting to Ein/m2/s
                temp(i,j,k) = t(i,j,k) !+ant(i,j,k) !uncomment to use future anomalies
                p0(i,j,k) = ps(i,j,k) * 0.01 ! transforamando de pascal pra mbar (kPa)
@@ -224,13 +233,21 @@ c      Calculating annual npp
 !     Calculate environmental variables (wbm)
 !     =======================================
     
-      call wbm (prec,temp,lsmk,p0,ca,par,cleafin,cawoodin,cfrootin,
+      call wbm (prec,temp,lsmk,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,
      &     emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,
      &     clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,
      &     evapm_pft,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft
-     &     ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft, cfroot_pft)   
+     &    ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft, cfroot_pft
+     &    ,gridcell_ocp)   
 
 !     SAVE RESULTS TO FILES
+      
+      open(10,file='../outputs/gridcell_ocp.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call savex(10, gridcell_ocp, q)
+
+      
       open(10,file='../outputs/cleaf.bin',
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
@@ -325,15 +342,11 @@ C     preparando o terreno pra salvar as variaveis
                      rgf(i,j,k)  = rgf(i,j,k) + rgf_pft(i,j,k,p)
                      rgs(i,j,k)  = rgs(i,j,k) + rgs_pft(i,j,k,p)
                      rg(i,j,k)  = rg(i,j,k) + rg_pft(i,j,k,p)
-                     
                   enddo
-c$$$                 print*, npp(i,j,k)
                enddo
             endif
-
          enddo
-      enddo
-c$$$  
+      enddo  
 
       open(10,file='../outputs/ph.bin',
      &     status='unknown',form='unformatted',

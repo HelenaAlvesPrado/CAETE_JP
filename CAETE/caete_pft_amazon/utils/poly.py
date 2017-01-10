@@ -10,7 +10,7 @@ dta = np.mean(dta, axis=0,)
 
 
 lats = np.arange(-57.25,22.75, 0.5)
-lons = np.arange(-90., -30, 0.5)
+lons = np.arange(-89.75, -29.75, 0.5)
 
 lons, lats = np.meshgrid(lons,lats)
 
