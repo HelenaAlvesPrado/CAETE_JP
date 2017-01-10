@@ -67,7 +67,7 @@ def catch_data(input_file, layers, nx, ny):
     Bcount = nx * ny * layers
 
     return np.fromfile(input_file, count=Bcount,
-                    dtype=np.float32).reshape((layers,nx,ny))
+                    dtype=np.float32).reshape((layers,ny,nx))
 
 
 

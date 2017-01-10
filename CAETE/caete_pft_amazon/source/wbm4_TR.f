@@ -627,9 +627,9 @@ c     Carbon allocation (carbon content on each compartment)
             nppavg(p) = nppavg(p) + nppa(p) /365.0 !kgC/m2/day
             
             laiavg(p) = laiavg(p) + laia(p)  /365.0 
-            clavg(p) = clavg(p) + (cl(p) * OCP_COEFFS(P))/365.0 !kgC/m2/day
-            csavg(p) = csavg(p) + (cs(p) * OCP_COEFFS(P))/365.0 !kgC/m2/day
-            hravg(p) = hravg(p) + (hr(p) * OCP_COEFFS(P))/365.0 !kgC/m2/day
+            clavg(p) = clavg(p) + cl(p)/365.0 !kgC/m2/day
+            csavg(p) = csavg(p) + cs(p)/365.0 !kgC/m2/day
+            hravg(p) = hravg(p) + hr(p)/365.0 !kgC/m2/day
             rmlavg(p) = rmlavg(p) + rml(p)/365.
             rmfavg(p) = rmfavg(p) + rmf(p)/365.
             rmsavg(p) = rmsavg(p) + rms(p)/365.
