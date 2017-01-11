@@ -217,6 +217,21 @@ c      Calculating annual npp
          enddo
          print*, (real(i)/real(nx))*100.0, '%'
       enddo
+
+      open(10,file='../spinup/clini.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call savex(10, cleafin, q)
+
+      open(10,file='../spinup/cfini.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call savex(10, cfrootin, q)
+      
+      open(10,file='../spinup/cwini.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call savex(10, cawoodin, q)
 !     ===========
 
 
@@ -245,14 +260,14 @@ c      Calculating annual npp
 !     Calculate environmental variables (wbm)
 !     =======================================
     
-      call wbm (prec,temp,lsmk,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,
-     &     emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,
-     &     clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,
-     &     evapm_pft,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft
-     &    ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft, cfroot_pft
-     &    ,gridcell_ocp,betal,betaw,betaf)   
-
-
+c      call wbm (prec,temp,lsmk,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,
+c     &     emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,
+c     &     clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,
+c     &     evapm_pft,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft
+c     &    ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft, cfroot_pft
+c     &    ,gridcell_ocp,betal,betaw,betaf)   
+c
+c
 
       
 !     SAVE RESULTS TO FILES
@@ -1088,13 +1103,12 @@ c     outputs
       call pft_par(7, tawood)
       call pft_par(8, tfroot)
 
-      
+ 
       sensitivity = 1.10
       sensitivity2 = 1.40
 
       do i6=1,npfts
          do k=1,nt
-            !print*, k, i6
             if (k.eq.1) then
                cleafi_aux(k) = aleaf(i6)*(nppot)
                cawoodi_aux(k) = aawood(i6)*(nppot)
@@ -1121,42 +1135,30 @@ c               crepi_aux(k) = ((arep(i6)*(nppot))-
 c     &              (crepi_aux(k-1)/(trep(i6)*365))) + crepi_aux(k-1)
                
                kk =  int(k*0.66)
-
-               if(aawood(i6) .gt. 0.0) then
-               
-                  if((cfrooti_aux(k)
-     $               /cfrooti_aux(kk).lt.sensitivity).and.(cleafi_aux(k)
-     $               /cleafi_aux(kk).lt.sensitivity).and.(cawoodi_aux(k)
-     $               /cawoodi_aux(kk).lt.sensitivity2)) then
+               if((cfrooti_aux(k)/cfrooti_aux(kk).lt.sensitivity)
+     $              .and.(cleafi_aux(k)/cleafi_aux(kk).lt.sensitivity)
+     $              .and.(cawoodi_aux(k)/cawoodi_aux(kk).lt.
+     $             sensitivity2)) then
+c                    .and.(cbwoodi_aux(k)/cbwoodi_aux(kk)
+c     $              .lt.sensitivity2).and.(cstoi_aux(k)
+c     $              /cstoi_aux(kk).lt.sensitivity).and.(cotheri_aux(k)
+c     $              /cotheri_aux(kk).lt.sensitivity).and.(crepi_aux(k)
+c     $              /crepi_aux(kk).lt.sensitivity))   then
                   
                   
+                  cleafini(i6) = cleafi_aux(k) ! carbon content (kg m-2) 
+                  cawoodini(i6) = cawoodi_aux(k)
+                  cfrootini(i6) = cfrooti_aux(k)
+c                  cbwoodini(i6) = cbwoodi_aux(k)
+c                  cstoini(i6) = cstoi_aux(k)
+c                  cotherini(i6) = cotheri_aux(k)
+c                  crepini(i6) = crepi_aux(k)
+                  exit
                   
-                     cleafini(i6) = cleafi_aux(k) ! carbon content (kg m-2) 
-                     cawoodini(i6) = cawoodi_aux(k)
-                     cfrootini(i6) = cfrooti_aux(k)
-                     !print*, 'saindo', 'pft:', i6, k
-                     exit
-                     
-                  endif
-               else
-                  if((cfrooti_aux(k)/cfrooti_aux(kk).lt.
-     $                 sensitivity).and.(cleafi_aux(k)
-     $                 /cleafi_aux(kk).lt.sensitivity)) then
-                     
-                  
-                     
-                     cleafini(i6) = cleafi_aux(k) ! carbon content (kg m-2) 
-                     cawoodini(i6) = 0.0
-                     cfrootini(i6) = cfrooti_aux(k)
-                     !print*, 'saindo', 'pft:', i6, k
-                     exit
-                  endif
-               ENDIF
+               endif
             endif
-            
          enddo
       enddo
-      
       
       return
       end subroutine spinup
