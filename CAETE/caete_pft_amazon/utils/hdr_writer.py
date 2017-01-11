@@ -8,14 +8,14 @@ import os
 
 # script to write header files to .bin files (bsq) with matrix data
 
-#GLOBAL VARIABLES 
+#GLOBAL VARIABLES
 nx = 120
 ny = 160
 
 linesep = '\r\n'
-   
+
 lizt = []
-    
+
 pixel_depht = 32
 
 pixel_type  = 'FLOAT' # || SIGNINT || UNSIGNINT
@@ -96,7 +96,7 @@ def write_header(file_conn, NBANDS, nx=nx, ny=ny, xllcorner=-90,
 
 
 def main():
-    bin_files_path = ['../outputs', '../inputs' ] 
+    bin_files_path = ['../outputs', '../outputs_pft', '../inputs' ] 
     for j in range(len(bin_files_path)):
         raw_list =[ i for i in os.listdir(bin_files_path[j]) if i.split('.')[-1] in FILE_EXT]
     

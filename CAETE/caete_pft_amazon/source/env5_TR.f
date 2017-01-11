@@ -85,9 +85,15 @@ c     variables related to carbon allocation and autothrophic respiration (bianc
       real, dimension(nx,ny,q) :: cleaf_pft,cawood_pft,cfroot_pft
 
 
-C      WARNING - NEW VARIABLE ---
+C      WARNING - NEW VARIABLES ---
       
       real gridcell_ocp(nx,ny,q) !  final grid cell occupation for each pft (percentage of area)
+      real betal(nx,ny,12,q)
+      real, dimension(nx,ny,12):: bl1,bl2,bl3,bl4,bl5,bl6,bl7 ! carbon allocated to growth (monthly sums) 
+      real betaw(nx,ny,12,q)
+      real, dimension(nx,ny,12):: bw1,bw2,bw3,bw4,bw5,bw6,bw7
+      real betaf(nx,ny,12,q)
+      real, dimension(nx,ny,12):: bf1,bf2,bf3,bf4,bf5,bf6,bf7
 
       
 c     variaveis do spinup
@@ -100,17 +106,23 @@ c     -----FIM DA DEFINICAO DE VARIAVEIS PARA RODAR O MODELO--
 C     
       
 C     THESE WILL RECEIVE MEANS BETWEEN q PFTs and for each pft (ex. ph to mean; ph1 to pft 1)
-      real, dimension(nx,ny,12) :: ph!, ph1, ph2, ph3
-      real, dimension(nx,ny,12) :: ar!, ar1, ar2, ar3
-      real, dimension(nx,ny,12) :: npp!, npp1, npp2, npp3
-      real, dimension(nx,ny,12) :: lai!, lai1, lai2, lai3
-      real, dimension(nx,ny,12) :: clit!, clit1, clit2, clit3
-      real, dimension(nx,ny,12) :: csoil!, csoil1, csoil2, csoil3
-      real, dimension(nx,ny,12) :: hr!, hr1, hr2, hr3
-      real, dimension(nx,ny,12) :: rcm!, rcm1, rcm2, rcm3
-      real, dimension(nx,ny,12) :: runom!, runom1, runom2, runom3
-      real, dimension(nx,ny,12) :: evaptr!, evaptr1, evaptr2, evaptr3
-      real, dimension(nx,ny,12) :: wsoil!, wsoil1, wsoil2, wsoil3
+      real, dimension(nx,ny,12) :: ph, ph1, ph2, ph3, ph4, ph5, ph6, ph7
+      real, dimension(nx,ny,12) :: ar, ar1, ar2, ar3, ar4, ar5, ar6, ar7
+      real, dimension(nx,ny,12) :: npp,npp1,npp2,npp3,npp4,npp5,npp6
+     &    ,npp7
+      real, dimension(nx,ny,12) :: lai, lai1, lai2, lai3, lai4, lai5,
+     &    lai6, lai7
+      real, dimension(nx,ny,12) :: clit, clit1, clit2, clit3, clit4,
+     &    clit5, clit6, clit7
+      real, dimension(nx,ny,12) :: csoil, csoil1, csoil2, csoil3, csoil4
+     &    , csoil5, csoil6, csoil7
+      real, dimension(nx,ny,12) :: hr, hr1, hr2, hr3, hr4, hr5, hr6, hr7
+      real, dimension(nx,ny,12) :: rcm, rcm1, rcm2, rcm3, rcm4, rcm5,
+     &    rcm6, rcm7
+      real, dimension(nx,ny,12) :: evaptr, et1, et2, et3, et4, et5, et6,
+     &    et7
+      real, dimension(nx,ny,12) :: wsoil
+      real, dimension(nx,ny,12) :: runom!
       
 C     NEW OUTPUTS (AUTOTRF RESPIRATION, ALLOCATION)
       
@@ -238,15 +250,16 @@ c      Calculating annual npp
      &     clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,
      &     evapm_pft,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft
      &    ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft, cfroot_pft
-     &    ,gridcell_ocp)   
+     &    ,gridcell_ocp,betal,betaw,betaf)   
 
-!     SAVE RESULTS TO FILES
+
+
       
+!     SAVE RESULTS TO FILES
       open(10,file='../outputs/gridcell_ocp.bin',
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
       call savex(10, gridcell_ocp, q)
-
       
       open(10,file='../outputs/cleaf.bin',
      &     status='unknown',form='unformatted',
@@ -438,112 +451,536 @@ C     preparando o terreno pra salvar as variaveis
      &     access='direct',recl=4*nx*ny)
       call save_file12(10, rg)
 
-c
-c
-c
-c      do i=1,nx
-c         do j=1,ny
-c            do k=1,12
-c               if(nint(lsmk(i,j)) .ne. 0) then
-c                  npp1(i,j,k) = npp_pft(i,j,k,1)
-c                  npp2(i,j,k) = npp_pft(i,j,k,2)
-c                  npp3(i,j,k) = npp_pft(i,j,k,3)
-c                  
-c                  rcm1(i,j,k) = rcm_pft(i,j,k,1)
-c                  rcm2(i,j,k) = rcm_pft(i,j,k,2)
-c                  rcm3(i,j,k) = rcm_pft(i,j,k,3)
-c
-c                  rm1(i,j,k) =rm_pft(i,j,k,1)
-c                  rm2(i,j,k) = rm_pft(i,j,k,2)
-c                  rm3(i,j,k) = rm_pft(i,j,k,3)
-c
-c                  rg1(i,j,k) = rg_pft(i,j,k,1)
-c                  rg2(i,j,k) = rg_pft(i,j,k,2)
-c                  rg3(i,j,k) = rg_pft(i,j,k,3)
-c
-c
-c               else
-c                  npp1(i,j,k) = no_data
-c                  npp2(i,j,k) = no_data
-c                  npp3(i,j,k) = no_data
-c                  
-c                  rcm1(i,j,k) = no_data
-c                  rcm2(i,j,k) = no_data
-c                  rcm3(i,j,k) = no_data
-c                  
-c                  rm1(i,j,k) = no_data
-c                  rm2(i,j,k) = no_data
-c                  rm3(i,j,k) = no_data
-c
-c                  rg1(i,j,k) = no_data
-c                  rg2(i,j,k) = no_data
-c                  rg3(i,j,k) = no_data
-c
-c               endif
-c            enddo
-c         enddo
-c      enddo
-c      
-c      open(10,file='../outputs_pft/npp.1.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, npp1)
-c
-c      open(10,file='../outputs_pft/npp.2.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, npp2)
-c
-c      open(10,file='../outputs_pft/npp.3.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, npp3)
-c
-c      open(10,file='../outputs_pft/rcm.1.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, rcm1)
-c
-c      open(10,file='../outputs_pft/rcm.2.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, rcm2)
-c
-c      open(10,file='../outputs_pft/rcm.3.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, rcm3)
-c
-c      open(10,file='../outputs_pft/rm.1.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, rm1)
-c
-c      open(10,file='../outputs_pft/rm.2.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, rm2)
-c
-c      open(10,file='../outputs_pft/rm.3.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, rm3)
-c
-c      open(10,file='../outputs_pft/rg.1.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, rg1)
-c
-c      open(10,file='../outputs_pft/rg.2.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, rg2)
-c
-c      open(10,file='../outputs_pft/rg.3.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, rg3)
 
+
+      
+      do i=1,nx
+         do j=1,ny
+            do k=1,12
+               if(nint(lsmk(i,j)) .ne. 0) then
+                  npp1(i,j,k) = npp_pft(i,j,k,1)
+                  npp2(i,j,k) = npp_pft(i,j,k,2)
+                  npp3(i,j,k) = npp_pft(i,j,k,3)
+                  npp4(i,j,k) = npp_pft(i,j,k,4)
+                  npp5(i,j,k) = npp_pft(i,j,k,5)
+                  npp6(i,j,k) = npp_pft(i,j,k,6)
+                  npp7(i,j,k) = npp_pft(i,j,k,7)
+
+                  ph1(i,j,k) = photo_pft(i,j,k,1)
+                  ph2(i,j,k) = photo_pft(i,j,k,2)
+                  ph3(i,j,k) = photo_pft(i,j,k,3)
+                  ph4(i,j,k) = photo_pft(i,j,k,4)
+                  ph5(i,j,k) = photo_pft(i,j,k,5)
+                  ph6(i,j,k) = photo_pft(i,j,k,6)
+                  ph7(i,j,k) = photo_pft(i,j,k,7)
+
+                  ar1(i,j,k) = aresp_pft(i,j,k,1)
+                  ar2(i,j,k) = aresp_pft(i,j,k,2)
+                  ar3(i,j,k) = aresp_pft(i,j,k,3)
+                  ar4(i,j,k) = aresp_pft(i,j,k,4)
+                  ar5(i,j,k) = aresp_pft(i,j,k,5)
+                  ar6(i,j,k) = aresp_pft(i,j,k,6)
+                  ar7(i,j,k) = aresp_pft(i,j,k,7)
+
+                  lai1(i,j,k) = lai_pft(i,j,k,1)
+                  lai2(i,j,k) = lai_pft(i,j,k,2)
+                  lai3(i,j,k) = lai_pft(i,j,k,3)
+                  lai4(i,j,k) = lai_pft(i,j,k,4)
+                  lai5(i,j,k) = lai_pft(i,j,k,5)
+                  lai6(i,j,k) = lai_pft(i,j,k,6)
+                  lai7(i,j,k) = lai_pft(i,j,k,7)
+
+                  hr1(i,j,k) = hresp_pft(i,j,k,1)
+                  hr2(i,j,k) = hresp_pft(i,j,k,2)
+                  hr3(i,j,k) = hresp_pft(i,j,k,3)
+                  hr4(i,j,k) = hresp_pft(i,j,k,4)
+                  hr5(i,j,k) = hresp_pft(i,j,k,5)
+                  hr6(i,j,k) = hresp_pft(i,j,k,6)
+                  hr7(i,j,k) = hresp_pft(i,j,k,7)
+
+                  clit1(i,j,k) = clit_pft(i,j,k,1)
+                  clit2(i,j,k) = clit_pft(i,j,k,2)
+                  clit3(i,j,k) = clit_pft(i,j,k,3)
+                  clit4(i,j,k) = clit_pft(i,j,k,4)
+                  clit5(i,j,k) = clit_pft(i,j,k,5)
+                  clit6(i,j,k) = clit_pft(i,j,k,6)
+                  clit7(i,j,k) = clit_pft(i,j,k,7)
+
+                  csoil1(i,j,k) = csoil_pft(i,j,k,1)
+                  csoil2(i,j,k) = csoil_pft(i,j,k,2)
+                  csoil3(i,j,k) = csoil_pft(i,j,k,3)
+                  csoil4(i,j,k) = csoil_pft(i,j,k,4)
+                  csoil5(i,j,k) = csoil_pft(i,j,k,5)
+                  csoil6(i,j,k) = csoil_pft(i,j,k,6)
+                  csoil7(i,j,k) = csoil_pft(i,j,k,7)
+
+                  et1(i,j,k) = evapm_pft(i,j,k,1)
+                  et2(i,j,k) = evapm_pft(i,j,k,2)
+                  et3(i,j,k) = evapm_pft(i,j,k,3)
+                  et4(i,j,k) = evapm_pft(i,j,k,4)
+                  et5(i,j,k) = evapm_pft(i,j,k,5)
+                  et6(i,j,k) = evapm_pft(i,j,k,6)
+                  et7(i,j,k) = evapm_pft(i,j,k,7)
+                  
+                  rcm1(i,j,k) = rcm_pft(i,j,k,1)
+                  rcm2(i,j,k) = rcm_pft(i,j,k,2)
+                  rcm3(i,j,k) = rcm_pft(i,j,k,3)
+                  rcm4(i,j,k) = rcm_pft(i,j,k,4)
+                  rcm5(i,j,k) = rcm_pft(i,j,k,5)
+                  rcm6(i,j,k) = rcm_pft(i,j,k,6)
+                  rcm7(i,j,k) = rcm_pft(i,j,k,7)
+
+                  bl1(i,j,k) = betal(i,j,k,1)
+                  bl2(i,j,k) = betal(i,j,k,2)
+                  bl3(i,j,k) = betal(i,j,k,3)
+                  bl4(i,j,k) = betal(i,j,k,4)
+                  bl5(i,j,k) = betal(i,j,k,5)
+                  bl6(i,j,k) = betal(i,j,k,6)
+                  bl7(i,j,k) = betal(i,j,k,7)
+
+                  bw1(i,j,k) = betaw(i,j,k,1)
+                  bw2(i,j,k) = betaw(i,j,k,2)
+                  bw3(i,j,k) = betaw(i,j,k,3)
+                  bw4(i,j,k) = betaw(i,j,k,4)
+                  bw5(i,j,k) = betaw(i,j,k,5)
+                  bw6(i,j,k) = betaw(i,j,k,6)
+                  bw7(i,j,k) = betaw(i,j,k,7)
+                  
+                  bf1(i,j,k) = betaf(i,j,k,1)
+                  bf2(i,j,k) = betaf(i,j,k,2)
+                  bf3(i,j,k) = betaf(i,j,k,3)
+                  bf4(i,j,k) = betaf(i,j,k,4)
+                  bf5(i,j,k) = betaf(i,j,k,5)
+                  bf6(i,j,k) = betaf(i,j,k,6)
+                  bf7(i,j,k) = betaf(i,j,k,7)
+                  
+               else
+                  npp1(i,j,k) = no_data
+                  npp2(i,j,k) = no_data
+                  npp3(i,j,k) = no_data
+                  npp4(i,j,k) = no_data
+                  npp5(i,j,k) = no_data
+                  npp6(i,j,k) = no_data
+                  npp7(i,j,k) = no_data
+
+                  ph1(i,j,k) = no_data
+                  ph2(i,j,k) = no_data
+                  ph3(i,j,k) = no_data
+                  ph4(i,j,k) = no_data
+                  ph5(i,j,k) = no_data
+                  ph6(i,j,k) = no_data
+                  ph7(i,j,k) = no_data
+
+                  ar1(i,j,k) = no_data
+                  ar2(i,j,k) = no_data
+                  ar3(i,j,k) = no_data
+                  ar4(i,j,k) = no_data
+                  ar5(i,j,k) = no_data
+                  ar6(i,j,k) = no_data
+                  ar7(i,j,k) = no_data
+
+                  hr1(i,j,k) = no_data
+                  hr2(i,j,k) = no_data
+                  hr3(i,j,k) = no_data
+                  hr4(i,j,k) = no_data
+                  hr5(i,j,k) = no_data
+                  hr6(i,j,k) = no_data
+                  hr7(i,j,k) = no_data
+
+                  clit1(i,j,k) = no_data
+                  clit2(i,j,k) = no_data
+                  clit3(i,j,k) = no_data
+                  clit4(i,j,k) = no_data
+                  clit5(i,j,k) = no_data
+                  clit6(i,j,k) = no_data
+                  clit7(i,j,k) = no_data
+
+                  csoil1(i,j,k) = no_data
+                  csoil2(i,j,k) = no_data
+                  csoil3(i,j,k) = no_data
+                  csoil4(i,j,k) = no_data
+                  csoil5(i,j,k) = no_data
+                  csoil6(i,j,k) = no_data
+                  csoil7(i,j,k) = no_data
+
+                  et1(i,j,k) = no_data
+                  et2(i,j,k) = no_data
+                  et3(i,j,k) = no_data
+                  et4(i,j,k) = no_data
+                  et5(i,j,k) = no_data
+                  et6(i,j,k) = no_data
+                  et7(i,j,k) = no_data
+                  
+                  rcm1(i,j,k) = no_data
+                  rcm2(i,j,k) = no_data
+                  rcm3(i,j,k) = no_data
+                  rcm4(i,j,k) = no_data
+                  rcm5(i,j,k) = no_data
+                  rcm6(i,j,k) = no_data
+                  rcm7(i,j,k) = no_data
+                  
+                  bl1(i,j,k) = no_data
+                  bl2(i,j,k) = no_data
+                  bl3(i,j,k) = no_data
+                  bl4(i,j,k) = no_data
+                  bl5(i,j,k) = no_data
+                  bl6(i,j,k) = no_data
+                  bl7(i,j,k) = no_data
+
+                  bw1(i,j,k) = no_data
+                  bw2(i,j,k) = no_data
+                  bw3(i,j,k) = no_data
+                  bw4(i,j,k) = no_data
+                  bw5(i,j,k) = no_data
+                  bw6(i,j,k) = no_data
+                  bw7(i,j,k) = no_data
+                  
+                  bf1(i,j,k) = no_data
+                  bf2(i,j,k) = no_data
+                  bf3(i,j,k) = no_data
+                  bf4(i,j,k) = no_data
+                  bf5(i,j,k) = no_data
+                  bf6(i,j,k) = no_data
+                  bf7(i,j,k) = no_data
+               endif
+            enddo
+         enddo
+      enddo
+
+      
+!     NPP
+      open(10,file='../outputs_pft/npp.1.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, npp1)
+      open(10,file='../outputs_pft/npp.2.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, npp2)
+      open(10,file='../outputs_pft/npp.3.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, npp3)
+      open(10,file='../outputs_pft/npp.4.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, npp4)
+      open(10,file='../outputs_pft/npp.5.bin',
+     &     status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, npp5)
+      open(10,file='../outputs_pft/npp.6.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, npp6)
+      open(10,file='../outputs_pft/npp.7.bin',
+     &    status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, npp7)
+
+!     PHOTO      
+      open(10,file='../outputs_pft/ph.1.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, ph1)
+      open(10,file='../outputs_pft/ph.2.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, ph2)
+      open(10,file='../outputs_pft/ph.3.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, ph3)
+      open(10,file='../outputs_pft/ph.4.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, ph4)
+      open(10,file='../outputs_pft/ph.5.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, ph5)
+      open(10,file='../outputs_pft/ph.6.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, ph6)
+      open(10,file='../outputs_pft/ph.7.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, ph7)
+
+      
+!     ARESP
+      open(10,file='../outputs_pft/ar.1.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, ar1)
+      open(10,file='../outputs_pft/ar.2.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, ar2)
+      open(10,file='../outputs_pft/ar.3.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, ar3)
+      open(10,file='../outputs_pft/ar.4.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, ar4)
+      open(10,file='../outputs_pft/ar.5.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, ar5)
+      open(10,file='../outputs_pft/ar.6.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, ar6)
+      open(10,file='../outputs_pft/ar.7.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, ar7)
+
+      
+!     HRESP
+      open(10,file='../outputs_pft/hr.1.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, hr1)
+      open(10,file='../outputs_pft/hr.2.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, hr2)
+      open(10,file='../outputs_pft/hr.3.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, hr3)
+      open(10,file='../outputs_pft/hr.4.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, hr4)
+      open(10,file='../outputs_pft/hr.5.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, hr5)
+      open(10,file='../outputs_pft/hr.6.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, hr6)
+      open(10,file='../outputs_pft/hr.7.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, hr7)
+
+!     CLIT
+      open(10,file='../outputs_pft/clit.1.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, clit1)
+      open(10,file='../outputs_pft/clit.2.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, clit2)
+      open(10,file='../outputs_pft/clit.3.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, clit3)
+      open(10,file='../outputs_pft/clit.4.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, clit4)
+      open(10,file='../outputs_pft/clit.5.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, clit5)
+      open(10,file='../outputs_pft/clit.6.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, clit6)
+      open(10,file='../outputs_pft/clit.7.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, clit7)
+
+!     CSOIL
+      open(10,file='../outputs_pft/csoil.1.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, csoil1)
+      open(10,file='../outputs_pft/csoil.2.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, csoil2)
+      open(10,file='../outputs_pft/csoil.3.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, csoil3)
+      open(10,file='../outputs_pft/csoil.4.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, csoil4)
+      open(10,file='../outputs_pft/csoil.5.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, csoil5)
+      open(10,file='../outputs_pft/csoil.6.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, csoil6)
+      open(10,file='../outputs_pft/csoil.7.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, csoil7)
+
+!     EVAPM
+      open(10,file='../outputs_pft/et.1.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, et1)
+      open(10,file='../outputs_pft/et.2.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, et2)
+      open(10,file='../outputs_pft/et.3.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, et3)
+      open(10,file='../outputs_pft/et.4.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, et4)
+      open(10,file='../outputs_pft/et.5.bin',
+     &     status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, et5)
+      open(10,file='../outputs_pft/et.6.bin',
+     &    status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call save_file12(10, et6)
+      open(10,file='../outputs_pft/et.7.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, et7)
+      
+!     RCM 
+      open(10,file='../outputs_pft/rcm.1.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, rcm1)  
+      open(10,file='../outputs_pft/rcm.2.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, rcm2)
+      open(10,file='../outputs_pft/rcm.3.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, rcm3)
+      open(10,file='../outputs_pft/rcm.4.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, rcm4)
+      open(10,file='../outputs_pft/rcm.5.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, rcm5)
+      open(10,file='../outputs_pft/rcm.6.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, rcm6)
+      open(10,file='../outputs_pft/rcm.7.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, rcm7)
+      
+!     BLEAF
+      open(10,file='../outputs_pft/bl.1.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bl1)
+      open(10,file='../outputs_pft/bl.2.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bl2)
+      open(10,file='../outputs_pft/bl.3.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bl3)
+      open(10,file='../outputs_pft/bl.4.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bl4)
+      open(10,file='../outputs_pft/bl.5.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bl5)
+      open(10,file='../outputs_pft/bl.6.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bl6)
+      open(10,file='../outputs_pft/bl.7.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bl7)
+
+!     BAWOOD
+      open(10,file='../outputs_pft/bw.1.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bw1)
+      open(10,file='../outputs_pft/bw.2.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bw2)
+      open(10,file='../outputs_pft/bw.3.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bw3)
+      open(10,file='../outputs_pft/bw.4.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bw4)
+      open(10,file='../outputs_pft/bw.5.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bw5)
+      open(10,file='../outputs_pft/bw.6.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bw6)
+      open(10,file='../outputs_pft/bw.7.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bw7)
+
+!     BFROOT
+      open(10,file='../outputs_pft/bf.1.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bl1)
+      open(10,file='../outputs_pft/bf.2.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bf2)
+      open(10,file='../outputs_pft/bf.3.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bf3)
+      open(10,file='../outputs_pft/bf.4.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bf4)
+      open(10,file='../outputs_pft/bf.5.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bf5)
+      open(10,file='../outputs_pft/bf.6.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bf6)
+      open(10,file='../outputs_pft/bf.7.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bf7)
+
+      
       stop
       end program env
 

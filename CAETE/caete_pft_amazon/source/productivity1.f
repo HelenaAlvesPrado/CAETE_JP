@@ -24,7 +24,7 @@ c234567
 !     -----
 !     
       integer pft
-      real ocp_pft,temp                 !Mean monthly temperature (oC)
+      real ocp_pft,temp         !Mean monthly temperature (oC)
       real p0                   !Mean surface pressure (hPa)
       real wa,w,wmax            !Soil moisture (dimensionless)
       real ca                   !Atmospheric CO2 concentration (Pa)

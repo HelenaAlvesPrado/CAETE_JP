@@ -3,7 +3,8 @@ C23456
      &    ,cfroot_ini,emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft
      &    ,clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,evapm_pft
      &    ,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft,rgf_pft
-     &    ,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft,grid_area)
+     &    ,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft,grid_area
+     &    ,betal,betaw,betaf)
       
 
       
@@ -81,7 +82,11 @@ c     NOVOS OUTPUTS DA BIANCA
       real cawood_pft(nx,ny,q) ! aboveground wood biomass (KgC/m2)
       real cfroot_pft(nx,ny,q)  ! fine root biomass
       
-      real grid_area(nx,ny,q)! gridcell area fraction of pfts!
+      real grid_area(nx,ny,q)   ! gridcell area fraction of pfts!
+      real betal(nx,ny,12,q)
+      real betaw(nx,ny,12,q)
+      real betaf(nx,ny,12,q)
+
 c     --------------------------------E N D----------------------------
 
 c     ------------------------- internal variables---------------------
@@ -110,7 +115,7 @@ c     ------------------------- internal variables---------------------
       real emes(q),rmlmes(q),rmfmes(q),rmsmes(q)
       real rmmes(q),rglmes(q),rgfmes(q),rgsmes(q),rgmes(q)
       real cleafmes(q),cawoodmes(q),cfrootmes(q), gridocpmes(q)
-
+      real betalmes(q), betawmes(q), betafmes(q)
       
       real t0,t1                !Soil temperature aux variables 
       real wsaux1,dwww,wmax     !auxiliar to equilibrium check
@@ -202,6 +207,10 @@ c     Write to track program execution
                   rgf_pft(i,j,k,p)    = no_data
                   rgs_pft(i,j,k,p)    = no_data
                   rg_pft(i,j,k,p)     = no_data
+                  betal(i,j,k,p) = no_data ! to store accumulated beta_leaf(kgC/m2)
+                  betaw(i,j,k,p) = no_data ! 
+                  betaf(i,j,k,p) = no_data
+
                enddo              
             enddo
      
@@ -248,7 +257,8 @@ c     Write to track program execution
      &             ,wfim,gfim, sfim,smes,rmes,emes,epmes,phmes,armes
      &             ,nppmes,laimes,clmes,csmes,hrmes,rcmes,rmlmes,rmfmes
      &             ,rmsmes,rmmes,rglmes,rgfmes,rgsmes,rgmes,cleafmes
-     &             ,cawoodmes,cfrootmes, gridocpmes)
+     &             ,cawoodmes,cfrootmes, gridocpmes,betalmes, betawmes
+     &             ,betafmes)
 
                do p=1,q
                   if(p .eq. 1) emaxm(i,j,k) = epmes
@@ -282,6 +292,10 @@ c     Write to track program execution
                   cleaf1_pft(p)  = cleafmes(p) 
                   cawood1_pft(p) = cawoodmes(p)
                   cfroot1_pft(p) = cfrootmes(p)
+
+                  betal(i,j,k,p) = betalmes(p)
+                  betaw(i,j,k,p) = betawmes(p)
+                  betaf(i,j,k,p) = betafmes(p)
                   
                   if(k .eq. 12) then
                       cleaf_pft (i,j,p) = cleafmes(p)
@@ -336,7 +350,8 @@ c     finalize nx loop
      $    ,ipar,rh,cl1_pft,ca1_pft,cf1_pft,w2,g2,s2,smavg,ruavg,evavg
      &    ,epavg,phavg,aravg,nppavg,laiavg,clavg,csavg,hravg,rcavg
      &    ,rmlavg,rmfavg,rmsavg,rmavg,rglavg,rgfavg,rgsavg,rgavg
-     &    ,cleafavg_pft,cawoodavg_pft,cfrootavg_pft, ocpavg)
+     &    ,cleafavg_pft,cawoodavg_pft,cfrootavg_pft,ocpavg,betalavg
+     &    ,betawavg,betafavg)
 
 
       integer, parameter :: npft = 7
@@ -382,7 +397,8 @@ c     finalize nx loop
       real cleafavg_pft(npft) ! Carbon in plant tissues
       real cawoodavg_pft(npft) 
       real cfrootavg_pft(npft)
-      real ocpavg(npft)
+      real ocpavg(npft), betalavg(npft), betawavg(npft), betafavg(npft)
+      
 !     -----------------------Internal Variables------------------------
       integer p
       
@@ -485,7 +501,16 @@ c      rh    = 0.685
          rgfavg(p)  = 0.0
          rgsavg(p)  = 0.0
          rgavg(p)   = 0.0
-         ocp_mm(p)  = 0.0 
+         ocpavg(p)  = 0.0
+         ocp_mm(p)  = 0.0
+         betalavg(p) = 0.0
+         betawavg(p) = 0.0
+         betafavg(p) = 0.0
+         alfa_leaf(p) = 0.0
+         alfa_awood(p) = 0.0
+         alfa_froot(p) = 0.0
+
+         
       enddo
       
 !     Numerical integration
@@ -519,9 +544,9 @@ c      rh    = 0.685
             rgs(p)   = 0.0
 
             if ((i.eq.1).and.(month.eq.1)) then    
-               beta_leaf(p) = 0.0000001
-               beta_awood(p) = 0.0000001
-               beta_froot(p)= 0.0000001
+               beta_leaf(p) = 0.00000001
+               beta_awood(p) = 0.00000001
+               beta_froot(p)= 0.00000001
             endif
          enddo
          
@@ -570,9 +595,9 @@ c     Carbon allocation (carbon content on each compartment)
             call critical_value(ca2(p))
             call critical_value(cf2(p))
 
-            alfa_leaf(p)  = max((cl2(p) - cl1(p)), 0.0000001) 
-            alfa_awood(p) = max((ca2(p) - ca1(p)), 0.0000001)
-            alfa_froot(p) = max((cf2(p) - cf1(p)), 0.0000001)
+            alfa_leaf(p)  = amax1((cl2(p) - cl1(p)), 0.0000001) 
+            alfa_awood(p) = amax1((ca2(p) - ca1(p)), 0.0000001)
+            alfa_froot(p) = amax1((cf2(p) - cf1(p)), 0.0000001)
             
 !     Snow budget
 !     ===========     
@@ -652,7 +677,10 @@ c     Carbon allocation (carbon content on each compartment)
             rgavg(p) = rgavg(p) + rg(p) /365.
             cleafavg_pft(p)  =  cl2(p) 
             cawoodavg_pft(p) =  ca2(p)
-            cfrootavg_pft(p) =  cf2(p) 
+            cfrootavg_pft(p) =  cf2(p)
+            betalavg(p) = betalavg(p) + alfa_leaf(p)  
+            betawavg(p) = betawavg(p) + alfa_awood(p)
+            betafavg(p) = betafavg(p) + alfa_froot(p)
          enddo
       enddo                     ! end ndmonth loop
       
@@ -683,7 +711,7 @@ c     Carbon allocation (carbon content on each compartment)
          rgfavg(p) = rgfavg(p) * 12.0 
          rgsavg(p) = rgsavg(p) * 12.0 
          rgavg(p) = rgavg(p) * 12.0
-         ocpavg(p) = (ocp_mm(p)/real(ndmonth(month))) * 100.
+         ocpavg(p) = ocp_coeffs(p) * 100.
       enddo
       return
       end subroutine budget
