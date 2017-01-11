@@ -260,32 +260,36 @@ c      Calculating annual npp
 !     Calculate environmental variables (wbm)
 !     =======================================
     
-c      call wbm (prec,temp,lsmk,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,
-c     &     emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,
-c     &     clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,
-c     &     evapm_pft,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft
-c     &    ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft, cfroot_pft
-c     &    ,gridcell_ocp,betal,betaw,betaf)   
-c
-c
+      call wbm (prec,temp,lsmk,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,
+     &     emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,
+     &     clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,
+     &     evapm_pft,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft
+     &    ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft, cfroot_pft
+     &    ,gridcell_ocp,betal,betaw,betaf)   
+
+
 
       
 !     SAVE RESULTS TO FILES
+      call nan2ndt(gridcell_ocp, q)
       open(10,file='../outputs/gridcell_ocp.bin',
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
       call savex(10, gridcell_ocp, q)
-      
+
+      call nan2ndt(cleaf_pft, q)
       open(10,file='../outputs/cleaf.bin',
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
       call savex(10, cleaf_pft, q)
-
+      
+      call nan2ndt(cawood_pft, q)
       open(10,file='../outputs/cawood.bin',
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
       call savex(10,cawood_pft,q)
-
+      
+      call nan2ndt(cfroot_pft, q)
       open(10,file='../outputs/cfroot.bin',
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
@@ -1159,7 +1163,6 @@ c                  crepini(i6) = crepi_aux(k)
             endif
          enddo
       enddo
-      
       return
       end subroutine spinup
 !     ================================
@@ -1216,3 +1219,24 @@ c                  crepini(i6) = crepi_aux(k)
       close(nunit)
       return
       end subroutine savex
+
+      
+!     ===============================
+      subroutine nan2ndt(var, nl)
+
+      integer nl
+      integer, parameter :: nx=120, ny=160
+      integer i,j
+      real, parameter :: no_data = -9999.0
+      real var(nx,ny,nl)
+      
+      do i = 1,nx
+         do j = 1,ny
+            do k = 1,nl 
+               if(isnan(var(i,j,k))) var(i,j,k) = no_data
+            enddo
+         enddo
+      enddo  
+      
+      return
+      end subroutine nan2ndt

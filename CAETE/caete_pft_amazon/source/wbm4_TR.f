@@ -425,7 +425,8 @@ c     finalize nx loop
       real dw  (npft)
       real roff(npft)           !Total runoff
       real evap(npft)           !Actual evapotranspiration (mm/day)
-      real emax, wapft          !Maximum evapotranspiration
+      real emax
+      real*8 wapft                     !Maximum evapotranspiration
       
       integer ndmonth(12)       !Number of months
       data ndmonth /31,28,31,30,31,30,31,31,30,31,30,31/ !Number of days for each month

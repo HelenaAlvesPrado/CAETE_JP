@@ -1,7 +1,7 @@
 import os
 import glob
 
-os.chdir('../outputs')
+os.chdir('../outputs_pft')
 files = os.listdir()
 files = glob.glob1(os.getcwd(), '*.bin')
 

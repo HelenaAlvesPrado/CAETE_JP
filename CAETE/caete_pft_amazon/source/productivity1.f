@@ -497,7 +497,8 @@ C 10   CONTINUE
 !     
 !     
       if (vpd_in.lt.0.25) gs = 1.5
-      if (vpd_in.ge.0.25) then 
+      if (vpd_in.ge.0.25) then
+!     esta proxima linha esta causando uma IEEE_DENORMAL
          gs = g0 + 1.6 * (1. + (g1(m)/D1)) * (aa) !Based on Medlyn et al. 2011
 !     gs = g0 + 1.6 * (1 + (g1/D)) * (aa) !Based on Medlyn et al. 2011
 !     
@@ -652,6 +653,15 @@ C         call critical_value(hr)
 
       return
       end subroutine critical_value2
+
+      subroutine critical_value3(var)
+      implicit none
+      real*16 var
+      
+      if(abs(var) .lt. 0.000001) var = 0.0
+
+      return
+      end subroutine critical_value3
 
 
 c23456
@@ -840,8 +850,13 @@ C23456
 !     ===
 !     
       subroutine runoff (wa,roff)
-      real wa,roff
-      roff = 11.5*(wa**6.6) !From NCEP-NCAR Reanalysis data
+      real*8 :: wa
+      real :: roff
+      real*16 :: roff64
+      roff64 = 38.*(wa**11.)
+c      roff64 = 11.5*(wa**6.6) * 1000. !From NCEP-NCAR Reanalysis data
+      call critical_value3(roff64)
+      roff = real(roff64, 4)
       return
       end
 !     
