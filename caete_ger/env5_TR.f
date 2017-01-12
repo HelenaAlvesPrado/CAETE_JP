@@ -93,6 +93,19 @@ c     variaveis do spinup
       real npp_pot(nx,ny,12)
       real, dimension(nx,ny) :: aux_npp
       real npp_sca              !NPP escalar: para facilitar o calculo do SPINUP
+
+c     variáveis anuais
+c      real, dimension(nx,ny) :: ave_ph = 0.0
+c      real, dimension(nx,ny) :: ave_ar = 0.0
+c      real, dimension(nx,ny) :: ave_npp = 0.0
+c      real, dimension(nx,ny) :: ave_lai = 0.0
+c      real, dimension(nx,ny) :: ave_clit = 0.0
+c      real, dimension(nx,ny) :: ave_cs = 0.0
+c      real, dimension(nx,ny) :: ave_hr = 0.0
+c      real, dimension(nx,ny) :: ave_rc = 0.0
+c      real, dimension(nx,ny) :: ave_runom = 0.0
+c      real, dimension(nx,ny) :: ave_evap = 0.0
+c      real, dimension(nx,ny) :: ave_wsoil = 0.0
       
 c     -----FIM DA DEFINICAO DE VARIAVEIS PARA RODAR O MODELO--
 C     
@@ -209,16 +222,19 @@ c      Calculating annual npp
 c         print*, (real(i)/real(nx))*100.0, '%'
       enddo
 !
+      call nan2ndt(cleafin, q)
       open(10,file='../spinup/clini.bin',
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
       call savex(10, cleafin, q)
 
+      call nan2ndt(cfrootin, q)
       open(10,file='../spinup/cfini.bin',
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)
       call savex(10, cfrootin, q)
-      
+
+      call nan2ndt(cawoodin, q)
       open(10,file='../spinup/cwini.bin',
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)
@@ -261,25 +277,25 @@ c         print*, (real(i)/real(nx))*100.0, '%'
 c
 c    
 !     SAVE RESULTS TO FILES
-c      call nan2ndt(gridcell_ocp, q)
+      call nan2ndt(gridcell_ocp, q)
       open(10,file='../outputs/gridcell_ocp.bin',
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
       call savex(10, gridcell_ocp, q)
       
-c      call nan2ndt(cleaf_pft, q)
+      call nan2ndt(cleaf_pft, q)
       open(10,file='../outputs/cleaf.bin',
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
       call savex(10, cleaf_pft, q)              !pool final do respectivo PFT
 
-c      call nan2ndt(cawood_pft, q)
+      call nan2ndt(cawood_pft, q)
       open(10,file='../outputs/cawood.bin',
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
       call savex(10,cawood_pft,q)
 
-c      call nan2ndt(cfroot_pft, q)
+      call nan2ndt(cfroot_pft, q)
       open(10,file='../outputs/cfroot.bin',
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
@@ -458,6 +474,40 @@ C     preparando o terreno pra salvar as variaveis
      &     access='direct',recl=4*nx*ny)
       call save_file12(10, rg)
 !
+!
+c      do i = 1,nx
+c        do j = 1,ny
+c            if(nint(lsmk(i,j)) .ne. 0) then
+c            ave_ph(i,j) = ave_ph(i,j) + ph(i,j,k)/12.
+c            ave_ar(i,j) = ave_ar(i,j) + ar(i,j,k)/12.
+c            ave_npp(i,j) = ave_npp(i,j) + npp(i,j,k)/12.
+c            ave_lai(i,j) = ave_lai(i,j) + lai(i,j,k)/12.
+c            ave_clit(i,j) = ave_clit(i,j) + clit(i,j,k)/12.
+c            ave_cs(i,j) = ave_cs(i,j) + csoil(i,j,k)/12.
+c            ave_hr(i,j) = ave_hr(i,j) + hr(i,j,k)/12.
+c            ave_rc(i,j) = ave_rc(i,j) + rcm(i,j,k)/12.
+c            ave_runom(i,j) = ave_runom(i,j) + runom(i,j,k)/12.
+c            ave_evap(i,j) = ave_evap(i,j) + evaptr(i,j,k)/12.
+c            ave_wsoil(i,j) = ave_wsoil(i,j) + wsoil(i,j,k)/12.
+c            endif
+c         enddo
+c      enddo
+c
+!      open(50,file='../outputs/ambientais.bin',
+!     &        status='unknown',form='unformatted',
+!     &        access='direct',recl=4*nx*ny)
+!      write(50,rec=1) ave_npp
+!      write(50,rec=2) ave_rc
+!      write(50,rec=3) ave_ar
+!      write(50,rec=4) ave_lai
+!      write(50,rec=5) ave_clit
+!      write(50,rec=6) ave_cs
+!      write(50,rec=7) ave_hr
+!      write(50,rec=8) ave_runom
+!      write(50,rec=9) ave_evap
+!      write(50,rec=10) ave_wsoil
+!      write(50,rec=11) ave_ph
+!      close(50)
 !
       do i=1,nx
          do j=1,ny
@@ -1247,36 +1297,36 @@ c     Outputs
       end subroutine savex
       !     ================================
 
-c      subroutine nan2ndt(var, nl)
+      subroutine nan2ndt(var, nl)
 !
-!      integer nl
-!      integer, parameter :: nx=120, ny=160
-!      integer i,j
-!      real, parameter :: no_data = -9999.0
-!      real var(nx,ny,nl)
+      integer nl
+      integer, parameter :: nx=120, ny=160
+      integer i,j
+      real, parameter :: no_data = -9999.0
+      real var(nx,ny,nl)
       
-!      do i = 1,nx
-!         do j = 1,ny
-!            do k = 1,nl
+      do i = 1,nx
+         do j = 1,ny
+            do k = 1,nl
                
-!               if(var(i,j,k) .gt. 1e32)then
-!                  var(i,j,k) = 0.0
-c                  print*, 'var .gt. 1e32',i,j,k
-!               endif
+               if(var(i,j,k) .gt. 1e32)then
+                  var(i,j,k) = 0.0
+!                  print*, 'var .gt. 1e32',i,j,k
+               endif
                
-!               if(var(i,j,k) .lt. 1e-32) then
-!                  var(i,j,k) = 0.0
-c                  print*, 'var .lt. 1e-32',i,j,k
-!               endif
+               if(var(i,j,k) .lt. 1e-32) then
+                  var(i,j,k) = 0.0
+!                  print*, 'var .lt. 1e-32',i,j,k
+               endif
                
-!               if(isnan(var(i,j,k))) then
-!                  var(i,j,k) = no_data
-c                  print*, 'NaN found', '---place',i,j,k
-!               endif
+               if(isnan(var(i,j,k))) then
+                  var(i,j,k) = no_data
+!                  print*, 'NaN found', '---place',i,j,k
+               endif
 !               
-!            enddo
-!         enddo
-!      enddo  
+            enddo
+         enddo
+      enddo  
 !      
-!      return
-!      end subroutine nan2ndt
+      return
+      end subroutine nan2ndt

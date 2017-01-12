@@ -27,7 +27,7 @@ c234567
       integer pft
       real ocp_pft              !Ocuppation_%
       real temp                 !Mean monthly temperature (oC)
-      real ru
+      real rh
       real p0                   !Mean surface pressure (hPa)
       real wa,w,wmax            !Soil moisture (dimensionless)
       real ca                   !Atmospheric CO2 concentration (Pa)
@@ -422,12 +422,12 @@ c
       rg = real(rg64,4)  
       call critical_value(rg)
      
-      if (rg.lt.0) then
-         rg = 0.0
-      endif
-      if (rg.gt.0.01)then
-      print*, rg
-      endif      
+!      if (rg.lt.0) then
+!         rg = 0.0
+!      endif
+!      if (rg.gt.0.01)then
+!      print*, rg
+!      endif      
 !     c Autotrophic (plant) respiration -ar- (kgC/m2/yr)
 !     Respiration minimum and maximum temperature
 !     -------------------------------------------
@@ -667,14 +667,14 @@ C         call critical_value(hr)
       return
       end subroutine critical_value2
 
-c      subroutine critical_value3(var)
-!        implicit none
-!        real*16 var
-c       
-c       if(abs(var) .lt. 0.000001) var = 0.0
-c 
-c       return
-c       end subroutine critical_value3
+      subroutine critical_value3(var)
+      implicit none
+      real*16 var
+       
+      if(abs(var) .lt. 0.000001) var = 0.0
+ 
+      return
+      end subroutine critical_value3
 
 c23456
       SUBROUTINE PFT_AREA_FRAC(CLEAF, CFROOT, CAWOOD, OCP_COEFFS,
@@ -855,22 +855,22 @@ C23456
 !     =================================================================
 !     ===
 !     
-!      subroutine runoff (wa,roff)
-!      real*8 :: wa
-!      real :: roff
-!      real*16 :: roff64
-!      roff64 = 38.*(wa**11.)
-c      roff64 = 11.5*(wa**6.6) * 1000. !From NCEP-NCAR Reanalysis data
-!      call critical_value3(roff64)
-!      roff = real(roff64, 4)
-!      return
-!      end
-!
       subroutine runoff (wa,roff)
-      real wa,roff
-      roff = 11.5*(wa**6.6) !From NCEP-NCAR Reanalysis data
+      real*8 :: wa
+      real :: roff
+      real*16 :: roff64
+      roff64 = 38.*(wa**11.)
+      roff64 = 11.5*(wa**6.6) * 1000. !From NCEP-NCAR Reanalysis data
+      call critical_value3(roff64)
+      roff = real(roff64, 4)
       return
       end
+!
+!      subroutine runoff (wa,roff)
+!      real wa,roff
+!      roff = 11.5*(wa**6.6) !From NCEP-NCAR Reanalysis data
+!      return
+!      end
 
 !     =================================================================
 !     ====
