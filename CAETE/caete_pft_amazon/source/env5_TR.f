@@ -218,16 +218,19 @@ c      Calculating annual npp
          print*, (real(i)/real(nx))*100.0, '%'
       enddo
 
+      call nan2ndt(cleafin, q)
       open(10,file='../spinup/clini.bin',
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
       call savex(10, cleafin, q)
 
+      call nan2ndt(cfrootin, q)
       open(10,file='../spinup/cfini.bin',
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)
       call savex(10, cfrootin, q)
-      
+
+      call nan2ndt(cawoodin, q)
       open(10,file='../spinup/cwini.bin',
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)
@@ -1114,7 +1117,7 @@ c     outputs
       do i6=1,npfts
          do k=1,nt
             if (k.eq.1) then
-               cleafi_aux(k) = aleaf(i6)*(nppot)
+               cleafi_aux (k) =  aleaf(i6)*(nppot)
                cawoodi_aux(k) = aawood(i6)*(nppot)
                cfrooti_aux(k) = afroot(i6)*(nppot)
 c               cbwoodi_aux(k) = abwood(i6)*(nppot)
@@ -1234,12 +1237,12 @@ c                  crepini(i6) = crepi_aux(k)
          do j = 1,ny
             do k = 1,nl
                
-               if(var(i,j,k) .gt. 1e32)then
+               if(var(i,j,k) .gt. 1e13)then
                   var(i,j,k) = 0.0
 c                  print*, 'var .gt. 1e32',i,j,k
                endif
                
-               if(var(i,j,k) .lt. 1e-32) then
+               if(var(i,j,k) .lt. 1e-7) then
                   var(i,j,k) = 0.0
 c                  print*, 'var .lt. 1e-32',i,j,k
                endif
