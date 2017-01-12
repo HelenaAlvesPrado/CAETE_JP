@@ -1232,8 +1232,23 @@ c                  crepini(i6) = crepi_aux(k)
       
       do i = 1,nx
          do j = 1,ny
-            do k = 1,nl 
-               if(isnan(var(i,j,k))) var(i,j,k) = no_data
+            do k = 1,nl
+               
+               if(var(i,j,k) .gt. 1e32)then
+                  var(i,j,k) = 0.0
+c                  print*, 'var .gt. 1e32',i,j,k
+               endif
+               
+               if(var(i,j,k) .lt. 1e-32) then
+                  var(i,j,k) = 0.0
+c                  print*, 'var .lt. 1e-32',i,j,k
+               endif
+               
+               if(isnan(var(i,j,k))) then
+                  var(i,j,k) = no_data
+c                  print*, 'NaN found', '---place',i,j,k
+               endif
+               
             enddo
          enddo
       enddo  

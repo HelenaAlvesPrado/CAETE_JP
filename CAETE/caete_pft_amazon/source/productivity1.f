@@ -654,6 +654,8 @@ C         call critical_value(hr)
       return
       end subroutine critical_value2
 
+
+      
       subroutine critical_value3(var)
       implicit none
       real*16 var
