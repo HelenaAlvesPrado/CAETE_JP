@@ -147,9 +147,6 @@ C     NEW OUTPUTS (AUTOTRF RESPIRATION, ALLOCATION)
       real, dimension(nx,ny,12) :: rgf!, rgf1, rgf2, rgf3
       real, dimension(nx,ny,12) :: rgs!, rgs1, rgs2, rgs3
       real, dimension(nx,ny,12) :: rg!,  rg1,  rg2,  rg3 
-      real, dimension(nx,ny,12) :: cleaf!,  cleaf1,  cleaf2,  cleaf3
-      real, dimension(nx,ny,12) :: cawood!, cawood1, cawood2, cawood3
-      real, dimension(nx,ny,12) :: cfroot!, cfroot1, cfroot2, cfroot3
       
 C     -------END DECLARATION----------------------------------------
       
@@ -217,6 +214,7 @@ c      Calculating annual npp
                   aux1(p) = 0.0
                   aux2(p) = 0.0
                   aux3(p) = 0.0
+                  gridcell_ocp(i,j,p) = 0.0
                enddo
                
                call spinup(npp_sca, aux1, aux2, aux3)
@@ -225,6 +223,13 @@ c      Calculating annual npp
                   cleafin(i,j,p)  = aux1(p)
                   cfrootin(i,j,p) = aux2(p)
                   cawoodin(i,j,p) = aux3(p)
+               enddo
+            else
+               do p = 1,q
+                  cleafin(i,j,p)  = no_data
+                  cfrootin(i,j,p) = no_data
+                  cawoodin(i,j,p) = no_data
+                  gridcell_ocp(i,j,p) = no_data
                enddo
             endif
          enddo
@@ -334,9 +339,6 @@ c      Calculating annual npp
                   rgf(i,j,k)  = 0.0
                   rgs(i,j,k)  = 0.0
                   rg(i,j,k)  = 0.0
-                  cleaf(i,j,k)  = 0.0
-                  cawood(i,j,k)  = 0.0
-                  cfroot(i,j,k)  = 0.0
                else
                   ph(i,j,k) = no_data
                   ar(i,j,k) = no_data
