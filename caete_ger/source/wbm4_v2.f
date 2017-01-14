@@ -174,7 +174,7 @@ c     ------------------------- internal variables---------------------
                cleaf_pft(i,j,p)  = no_data ! leaf biomass (KgC/m2)
                cawood_pft(i,j,p) = no_data ! aboveground biomass (KgC/m2)
                cfroot_pft(i,j,p) = no_data ! fine root biomass (KgC/m2)
-               grid_area(i,j,p) = no_data ! gridcell area fraction of pfts(%)
+               grid_area(i,j,p)  = no_data ! gridcell area fraction of pfts(%)
             enddo
 
 c     Write to track program execution     
@@ -570,35 +570,35 @@ c      rh    = 0.685
      &          ,nppa(p),laia(p),f5(p),f1(p),vpd(p),rm(p),rml(p)
      &          ,rmf(p),rms(p),rg(p),rgl(p),rgf(p),rgs(p),rc2(p))
 
-            call critical_value(ph(p))
-            call critical_value(ar(p))
-            call critical_value(nppa(p))
-            call critical_value(laia(p))
-            call critical_value(f5(p))
-            call critical_value(f1(p))
-            call critical_value(vpd(p))
-            call critical_value(rm(p))
-            call critical_value(rml(p))
-            call critical_value(rmf(p))
-            call critical_value(rms(p))
-            call critical_value(rg(p))
-            call critical_value(rgl(p))
-            call critical_value(rgf(p))
-            call critical_value(rgs(p))
-            call critical_value(rc2(p))
+c            call critical_value(ph(p))
+c            call critical_value(ar(p))
+c            call critical_value(nppa(p))
+c            call critical_value(laia(p))
+c            call critical_value(f5(p))
+c            call critical_value(f1(p))
+c            call critical_value(vpd(p))
+c            call critical_value(rm(p))
+c            call critical_value(rml(p))
+c            call critical_value(rmf(p))
+c            call critical_value(rms(p))
+c            call critical_value(rg(p))
+c            call critical_value(rgl(p))
+c            call critical_value(rgf(p))
+c            call critical_value(rgs(p))
+c            call critical_value(rc2(p))
             
 c     Carbon allocation (carbon content on each compartment)
 !     =====================================================
             call allocation (p, nppa(p), cl1(p), ca1(p), !output !input
      &          cf1(p),cl2(p), ca2(p), cf2(p)) 
 
-            call critical_value(cl2(p))
-            call critical_value(ca2(p))
-            call critical_value(cf2(p))
+c            call critical_value(cl2(p))
+c            call critical_value(ca2(p))
+c            call critical_value(cf2(p))
 
-            alfa_leaf(p)  = amax1((cl2(p) - cl1(p)), 0.0000001) 
-            alfa_awood(p) = amax1((ca2(p) - ca1(p)), 0.0000001)
-            alfa_froot(p) = amax1((cf2(p) - cf1(p)), 0.0000001)
+            alfa_leaf(p)  = amax1((cl2(p) - cl1(p)), 0.0) 
+            alfa_awood(p) = amax1((ca2(p) - ca1(p)), 0.0)
+            alfa_froot(p) = amax1((cf2(p) - cf1(p)), 0.0)
             
 !     Snow budget
 !     ===========     

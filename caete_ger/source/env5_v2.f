@@ -100,23 +100,22 @@ c     variaveis do spinup
       real, dimension(q) :: aux1, aux2, aux3
       real npp_pot(nx,ny,12)
       real, dimension(nx,ny) :: aux_npp
-      real npp_sca
-      
-c     variáveis anuais ---------- começamos a adicionar, mas nao deu tempo de terminar
-c      real, dimension(nx,ny) :: ave_ph = 0.0
-c      real, dimension(nx,ny) :: ave_ar = 0.0
-c      real, dimension(nx,ny) :: ave_npp = 0.0
-c      real, dimension(nx,ny) :: ave_lai = 0.0
-c      real, dimension(nx,ny) :: ave_clit = 0.0
-c      real, dimension(nx,ny) :: ave_cs = 0.0
-c      real, dimension(nx,ny) :: ave_hr = 0.0
-c      real, dimension(nx,ny) :: ave_rc = 0.0
-c      real, dimension(nx,ny) :: ave_runom = 0.0
-c      real, dimension(nx,ny) :: ave_evap = 0.0
-c      real, dimension(nx,ny) :: ave_wsoil = 0.0      
+      real npp_sca  
 
 c     -----FIM DA DEFINICAO DE VARIAVEIS PARA RODAR O MODELO--
-C     
+C
+c     variaveis anuais -
+      real, dimension(nx,ny) :: ave_ph = 0.0
+      real, dimension(nx,ny) :: ave_ar = 0.0
+      real, dimension(nx,ny) :: ave_npp = 0.0
+      real, dimension(nx,ny) :: ave_lai = 0.0
+      real, dimension(nx,ny) :: ave_clit = 0.0
+      real, dimension(nx,ny) :: ave_cs = 0.0
+      real, dimension(nx,ny) :: ave_hr = 0.0
+      real, dimension(nx,ny) :: ave_rc = 0.0
+      real, dimension(nx,ny) :: ave_runom = 0.0
+      real, dimension(nx,ny) :: ave_evap = 0.0
+      real, dimension(nx,ny) :: ave_wsoil = 0.0    
       
 C     THESE WILL RECEIVE MEANS BETWEEN q PFTs and for each pft (ex. ph to mean; ph1 to pft 1)
       real, dimension(nx,ny,12) :: ph, ph1, ph2, ph3, ph4, ph5, ph6, ph7
@@ -154,19 +153,33 @@ C     -------END DECLARATION----------------------------------------
 !     ==========
       open( 9,file='../inputs/lsmk_sa.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
+
       open(10,file='../inputs/ps_sa.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
+
       open(11,file='../inputs/pr_sa.bin',status='old',
-     &     form='unformatted',access='direct',recl=4*nx*ny)
+     &    form='unformatted',access='direct',recl=4*nx*ny)
+      
       open(12,file='../inputs/tas_sa.bin',status='old',
-     &     form='unformatted',access='direct',recl=4*nx*ny)
+     &    form='unformatted',access='direct',recl=4*nx*ny)
+      
       open(13,file='../inputs/rsds_sa.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
+
       open(14,file='../inputs/hurs_sa.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
-      open(26,file='../inputs/npp_sa.bin',status='old',
-     &     form='unformatted',access='direct',recl=4*nx*ny)
-      
+
+c      open(26,file='../inputs/npp_sa.bin',status='old',
+c     &     form='unformatted',access='direct',recl=4*nx*ny)
+
+      open(27,file='../spinup/clini.bin',status='old',
+     &    form='unformatted',access='direct',recl=4*nx*ny)
+
+      open(28,file='../spinup/cfini.bin',status='old',
+     &    form='unformatted',access='direct',recl=4*nx*ny)
+
+      open(29,file='../spinup/cwini.bin',status='old',
+     &    form='unformatted',access='direct',recl=4*nx*ny)
 !     Read data
 !     =========
       
@@ -177,7 +190,10 @@ C     -------END DECLARATION----------------------------------------
        call readx(12,t,12)
        call readx(13,ipar,12)
        call readx(14,rhaux,12)
-       call readx(26,npp_pot,12)
+c       call readx(26,npp_pot,12)
+       call readx(29,cleafin,q)
+       call readx(28,cfrootin,q)
+       call readx(29,cawoodin,q)
      
 !     Close files
 !     ===========
@@ -188,91 +204,106 @@ C     -------END DECLARATION----------------------------------------
        close(12)
        close(13)
        close(14)
-       close(26)
+c       close(26)
+       close(27)
+       close(28)
+       close(29)
+       
 
-c      Calculating annual npp
-       do i =1,nx
-          do j=1,ny
-             if(nint(lsmk(i,j)) .ne. 0) then 
-                aux_npp(i,j) = 0.0
-                do k = 1,12
-                   aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
-                enddo
-             else
-                aux_npp(i,j) = no_data
-             endif
-          enddo
-       enddo
+cc      Calculating annual npp
+c       do i =1,nx
+c          do j=1,ny
+c             if(nint(lsmk(i,j)) .ne. 0) then 
+c                aux_npp(i,j) = 0.0
+c                do k = 1,12
+c                   aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
+c                enddo
+c             else
+c                aux_npp(i,j) = no_data
+c             endif
+c          enddo
+c       enddo
+c
+c!     calling spinup
+c      do i=1,nx
+c         do j=1,ny
+c            if (nint(lsmk(i,j)) .ne. 0) then
+c               npp_sca = aux_npp(i,j)
+c               
+c               do p=1,q   
+c                  aux1(p) = 0.0
+c                  aux2(p) = 0.0
+c                  aux3(p) = 0.0
+c                  gridcell_ocp(i,j,p) = 0.0
+c               enddo
+c               
+c               call spinup(npp_sca, aux1, aux2, aux3)
+c
+c               do p=1,q   
+c                  cleafin(i,j,p)  = aux1(p)
+c                  cfrootin(i,j,p) = aux2(p)
+c                  cawoodin(i,j,p) = aux3(p)
+c               enddo
+c            else
+c               do p = 1,q
+c                  cleafin(i,j,p)  = no_data
+c                  cfrootin(i,j,p) = no_data
+c                  cawoodin(i,j,p) = no_data
+c                  gridcell_ocp(i,j,p) = no_data
+c               enddo
+c            endif
+c         enddo
+c         if(mod(nx,5) .eq. 0)print*, (real(i)/real(nx))*100.0, '%'
+c      enddo
+c
+c      call nan2ndt(cleafin, q) !!! --------- incorporado essa subroutina
+c      open(10,file='../spinup/clini.bin',
+c     &     status='unknown',form='unformatted',
+c     &     access='direct',recl=4*nx*ny)
+c      call savex(10, cleafin, q)
+c
+c      call nan2ndt(cfrootin, q)
+c      open(10,file='../spinup/cfini.bin',
+c     &    status='unknown',form='unformatted',
+c     &    access='direct',recl=4*nx*ny)
+c      call savex(10, cfrootin, q)
+c
+c      call nan2ndt(cawoodin, q)
+c      open(10,file='../spinup/cwini.bin',
+c     &    status='unknown',form='unformatted',
+c     &    access='direct',recl=4*nx*ny)
+c      call savex(10, cawoodin, q)
+c!     ===========
 
-!     calling spinup
+
+
       do i=1,nx
          do j=1,ny
-            if (nint(lsmk(i,j)) .ne. 0) then
-               npp_sca = aux_npp(i,j)
-               
-               do p=1,q   
-                  aux1(p) = 0.0
-                  aux2(p) = 0.0
-                  aux3(p) = 0.0
-                  gridcell_ocp(i,j,p) = 0.0
-               enddo
-               
-               call spinup(npp_sca, aux1, aux2, aux3)
-
-               do p=1,q   
-                  cleafin(i,j,p)  = aux1(p)
-                  cfrootin(i,j,p) = aux2(p)
-                  cawoodin(i,j,p) = aux3(p)
-               enddo
-            else
+            
+!     this block set ocean grid cells to no_data 
+            if(nint(lsmk(i,j)) .eq. 0) then
                do p = 1,q
-                  cleafin(i,j,p)  = no_data
-                  cfrootin(i,j,p) = no_data
-                  cawoodin(i,j,p) = no_data
+                  cleaf_pft(i,j,p)  = no_data
+                  cfroot_pft(i,j,p) = no_data
+                  cawood_pft(i,j,p) = no_data
                   gridcell_ocp(i,j,p) = no_data
                enddo
             endif
-         enddo
-         print*, (real(i)/real(nx))*100.0, '%'
-      enddo
-
-      call nan2ndt(cleafin, q) !!! --------- incorporado essa subroutina
-      open(10,file='../spinup/clini.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call savex(10, cleafin, q)
-
-      call nan2ndt(cfrootin, q)
-      open(10,file='../spinup/cfini.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call savex(10, cfrootin, q)
-
-      call nan2ndt(cawoodin, q)
-      open(10,file='../spinup/cwini.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call savex(10, cawoodin, q)
-!     ===========
-
-
-
-      do i=1,nx
-         do j=1,ny
+!     ------------------------------------------
+               
             do k=1,12
 !     Photosynthetically active radiation (IPAR:Ein/m2/s)
 !     Observed data from ISLSCP2
                rhs(i,j,k) = rhaux(i,j,k) / 100.0
-               par(i,j,k) = ipar(i,j,k)/2.18e5 !Converting to Ein/m2/s
+               par(i,j,k) = ipar(i,j,k)/2.18E5 !Converting to Ein/m2/s
                temp(i,j,k) = t(i,j,k) !+ant(i,j,k) !uncomment to use future anomalies
                p0(i,j,k) = ps(i,j,k) * 0.01 ! transforamando de pascal pra mbar (kPa)
                prec(i,j,k) = pr(i,j,k) !+anpr(i,j,k) !+pr(i,j,k)*0.2 !uncomment to use future anomalies
-               if (prec(i,j,k).lt.0.0) prec (i,j,k) = 0.0
-               
+               if (prec(i,j,k).lt.0.0) prec (i,j,k) = 0.0  
             enddo
          enddo
       enddo
-      
+         
 !     Atmospheric CO2 pressure (Pa) !Ppmv / Pa
       ca= 363/9.901             !Pa (=363 ppmv; 1981-2010)
 
@@ -488,39 +519,53 @@ C     preparando o terreno pra salvar as variaveis
      &     access='direct',recl=4*nx*ny)
       call save_file12(10, rg)
 
-c      do i = 1,nx
-c        do j = 1,ny
-c            if(nint(lsmk(i,j)) .ne. 0) then
-c            ave_ph(i,j) = ave_ph(i,j) + ph(i,j,k)/12.
-c            ave_ar(i,j) = ave_ar(i,j) + ar(i,j,k)/12.
-c            ave_npp(i,j) = ave_npp(i,j) + npp(i,j,k)/12.
-c            ave_lai(i,j) = ave_lai(i,j) + lai(i,j,k)/12.
-c            ave_clit(i,j) = ave_clit(i,j) + clit(i,j,k)/12.
-c            ave_cs(i,j) = ave_cs(i,j) + csoil(i,j,k)/12.
-c            ave_hr(i,j) = ave_hr(i,j) + hr(i,j,k)/12.
-c            ave_rc(i,j) = ave_rc(i,j) + rcm(i,j,k)/12.
-c            ave_runom(i,j) = ave_runom(i,j) + runom(i,j,k)/12.
-c            ave_evap(i,j) = ave_evap(i,j) + evaptr(i,j,k)/12.
-c            ave_wsoil(i,j) = ave_wsoil(i,j) + wsoil(i,j,k)/12.
-c            endif
-c         enddo
-c      enddo
-c
-c      open(50,file='../outputs/ambientais.bin',
-c     &        status='unknown',form='unformatted',
-c     &        access='direct',recl=4*nx*ny)
-c      write(50,rec=1) ave_npp
-c      write(50,rec=2) ave_rc
-c      write(50,rec=3) ave_ar
-c      write(50,rec=4) ave_lai
-c      write(50,rec=5) ave_clit
-c      write(50,rec=6) ave_cs
-c      write(50,rec=7) ave_hr
-c      write(50,rec=8) ave_runom
-c      write(50,rec=9) ave_evap
-c      write(50,rec=10) ave_wsoil
-c      write(50,rec=11) ave_ph
-c      close(50)
+      do i = 1,nx
+         do j = 1,ny
+            if(nint(lsmk(i,j)) .ne. 0) then
+               do k = 1,12
+                  ave_ph(i,j) = ave_ph(i,j) + ph(i,j,k)/12.
+                  ave_ar(i,j) = ave_ar(i,j) + ar(i,j,k)/12.
+                  ave_npp(i,j) = ave_npp(i,j) + npp(i,j,k)/12.
+                  ave_lai(i,j) = ave_lai(i,j) + lai(i,j,k)/12.
+                  ave_clit(i,j) = ave_clit(i,j) + clit(i,j,k)/12.
+                  ave_cs(i,j) = ave_cs(i,j) + csoil(i,j,k)/12.
+                  ave_hr(i,j) = ave_hr(i,j) + hr(i,j,k)/12.
+                  ave_rc(i,j) = ave_rc(i,j) + rcm(i,j,k)/12.
+                  ave_runom(i,j) = ave_runom(i,j) + runom(i,j,k)/12.
+                  ave_evap(i,j) = ave_evap(i,j) + evaptr(i,j,k)/12.
+                  ave_wsoil(i,j) = ave_wsoil(i,j) + wsoil(i,j,k)/12.
+               enddo
+            else
+               ave_ph(i,j) = no_data
+               ave_ar(i,j) = no_data
+               ave_npp(i,j) = no_data
+               ave_lai(i,j) = no_data
+               ave_clit(i,j) = no_data
+               ave_cs(i,j) = no_data
+               ave_hr(i,j) = no_data
+               ave_rc(i,j) = no_data
+               ave_runom(i,j) = no_data
+               ave_evap(i,j) = no_data
+               ave_wsoil(i,j) = no_data
+            endif
+         enddo
+      enddo
+
+      open(50,file='../outputs/ambientais.bin',
+     &        status='unknown',form='unformatted',
+     &        access='direct',recl=4*nx*ny)
+      write(50,rec=1) ave_npp
+      write(50,rec=2) ave_rc
+      write(50,rec=3) ave_ar
+      write(50,rec=4) ave_lai
+      write(50,rec=5) ave_clit
+      write(50,rec=6) ave_cs
+      write(50,rec=7) ave_hr
+      write(50,rec=8) ave_runom
+      write(50,rec=9) ave_evap
+      write(50,rec=10) ave_wsoil
+      write(50,rec=11) ave_ph
+      close(50)
 
       
       do i=1,nx
@@ -1044,7 +1089,7 @@ c      close(50)
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)
       call save_file12(10, bf6)
-      open(10,file='../outputs_pft/bf.7.bin',
+       open(10,file='../outputs_pft/bf.7.bin',
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)
       call save_file12(10, bf7)
@@ -1061,7 +1106,8 @@ c      close(50)
 !     input
       integer, parameter :: vars = 7 
       integer :: par            ! parameter number 
-      real, dimension(vars) :: dt,dt1,dt2,dt3,dt4,dt5,dt6,dt7,dt8
+      real, dimension(vars) :: dt,dt1,dt2,dt3,dt4,dt5,dt6
+     &    ,dt7,dt8
       
       
 !     dt1 = g1
@@ -1087,15 +1133,15 @@ c      close(50)
 !     8 = temperate tree
 !     9 = temperate herb
 
-!     PFT         1       2       3       4       5       6       7     8     9 
-      data dt1 /3.37,   4.64,   7.18,   2.98,   4.35,   4.64,   4.22/
-      data dt2 /3.2e-5, 3.1e-5, 3.8e-5, 5.5e-5, 8.0e-5, 4.0e-5, 4.5e-5/      
-      data dt3 /0.40,   0.35,   0.30,   0.25,   0.55,   0.35,   0.40/
-      data dt4 /0.35,   0.25,   0.15,   0.10,   0.0,    0.00,   0.15/
-      data dt5 /0.25,   0.40,   0.55,   0.65,   0.45,   0.65,   0.45/
-      data dt6 /2.0,    0.5,    1.0,    1.0,    1.5,    1.0,    1.0/
-      data dt7 /50.0,   50.0,   35.0,   30.0,   0.0,    0.0,    30.5/
-      data dt8 /3.0,    2.0,    1.0,    1.5,    1.0,    1.0,    1.5/ 
+!     PFT         1       2       3       4       5       6       7      
+      data dt1/3.37,   4.645,   7.18,   2.98,   4.35,   4.64,   4.22/
+      data dt2/3.2E-5, 3.1E-5, 3.8E-5, 5.5E-5, 8.0E-5, 4.0E-5, 4.5E-5/      
+      data dt3/0.40,   0.35,   0.30,   0.25,   0.55,   0.35,   0.40/
+      data dt4/0.35,   0.25,   0.15,   0.10,   0.0,    0.00,   0.15/
+      data dt5/0.25,   0.40,   0.55,   0.65,   0.45,   0.65,   0.45/
+      data dt6/2.0,    0.5,    1.0,    1.0,    1.5,    1.0,    1.0/
+      data dt7/50.0,   50.0,   35.0,   30.0,   0.0,    0.0,    30.5/
+      data dt8/3.0,    2.0,    1.0,    1.5,    1.0,    1.0,    1.5/ 
      
       if(par .eq. 1 ) then      ! g1
          dt(:) = dt1(:)
@@ -1267,12 +1313,12 @@ c     outputs
          do j = 1,ny
             do k = 1,nl
                
-               if(var(i,j,k) .gt. 1e13)then
+               if(var(i,j,k) .gt. 1E12)then
                   var(i,j,k) = 0.0
 c                  print*, 'var .gt. 1e32',i,j,k
                endif
                
-               if(var(i,j,k) .lt. 1e-7) then
+               if(var(i,j,k) .lt. 1E-12) then
                   var(i,j,k) = 0.0
 c                  print*, 'var .lt. 1e-32',i,j,k
                endif

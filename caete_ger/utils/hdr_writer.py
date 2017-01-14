@@ -63,16 +63,18 @@ def catch_data(input_file, layers, nx, ny):
     layers = (int) number of layers in input_file * ease with catch_nt()
 
     returns np.array shape(layers,nx,ny)"""
-
-    Bcount = nx * ny * layers
-
-    return np.fromfile(input_file, count=Bcount,
+    if layers == 1:
+        Bcount = nx * ny
+        return np.fromfile(input_file, count=Bcount,
+                    dtype=np.float32).reshape((ny,nx))
+    else:
+        Bcount = nx * ny * layers
+        return np.fromfile(input_file, count=Bcount,
                     dtype=np.float32).reshape((layers,ny,nx))
 
 
-
-def write_header(file_conn, NBANDS, nx=nx, ny=ny, xllcorner=-90,
-                yllcorner=-57,byteOrder='LSBFIRST'):
+def write_header(file_conn, NBANDS, nx=nx, ny=ny, xllcorner=-90.,
+                yllcorner=-57.5,byteOrder='LSBFIRST'):
 
     """ Cria um cabeçalho.hdr nos padrões dos arquivos.flt """
 
@@ -84,8 +86,8 @@ def write_header(file_conn, NBANDS, nx=nx, ny=ny, xllcorner=-90,
             'NBITS %i%s'%(pixel_depht, linesep),
             'PIXELTYPE %s%s'%(pixel_type, linesep),
             'LAYOUT %s%s'%(bnd_layout, linesep),
-            'XLLCORNER %d%s'%(xllcorner,linesep),
-            'YLLCORNER %d%s'%(yllcorner,linesep),
+            'XLLCORNER %f%s'%(xllcorner,linesep),
+            'YLLCORNER %f%s'%(yllcorner,linesep),
             'CELLSIZE %f%s'%(cellsize,linesep),
             'NODATA_VALUE %f%s'%(NO_DATA,linesep),
             'BYTEORDER %s%s'%(byteOrder,linesep)

@@ -42,6 +42,7 @@ c234567
       real ar                   !Leaf area index (m2 leaf/m2 area)
       real nppa, vpd            !Net primary productivity (kgC/m2/yr)
       real f5
+      real*16 :: f5_64
       real rm, rml, rmf, rms, rg, rgl, rgf, rgs
       
       
@@ -60,8 +61,7 @@ c234567
       double precision rl       !Leaf respiration (kgC/m2/yr)
       double precision rp       !Non-leaf parts respiration (kgC/m2/yr)
       double precision sunlai,shadelai !Sunlai/Shadelai
-      double precision vpd64,d      !Vapor pressure deficit (kPa)
-      
+      double precision vpd64,d  !Vapor pressure deficit (kPa)
 !     
 !     Rubisco, light and transport limited photosynthesis rate
 !     --------------------------------------------------------
@@ -288,7 +288,7 @@ c      if (vm .gt. 1e-5)PRINT*, F1A, 'f1a'
 !     ==========      
       wa = (w/wmax) * ocp_pft
       
-      call canopy_resistence(pft,vpd64, f1a, ocp_pft,rc)
+      call canopy_resistence(pft , vpd64, f1a, ocp_pft, rc)
 !     Water stress response modifier (dimensionless)
 !     ----------------------------------------------     
 c      if (wa.gt.0.5) f5 = 1.0   !Not too lower in e.g. Amazonian dry season
@@ -305,20 +305,20 @@ c      if (wa.lt.0.205) f5 = wa  !Below wilting point f5 accompains wa (then Sah
       if(rc .gt. 0.0) then
          gc = (1./rc) * 86400000. !*86400000 transfor m/s to mm/dia)
       else
-         gc = 0.0
+         gc = (1./0.00005) * 86400000. ! 
       endif
 
-      if(gc .gt. 0.0) then
-         d =(emax*alfm)/(1. + gm/gc) !(based in Gerten et al. 2004)
-      else
-         d = 0.0
-      endif
+      d =(emax*alfm)/(1. + gm/gc) !(based in Gerten et al. 2004)
 
       if(d .gt. 0.0) then
-         f5 = real((1.-(exp(-1.*(pt/d)))), 4)
+         f5_64 = pt/d
+         f5_64 = exp(-1 * f5_64)
+         f5_64 = 1.0 - f5_64
       else
-         f5 = wa
+         f5_64 = wa
       endif
+
+      f5 = real(f5_64,4)
 
 
       
@@ -327,7 +327,7 @@ c      if (wa.lt.0.205) f5 = wa  !Below wilting point f5 accompains wa (then Sah
 !     
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
 c         print*, f5, 'f5'
-         f1 = f1a*f5            !f5:water stress factor
+         f1 = f1a*real(f5_64,8)            !f5:water stress factor
 C         call critical_value2(f1)
       else
          f1 = 0.0               !Temperature above/below photosynthesis windown
@@ -484,64 +484,45 @@ C 10   CONTINUE
 !     
 !     Internal
 !     --------
-!     
+!
+      real g1(7)    !3.00 (boreal) / 2.05 (temperate) / 3.02 (tropical)
       DOUBLE PRECISION f1b      !Photosynthesis (micromolCO2/m2/s)
       DOUBLE PRECISION gs2      !Canopy conductance (m/s)
       DOUBLE PRECISION gs       !Canopy conductance (molCO2/m2/s)
       DOUBLE PRECISION g0       !Residual stomatance conductance
-      DOUBLE PRECISION g1(7)    !3.00 (boreal) / 2.05 (temperate) / 3.02 (tropical)
+      
       DOUBLE PRECISION D1        !kPA
       DOUBLE PRECISION aa
       real rcmax 
 !     
       call pft_par(1, g1)
-      
+c      print*, g1(m)
       f1b = (f1_in*10e5)        !maior f1b = 13.38
       aa = (f1b/363.)
       g0 = 0.01
-!     g1 = 4.9
-      D1 = sqrt(vpd_in)
+
 !     rcmax = 200.0             !A=2.0
-!     
       rcmax = 550.0             !A=0.5                             
 !     rcmax = 1800.0            !A=0.1
-!     
-!     
-      if (vpd_in.lt.0.25) gs = 1.5
-      if (vpd_in.ge.0.25) then
-!     esta proxima linha esta causando uma IEEE_DENORMAL
-         gs = g0 + 1.6 * (1. + (g1(m)/D1)) * (aa) !Based on Medlyn et al. 2011
-!     gs = g0 + 1.6 * (1 + (g1/D)) * (aa) !Based on Medlyn et al. 2011
-!     
-c         call critical_value2(gs)
+      
+      if(vpd_in .gt. 0.0) then
+         D1 = sqrt(vpd_in)
+      else
+         gs = 1.5
+         goto 1000
       endif
-!     
-!     if (gs.le.0.01) gs = 0.0                                        
-!     if (gs.le.0.0) then                                             !
-!     -0.029<gs<1.29
-!     print*,gs
-!     endif
-!     
-      gs2 = gs/41.
-c      call critical_value2(gs2)
-!     if (gs2.le.0.00025) gs2 = 0.0
-!     if (gs2.gt.0.0318) then                                         !
-!     -0.00069<gs2<0.0317
-!     print*,print
-!     endif
-!     
+      
+      if (vpd_in.lt.0.25) then
+         gs = 1.5
+      else
+         gs = g0 + 1.6 * (1. + (g1(m)/D1)) * (aa) !Based on Medlyn et al. 2011
+      endif
+      
+ 1000 continue
+      
+      gs2 = gs/41.     
       rc2_in = real((1./gs2),4) * ocp_pft1
-c      call critical_value(rc2_in)
-!     if (rc2.ge.151.47) rc2 = rcmax !A=2
-!     
-C      if (rc2_in.ge.545.43) rc2_in = rcmax !A=0.5  
-!     if (rc2.ge.1779.97) rc2 = rcmax !A=0.1
-!     
-!     
-!     if (rc2.lt.19.57) then
-!     print*,rc2
-!     endif
-!     
+
       return
       end subroutine
 !     
@@ -649,29 +630,29 @@ C         call critical_value(hr)
       implicit none
       real var
       
-      if(abs(var) .lt. 0.0000001) var = 0.0
+      if(abs(var) .lt. 0.000001) var = 0.0
 
       return
       end subroutine critical_value
 
 
       
-      subroutine critical_value2(var)
+      subroutine critical_value2(var1)
       implicit none
-      double precision var
+      double precision var1
       
-      if(abs(var) .lt. 0.000000000001) var = 0.0
+      if(abs(var1) .lt. 0.00000001) var1 = 0.0
 
       return
       end subroutine critical_value2
 
 
       
-      subroutine critical_value3(var)
+      subroutine critical_value3(var2)
       implicit none
-      real*16 var
+      real*16 var2
       
-      if(abs(var) .lt. 0.000001) var = 0.0
+      if(abs(var2) .lt. 0.000000000001) var2 = 0.0
 
       return
       end subroutine critical_value3
@@ -684,7 +665,7 @@ c     esta subrotina calcula a areA DE CADA pft
 c     a partir do conteudo de carbono nos compartimentos vegetais no 
 c     dia anterior 
       INTEGER, PARAMETER :: NPFT = 7
-      INTEGER :: P, MAX_INDEX(1)
+      INTEGER :: P, MAX_INDEX(1), I
       REAL :: CLEAF(NPFT), CFROOT(NPFT), CAWOOD(NPFT)
       REAL :: TOTAL_BIOMASS_PFT(NPFT),OCP_COEFFS(NPFT)
       REAL :: TOTAL_BIOMASS, TOTAL_WOOD, TOTAL_W_PFT(NPFT)
@@ -931,12 +912,12 @@ c
 c     
 c     initialization
       if((scl1 .lt. 0.0000001) .or. (scf1 .lt. 0.0000001)) then
-c         IF(NPP .lt. 0.0000001) THEN
+         IF(NPP .lt. 0.0000001) THEN
             scl2 = 0.0
             scf2 = 0.0
             sca2 = 0.0 
             goto 10
-c         ENDIF
+         ENDIF
       endif   
       npp_aux = npp/365.0       !transform (KgC/m2/yr) in (KgC/m2/day)
 c      call critical_value(npp_aux)

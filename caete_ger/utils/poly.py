@@ -136,6 +136,7 @@ def main():
     
     os.chdir('../outputs')
     files = sorted(glob.glob1(os.getcwd(), '*.bin'))
+    files.remove('ambientais.bin')
     #print(files)
     seven_layers = [files[1],files[2],files[3],files[7]]
     #print(seven_layers)
