@@ -4,10 +4,10 @@ import gdal, ogr, os, osr
 import numpy as np
 import hdr_writer as hdr
 
-or_x = -90.
-or_y = 22.50
+or_x = -90.  # menor longitude 
+or_y = 22.50 # maior latitude
 
-origin = (or_x, or_y)
+origin = (or_x, or_y) #(upper left corner)
 
 def read_bin_ob(filename,x=120,y=160,pd=32):
     array = hdr.catch_data(filename,1,nx=x,ny=y)
@@ -33,21 +33,35 @@ def array2raster(newRasterfn,rasterOrigin,pixelWidth,pixelHeight,nbands,array):
     driver = gdal.GetDriverByName('HFA')
     outRaster = driver.Create(newRasterfn, cols, rows, nbands, gdal.GDT_Float32)
     
-    outRaster.SetGeoTransform((originX, pixelWidth, 0.0, originY, 0, pixelHeight))
+    outRaster.SetGeoTransform((originX, pixelWidth, 0.0, originY, 0.0, pixelHeight))
 
     if nbands == 1:
         outband = outRaster.GetRasterBand(nbands)
         outband.SetNoDataValue(-9999.0)
-        outband.WriteArray(np.flipud(array))
+        outband.WriteArray(array)
+        mask = array == -9999.0
+        masked_data = np.ma.masked_array(array, mask)
+        min_, max_ = outband.ComputeRasterMinMax(0)
+        mean_, std_ = np.mean(masked_data), np.std(masked_data)
+        outband.SetStatistics(min_,max_, mean_, std_)
+        outband.FlushCache()
+        outband= None
+        
     else:
         for i in list(range(nbands)):
             outband = outRaster.GetRasterBand(i+1)
             outband.SetNoDataValue(-9999.0)
             outband.WriteArray(array[i])
-
+            mask = array[i] == -9999.0
+            masked_data = np.ma.masked_array(array[i], mask)
+            min_, max_ = outband.ComputeRasterMinMax(0)
+            mean_, std_ = np.mean(masked_data), np.std(masked_data)
+            outband.SetStatistics(min_,max_, mean_, std_)
+            outband.FlushCache()
+            outband = None
     outRasterSRS = osr.SpatialReference()
     outRasterSRS.ImportFromEPSG(4326)
     outRaster.SetProjection(outRasterSRS.ExportToWkt())
-    outband.FlushCache()
+    
 
 

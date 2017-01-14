@@ -169,17 +169,17 @@ C     -------END DECLARATION----------------------------------------
       open(14,file='../inputs/hurs_sa.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
 
-c      open(26,file='../inputs/npp_sa.bin',status='old',
-c     &     form='unformatted',access='direct',recl=4*nx*ny)
+      open(26,file='../inputs/npp_sa.bin',status='old',
+     &     form='unformatted',access='direct',recl=4*nx*ny)
 
-      open(27,file='../spinup/clini.bin',status='old',
-     &    form='unformatted',access='direct',recl=4*nx*ny)
-
-      open(28,file='../spinup/cfini.bin',status='old',
-     &    form='unformatted',access='direct',recl=4*nx*ny)
-
-      open(29,file='../spinup/cwini.bin',status='old',
-     &    form='unformatted',access='direct',recl=4*nx*ny)
+c      open(27,file='../spinup/clini.bin',status='old',
+c     &    form='unformatted',access='direct',recl=4*nx*ny)
+c
+c      open(28,file='../spinup/cfini.bin',status='old',
+c     &    form='unformatted',access='direct',recl=4*nx*ny)
+c
+c      open(29,file='../spinup/cwini.bin',status='old',
+c     &    form='unformatted',access='direct',recl=4*nx*ny)
 !     Read data
 !     =========
       
@@ -190,10 +190,10 @@ c     &     form='unformatted',access='direct',recl=4*nx*ny)
        call readx(12,t,12)
        call readx(13,ipar,12)
        call readx(14,rhaux,12)
-c       call readx(26,npp_pot,12)
-       call readx(29,cleafin,q)
-       call readx(28,cfrootin,q)
-       call readx(29,cawoodin,q)
+       call readx(26,npp_pot,12)
+c       call readx(29,cleafin,q)
+c       call readx(28,cfrootin,q)
+c       call readx(29,cawoodin,q)
      
 !     Close files
 !     ===========
@@ -204,76 +204,76 @@ c       call readx(26,npp_pot,12)
        close(12)
        close(13)
        close(14)
-c       close(26)
-       close(27)
-       close(28)
-       close(29)
+       close(26)
+c       close(27)
+c       close(28)
+c       close(29)
        
 
-cc      Calculating annual npp
-c       do i =1,nx
-c          do j=1,ny
-c             if(nint(lsmk(i,j)) .ne. 0) then 
-c                aux_npp(i,j) = 0.0
-c                do k = 1,12
-c                   aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
-c                enddo
-c             else
-c                aux_npp(i,j) = no_data
-c             endif
-c          enddo
-c       enddo
-c
-c!     calling spinup
-c      do i=1,nx
-c         do j=1,ny
-c            if (nint(lsmk(i,j)) .ne. 0) then
-c               npp_sca = aux_npp(i,j)
-c               
-c               do p=1,q   
-c                  aux1(p) = 0.0
-c                  aux2(p) = 0.0
-c                  aux3(p) = 0.0
-c                  gridcell_ocp(i,j,p) = 0.0
-c               enddo
-c               
-c               call spinup(npp_sca, aux1, aux2, aux3)
-c
-c               do p=1,q   
-c                  cleafin(i,j,p)  = aux1(p)
-c                  cfrootin(i,j,p) = aux2(p)
-c                  cawoodin(i,j,p) = aux3(p)
-c               enddo
-c            else
-c               do p = 1,q
-c                  cleafin(i,j,p)  = no_data
-c                  cfrootin(i,j,p) = no_data
-c                  cawoodin(i,j,p) = no_data
-c                  gridcell_ocp(i,j,p) = no_data
-c               enddo
-c            endif
-c         enddo
-c         if(mod(nx,5) .eq. 0)print*, (real(i)/real(nx))*100.0, '%'
-c      enddo
-c
-c      call nan2ndt(cleafin, q) !!! --------- incorporado essa subroutina
-c      open(10,file='../spinup/clini.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call savex(10, cleafin, q)
-c
-c      call nan2ndt(cfrootin, q)
-c      open(10,file='../spinup/cfini.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call savex(10, cfrootin, q)
-c
-c      call nan2ndt(cawoodin, q)
-c      open(10,file='../spinup/cwini.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call savex(10, cawoodin, q)
-c!     ===========
+c      Calculating annual npp
+       do i =1,nx
+          do j=1,ny
+             if(nint(lsmk(i,j)) .ne. 0) then 
+                aux_npp(i,j) = 0.0
+                do k = 1,12
+                   aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
+                enddo
+             else
+                aux_npp(i,j) = no_data
+             endif
+          enddo
+       enddo
+
+!     calling spinup
+      print*, 'running spinup'
+      do i=1,nx
+         do j=1,ny
+            if (nint(lsmk(i,j)) .ne. 0) then
+               npp_sca = aux_npp(i,j)
+               
+               do p=1,q   
+                  aux1(p) = 0.0
+                  aux2(p) = 0.0
+                  aux3(p) = 0.0
+                  gridcell_ocp(i,j,p) = 0.0
+               enddo
+               
+               call spinup(npp_sca, aux1, aux2, aux3)
+
+               do p=1,q   
+                  cleafin(i,j,p)  = aux1(p)
+                  cfrootin(i,j,p) = aux2(p)
+                  cawoodin(i,j,p) = aux3(p)
+               enddo
+            else
+               do p = 1,q
+                  cleafin(i,j,p)  = no_data
+                  cfrootin(i,j,p) = no_data
+                  cawoodin(i,j,p) = no_data
+               enddo
+            endif
+         enddo
+         if(mod(nx,5) .eq. 0)print*, (real(i)/real(nx))*100.0, '%'
+      enddo
+
+      call nan2ndt(cleafin, q) !!! --------- incorporado essa subroutina
+      open(10,file='../spinup/clini.bin',
+     &     status='unknown',form='unformatted',
+     &     access='direct',recl=4*nx*ny)
+      call savex(10, cleafin, q)
+
+      call nan2ndt(cfrootin, q)
+      open(10,file='../spinup/cfini.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call savex(10, cfrootin, q)
+
+      call nan2ndt(cawoodin, q)
+      open(10,file='../spinup/cwini.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call savex(10, cawoodin, q)
+!     ===========
 
 
 

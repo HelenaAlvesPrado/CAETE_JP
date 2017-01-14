@@ -281,89 +281,77 @@ C     call critical_value2(jp)
       j1=(-b2-(sqrt(delta2)))/(2.0*a2)
       j2=(-b2+(sqrt(delta2)))/(2.0*a2)
       f1a = amin1(j1,j2)
-C     call critical_value2(f1a)
-
-c      if (vm .gt. 1e-5)PRINT*, F1A, 'f1a'
+!
 !     Soil water
 !     ==========      
+
       wa = (w/wmax) * ocp_pft
       
       call canopy_resistence(pft , vpd64, f1a, ocp_pft, rc)
+
+      
 !     Water stress response modifier (dimensionless)
 !     ----------------------------------------------     
-c      if (wa.gt.0.5) f5 = 1.0   !Not too lower in e.g. Amazonian dry season
-c      if ((wa.ge.0.205).and.(wa.le.0.5))
-c     &     f5 = (wa-0.205)/(0.5-0.205)
-c      if (wa.lt.0.205) f5 = wa  !Below wilting point f5 accompains wa (then Sahara is well represented)
-
 
       csru = 0.5 
       pt = csru * (cf1 * 1000.) * wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
       alfm = 1.391
       gm = 3.26 * 86400.           !(*86400 transform mm/s to mm/dia)
       
-      if(rc .gt. 0.0) then
+      if(rc .gt. 0.05) then
          gc = (1./rc) * 86400000. !*86400000 transfor m/s to mm/dia)
       else
-         gc = (1./0.00005) * 86400000. ! 
-      endif
+         gc = (1./0.05) * 86400000. ! BIANCA E HELENA - Mudei este esquema..   
+      endif                     ! tentem entender o algoritmo
+                                ! e tenham certeza que faz sentido ecologico
 
       d =(emax*alfm)/(1. + gm/gc) !(based in Gerten et al. 2004)
 
+!     BIanca- Eu alterei a estrutura desta equacao para evitar erros
+!     Isso faz a mesma coisa que o calculo que vc implementou - jp
       if(d .gt. 0.0) then
          f5_64 = pt/d
          f5_64 = exp(-1 * f5_64)
          f5_64 = 1.0 - f5_64
       else
-         f5_64 = wa
-      endif
+         f5_64 = wa  ! eu acrescentei esta parte caso d seja igual a zero
+      endif          ! nao sei se faz sentido!
 
-      f5 = real(f5_64,4)
-
-
+      f5 = real(f5_64,4) !esta funcao transforma o f5 (double precision)
+!     em real (32 bits) 
       
 !     Photosysthesis minimum and maximum temperature
 !     ----------------------------------------------
-!     
+      
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
-c         print*, f5, 'f5'
-         f1 = f1a*real(f5_64,8)            !f5:water stress factor
-C         call critical_value2(f1)
+         f1 = f1a*real(f5_64,8) !f5:water stress factor-- Notem que aqui a tranformacao eh de 128 pra 64 bits
       else
          f1 = 0.0               !Temperature above/below photosynthesis windown
       endif
-      
-c      if (f1 .gt. 0.0) PRINT*, f1, 'f1', f5, 'f5', wa, 'wa'
-!     Leaf area index (m2 leaf/m2 arEa) bianca
+
+!     Leaf area index (m2/m2)
 !     ---------------------------------
-!      sla=((0.0300*1000.)*((365./(((tleaf(pft))/365.)/12.))**(-0.46)))*
-!     &    ocp_pft
-      sla=((0.0300*1000.)*((365./(((tleaf(pft))/365.)/12.))**(-0.46)))
-    
-      laia64 = (cl1 * 365.0 * sla) * ocp_pft    !!!!!! agora ocp_pft multiplica laia, pq achamos mais interessante. Mas pensaremos melhor nisso amanha
+      sla=((0.0300*1000.)*((365./(((tleaf(pft))/365.)/12.))**(-0.46)))    
+      laia64 = (cl1 * 365.0 * sla) * ocp_pft    !boa!
       laia = real(laia64,4)
       
-!     SunLAI
+!     LAI
 !     ------
       sunlai = (1.0-(exp(-p26*laia64)))/p26
-c     call critical_value(sunlai)
 !     --------
       shadelai = laia64 - sunlai
-c     call critical_value(shadelai)
-!
-      
+
 !     Scaling-up to canopy level (dimensionless)
 !     ------------------------------------------
       f4 = (1.0-(exp(-p26*laia64)))/p26 !Sun 90 degrees in the whole canopy, to be used for respiration
-
       
 !     Sun/Shade approach to canopy scaling !Based in de Pury & Farquhar (1997)
-!     
-!     -----------------------------------     
+!     ------------------------------------------------------------------------
       f4sun = ((1.0-(exp(-p26*sunlai)))/p26) !sun 90 degrees
       f4shade = ((1.0-(exp(-p27*shadelai)))/p27) !sun ~20 degrees
 
-      
+      laia  = real((f4sun + f4shade), 4) ! pra mim faz sentido que a laia final seja
+                                         ! a soma da lai em nivel de dossel (sun + shade) - jp
 !     Canopy gross photosynthesis (kgC/m2/yr)
 !     =======================================
 !     (0.012 converts molCO2 to kgC)
@@ -371,56 +359,57 @@ c     call critical_value(shadelai)
       ph64 = 0.012*31557600.0*f1*f4sun*f4shade
       ph = real(ph64, 4)       ! kg m-2 year-1
 
-cc     -===============================----------=============================---
-!     c Maintenance respiration (kgC/m2/yr) (based in Ryan 1991)
+c     ============================================================
+c     Autothrophic respiration
+!     ========================
+!     Maintenance respiration (kgC/m2/yr) (based in Ryan 1991)
+      csa= 0.05 * ca1           !sapwood carbon content (kgC/m2). 5% of woody tissues (Pavlick, 2013)
+!     Atencao
+!     eu alterei os valores da razao c:n ...os dados foram chutados por mim,
+!     com base numa leitura superficial do seguinte paper:
       
+!     http://onlinelibrary.wiley.com/wol1/doi/10.1111/gcb.12022/suppinfo
       
-      csa= 0.05 * ca1   !sapwood carbon content (kgC/m2). 5% of woody tissues (Pavlick, 2013)
-C      call critical_value2(csa)
-c      
-      ncl = 0.034               !(gN/gC)
-      ncf = 0.034               !(gN/gC)
+!     Notem que eu li apenas o material suplementar.
+!     Assumi que a massa de carbono em todos os tecidos
+!     eh de 50%! Quem concorda? por favor nao coloquem acentuacao
+!     grafica nos comments -- eu sei que eh dificil,
+!     eu esqueço as vezes =P. Mas eu desconfio que essa eh a origem do bug que
+!     nao deixa a bia editar o codigo no notepad++ 
+      
+      ncl = 0.021               !(gN/gC) 
+      ncf = 0.004               !(gN/gC)
       ncs = 0.003               !(gN/gC)
-c      
-c      
+
+      
       rml64 = (ncl * cl1) * 27. * exp(0.03*temp)
-      call critical_value2(rml64)
-      rml =  real(rml64,4)
+      rml =  real(rml64,4) * ocp_pft
 
       rmf64 = (ncf * cf1) * 27. * exp(0.03*temp)
-      call critical_value2(rmf64)
-      rmf =  real(rmf64,4)
+      rmf =  real(rmf64,4) * ocp_pft
 
       rms64 = (ncs * csa) * 27. * exp(0.03*temp)
-      call critical_value2(rms64)
-      rms = real(rms64,4) 
-c      
+      rms = real(rms64,4) * ocp_pft
+       
       rm64 = (rml64 + rmf64 + rms64)
       rm = real(rm64, 4)
-c      call critical_value(rm)
-c      print*, rm, 'rm'
-c      
+
 c     Growth respiration (KgC/m2/yr)(based in Ryan 1991; Sitch et al.
 c     2003; Levis et al. 2004)         
-c      
-      csai =  (beta_awood * 0.05) !!!!!!!!! agora multiplicado pra respiracao ser so do sapwood
-      call critical_value2(csai)
+       
+      csai =  (beta_awood * 0.05)
 
       rgl64 = 0.25 * beta_leaf * 365.
-      call critical_value2(rgl64)
-      rgl = real(rgl64,4)
+      rgl = real(rgl64,4) * ocp_pft
 
       rgf64 =  0.25* beta_froot * 365.
-      call critical_value2(rgf64)
-      rgf = real(rgf64,4)
+      rgf = real(rgf64,4) * ocp_pft
 
       rgs64 = (0.25 * csai * 365.)
-      call critical_value2(rgs64)
-      rgs = real(rgs64,4)
+      rgs = real(rgs64,4) * ocp_pft
      
       rg64 = (rgl64 + rgf64 + rgs64)
-      rg = real(rg64,4)  
-      call critical_value(rg)
+      rg = real(rg64,4) * ocp_pft
      
       if (rg.lt.0) then
          rg = 0.0
@@ -428,104 +417,83 @@ c
       
 !     c Autotrophic (plant) respiration -ar- (kgC/m2/yr)
 !     Respiration minimum and maximum temperature
-!     -------------------------------------------
-!     
+!     -------------------------------------------     
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
-         ar64 = ((rm64* ocp_pft) + rg64) ! * 0.8 ! gambiarra para diminuir a ar
-         call critical_value2(ar64)
+         ar64 = rm64 + rg64
          ar = real(ar64,4) 
-c
-c         if (ph .gt. 0.)PRINT*, AR ,'ar' , rm, 'rm', rg, 'rg'
       else
          ar = 0.0               !Temperature above/below respiration windown
       endif
-c     --------------------------------------------------------------------------     
+      
+c     -----------------------------------------------------------------
+!     NPP
 !     ============
 !     Productivity
 !     ============
-!     
 !     Net primary productivity(kgC/m2/yr)
-!     1===================================
-!     c nppa64  = ph - ar
-!     nppa =real(nppa64,4)
+!     ====================================
       nppa = ph - ar
-      if(nppa .lt. 0.0) nppa = 0.0 
-      call critical_value(nppa)
-      
-c      if (nppa .gt. 0.) print*, nppa, 'npp'
-c
-c      if (nppa .ne. 0.) print*, nppa64, 'npp64'
-c     PRINT*, NPPA
-c     if (nppa.lt.0.0) nppa = 0.0 !Maybe this is incorrect, but demands
-c     retuning of every biome limits
-C 10   CONTINUE
+      !if(nppa .lt. 0.0) nppa = 0.0 
+!     No futuro proximo poderiamos usar uma npp negativa para indicar uma perda de carbono
+!     dos tecidos vegetais... e uma possivel extincao do pft/pls da celula de grid.
       return
       end subroutine productivity1
-!     
-!     ======================
-!     Canopy resistence(s/m)
-!     ======================
-!     
-      subroutine canopy_resistence (m,vpd_in,f1_in,ocp_pft1,rc2_in)
-!     
+
+
+
+      
+!     ==================================================================
+      subroutine canopy_resistence(m,vpd_in,f1_in,ocp_pft1,rc2_in)
+      
 !     Variables
 !     =========
-!     
+      
 !     Inputs
-!     ------
-!     
+!     ------      
       integer m
-      DOUBLE PRECISION f1_in    !Photosynthesis (molCO2/m2/s)
-      DOUBLE PRECISION vpd_in   !kPa
-      real ocp_pft1 
+      double precision f1_in    !Photosynthesis (molCO2/m2/s)
+      double precision vpd_in   !kPa
+      
 !     Outputs
 !     -------
       real rc2_in               !Canopy resistence (s/m)
-!     
+      
 !     Internal
 !     --------
-!
-      real g1(7)    !3.00 (boreal) / 2.05 (temperate) / 3.02 (tropical)
-      DOUBLE PRECISION f1b      !Photosynthesis (micromolCO2/m2/s)
-      DOUBLE PRECISION gs2      !Canopy conductance (m/s)
-      DOUBLE PRECISION gs       !Canopy conductance (molCO2/m2/s)
-      DOUBLE PRECISION g0       !Residual stomatance conductance
-      
-      DOUBLE PRECISION D1        !kPA
-      DOUBLE PRECISION aa
-      real rcmax 
-!     
-      call pft_par(1, g1)
-c      print*, g1(m)
-      f1b = (f1_in*10e5)        !maior f1b = 13.38
-      aa = (f1b/363.)
-      g0 = 0.01
+      real g1(7) 
+      double precision f1b      !Photosynthesis (micromolCO2/m2/s)
+      double precision gs2      !Canopy conductance (m/s)
+      double precision gs       !Canopy conductance (molCO2/m2/s)
+      double precision g0       !Residual stomatance conductance
+      double precision D1       !kPA
+      double precision aa
 
-!     rcmax = 200.0             !A=2.0
-      rcmax = 550.0             !A=0.5                             
-!     rcmax = 1800.0            !A=0.1
+      call pft_par(1, g1)
+      
+      f1b = (f1_in*10e5)        ! Helena - Mudei algumas coisas aqui
+      aa = (f1b/363.)           ! Entenda o algoritmo e tenha certeza de que  
+      g0 = 0.01                 ! condiz com a realidade esperada =)
       
       if(vpd_in .gt. 0.0) then
-         D1 = sqrt(vpd_in)
+         goto 10
       else
          gs = 1.5
-         goto 1000
+         goto 100
       endif
-      
+ 10   continue
       if (vpd_in.lt.0.25) then
          gs = 1.5
       else
+         D1 = sqrt(vpd_in)
          gs = g0 + 1.6 * (1. + (g1(m)/D1)) * (aa) !Based on Medlyn et al. 2011
       endif
-      
- 1000 continue
-      
+ 100  continue
       gs2 = gs/41.     
       rc2_in = real((1./gs2),4) * ocp_pft1
-
+      
       return
-      end subroutine
-!     
+      end subroutine canopy_resistence
+      
 !     =====================================
 !     Microbial (heterotrophic) respiration
 !     =====================================
@@ -625,6 +593,9 @@ C         call critical_value(hr)
       end
 !     ===================================================
 
+!     Estas 3 subrotinas critical_value eu utilizei durante o debug
+!     Ainda tem algumas espalhadas pelo codigo, pretendo
+!     ir retirando aos poucos agora, mas no futuro eu vou utiliza-las
       
       subroutine critical_value(var)
       implicit none
@@ -693,7 +664,7 @@ c     dia anterior
          DO P = 1,NPFT   
             OCP_COEFFS(P) = TOTAL_BIOMASS_PFT(P) / TOTAL_BIOMASS
             IF(OCP_COEFFS(P) .LT. 0.0) OCP_COEFFS(P) = 0.0
-            CALL CRITICAL_VALUE(OCP_COEFFS(P))
+c            CALL CRITICAL_VALUE(OCP_COEFFS(P))
 c            PRINT*, OCP_COEFFS(P), 'ocp'
          ENDDO
       ELSE
@@ -721,6 +692,7 @@ C23456
 !     =========================================================
 !     
       subroutine penman (spre,temp,ur,rn,rc2,evap)
+!     Desconfio seriamente que temos que revisar esta subrotina
 !     
 !     Inputs
 !     ------

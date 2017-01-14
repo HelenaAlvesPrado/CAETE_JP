@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import numpy as np
 import os
+import numpy as np
+import gdal
+from array2raster import *
+
 
 # writen by jpdarela 16-10-2016
 
@@ -98,7 +101,7 @@ def write_header(file_conn, NBANDS, nx=nx, ny=ny, xllcorner=-90.,
 
 
 def main():
-    bin_files_path = ['../outputs', '../outputs_pft', '../inputs' ] 
+    bin_files_path = ['../outputs', '../outputs_pft', '../inputs', '../spinup' ] 
     for j in range(len(bin_files_path)):
         raw_list =[ i for i in os.listdir(bin_files_path[j]) if i.split('.')[-1] in FILE_EXT]
     
@@ -106,11 +109,16 @@ def main():
         
             path_in = os.path.join(bin_files_path[j],i)
             if len(i.split('.')) == 3:
-                path_out = os.path.join(bin_files_path[j], (i.split('.')[0] + '.' + i.split('.')[1] + str('.hdr')))
+                path_out = os.path.join(bin_files_path[j], (i.split('.')[0] + '.' + i.split('.')[1] + str('.img')))
             else:
-                path_out = os.path.join(bin_files_path[j], (i.split('.')[0] + str('.hdr')))
+                path_out = os.path.join(bin_files_path[j], (i.split('.')[0] + str('.img')))
             nlayers = catch_nt(path_in, nx, ny, pixel_depht)
-            write_header(path_out, nlayers, nx, ny )
+            # write_header(path_out, nlayers, nx, ny )
+            if nlayers == 1:
+                dt = read_bin_ob(path_in)
+            else:
+                dt = read_bin_mb(path_in)
+            array2raster(path_out, origin, 0.5, -0.5, nlayers, dt)
         
             print(nlayers)
             print(path_in)
