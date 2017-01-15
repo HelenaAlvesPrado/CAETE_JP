@@ -419,7 +419,8 @@ c     2003; Levis et al. 2004)
 !     -------------------------------------------     
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
          ar64 = rm64 + rg64
-         ar = real(ar64,4) 
+         ar = real(ar64,4)
+         if(ar .lt. 0.00001) ar = 0.0
       else
          ar = 0.0               !Temperature above/below respiration windown
       endif
@@ -432,7 +433,7 @@ c     -----------------------------------------------------------------
 !     Net primary productivity(kgC/m2/yr)
 !     ====================================
       nppa = ph - ar
-      !if(nppa .lt. 0.0) nppa = 0.0 
+      if(nppa .lt. 0.0) nppa = 0.0 
 !     No futuro proximo poderiamos usar uma npp negativa para indicar uma perda de carbono
 !     dos tecidos vegetais... e uma possivel extincao do pft/pls da celula de grid.
       return
@@ -863,7 +864,7 @@ c
       real sca2                  !final carbon content on aboveground woody biomass compartment (KgC/m2)
       real scf1                  !previous day carbon content on fine roots compartment (KgC/m2)
       real scf2                  !final carbon content on fine roots compartment (KgC/m2)      
-      
+      real*16 scf2_128, sca2_128, scl2_128
       real aleaf(npfts)             !npp percentage allocated compartment
       real aawood(npfts)
       real afroot(npfts)
@@ -882,29 +883,36 @@ c
 c     
 c     
 c     initialization
-c      if((scl1 .lt. 0.0000001) .or. (scf1 .lt. 0.0000001)) then
-c         IF(NPP .lt. 0.0000001) THEN
-c            scl2 = 0.0
-c            scf2 = 0.0
-c            sca2 = 0.0 
-c            goto 10
-c         ENDIF
-c      endif   
+      if((scl1 .lt. 0.0000001) .or. (scf1 .lt. 0.0000001)) then
+         IF(NPP .lt. 0.0000001) THEN
+            scl2 = 0.0
+            scf2 = 0.0
+            sca2 = 0.0 
+            goto 10
+         ENDIF
+      endif   
       npp_aux = npp/365.0       !transform (KgC/m2/yr) in (KgC/m2/day)
-      scl2 = scl1 + (aleaf(pft) * npp_aux) -(scl1 /(tleaf(pft)*365.0))
-      scf2 = scf1 +(afroot(pft) * npp_aux)-(scf1 /(tfroot(pft)*365.0))
+      scl2_128 = scl1 + (aleaf(pft) * npp_aux) -(scl1 /(tleaf(pft)
+     &    *365.0))
+      scf2_128 = scf1 +(afroot(pft) * npp_aux)-(scf1 /(tfroot(pft)
+     &    *365.0))
       if(aawood(pft) .gt. 0.0) then
-         sca2 = sca1 +(aawood(pft)*npp_aux)-(sca1/(tawood(pft)*365.0))
+         sca2_128 = sca1 +(aawood(pft)*npp_aux)-(sca1/(tawood(pft)
+     &       *365.0))
       else
          sca2 = 0.0
       endif
+
+      scf2 = real(scf2_128,4)
+      sca2 = real(sca2_128,4)
+      scl2 = real(scl2_128,4)
 
 
       if(scl2 .lt. 0.0) scl2 = 0.0
       if(scf2 .lt. 0.0) scf2 = 0.0
       if(sca2 .lt. 0.0) sca2 = 0.0
       
-c     10   continue
+ 10   continue
       return
       end
 c    

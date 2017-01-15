@@ -661,7 +661,7 @@ c            call critical_value(cf2(p))
             rcavg(p) = rcavg(p) + rc2(p) ! s m -1
             
             phavg(p) = phavg(p) +   ph(p) /365.0 !kgC/m2/day
-            aravg(p) = aravg(p) +   ar(p) /365.0 !kgC/m2/day
+            aravg(p) = aravg(p) +   ar(p)  !kgC/m2/year
             nppavg(p) = nppavg(p) + nppa(p) /365.0 !kgC/m2/day
             
             laiavg(p) = laiavg(p) + laia(p)  /365.0 
@@ -701,7 +701,7 @@ c            call critical_value(cf2(p))
          evavg(p) = evavg(p)/real(ndmonth(month))
          rcavg(p) = rcavg(p)/real(ndmonth(month))
          phavg(p) = phavg(p) * 12.0 !kgC/m2/yr
-         aravg(p) = aravg(p) * 12.0 !kgC/m2/yr
+         aravg(p) = aravg(p)    !kgC/m2/yr
          nppavg(p) = nppavg(p) * 12.0 !kgC/m2/yr
          laiavg(p) = laiavg(p) * 12.0
          clavg(p) = clavg(p) * 12.0 !kgC/m2
