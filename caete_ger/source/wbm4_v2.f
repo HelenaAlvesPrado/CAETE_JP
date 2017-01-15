@@ -658,7 +658,7 @@ c            call critical_value(cf2(p))
             smavg(p) = smavg(p) + smelt(p)
             ruavg(p) = ruavg(p) + roff(p)  ! mm day-1
             evavg(p) = evavg(p) + evap(p) * ocp_coeffs(p)  ! mm day-1
-            rcavg(p) = rcavg(p) + rc2(p) * ocp_coeffs(p)   ! s m -1
+            rcavg(p) = rcavg(p) + rc2(p) ! s m -1
             
             phavg(p) = phavg(p) +   ph(p) /365.0 !kgC/m2/day
             aravg(p) = aravg(p) +   ar(p) /365.0 !kgC/m2/day
