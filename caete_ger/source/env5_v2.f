@@ -253,7 +253,7 @@ c      Calculating annual npp
                enddo
             endif
          enddo
-         if(mod(nx,5) .eq. 0)print*, (real(i)/real(nx))*100.0, '%'
+!     if(mod(nx,10) .eq. 0)print*, (real(i)/real(nx))*100.0, '%'
       enddo
 
       call nan2ndt(cleafin, q) !!! --------- incorporado essa subroutina

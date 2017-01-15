@@ -3,8 +3,7 @@
 
 import os
 import numpy as np
-import gdal
-from array2raster import *
+
 
 
 # writen by jpdarela 16-10-2016
@@ -125,4 +124,6 @@ def main():
             print(path_out, '\n')
 
 if __name__ == '__main__':
+    from array2raster import *
+#    import gdal
     main()

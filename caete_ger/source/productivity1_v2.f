@@ -298,10 +298,10 @@ C     call critical_value2(jp)
       alfm = 1.391
       gm = 3.26 * 86400.           !(*86400 transform mm/s to mm/dia)
       
-      if(rc .gt. 0.05) then
+      if(rc .gt. 1.0) then
          gc = (1./rc) * 86400000. !*86400000 transfor m/s to mm/dia)
       else
-         gc = (1./0.05) * 86400000. ! BIANCA E HELENA - Mudei este esquema..   
+         gc =  86400000. ! BIANCA E HELENA - Mudei este esquema..   
       endif                     ! tentem entender o algoritmo
                                 ! e tenham certeza que faz sentido ecologico
 
@@ -331,10 +331,9 @@ C     call critical_value2(jp)
 
 !     Leaf area index (m2/m2)
 !     ---------------------------------
+!     Specifc Leaf Area----------------
       sla=((0.0300*1000.)*((365./(((tleaf(pft))/365.)/12.))**(-0.46)))    
-      laia64 = (cl1 * 365.0 * sla) * ocp_pft    !boa!
-      laia = real(laia64,4)
-      
+      laia64 = (cl1 * 365.0 * sla)
 !     LAI
 !     ------
       sunlai = (1.0-(exp(-p26*laia64)))/p26
