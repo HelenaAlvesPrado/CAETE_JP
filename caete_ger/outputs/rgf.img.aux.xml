@@ -3,120 +3,120 @@
     <Description>Layer_1</Description>
     <Metadata>
       <MDI key="LAYER_TYPE">athematic</MDI>
-      <MDI key="STATISTICS_MAXIMUM">0.10937225818634</MDI>
-      <MDI key="STATISTICS_MEAN">0.010004762543341</MDI>
+      <MDI key="STATISTICS_MAXIMUM">0.023376800119877</MDI>
+      <MDI key="STATISTICS_MEAN">0.00050211950935134</MDI>
       <MDI key="STATISTICS_MINIMUM">0</MDI>
-      <MDI key="STATISTICS_STDDEV">0.013610000807202</MDI>
+      <MDI key="STATISTICS_STDDEV">0.0024597601425269</MDI>
     </Metadata>
   </PAMRasterBand>
   <PAMRasterBand band="2">
     <Description>Layer_2</Description>
     <Metadata>
       <MDI key="LAYER_TYPE">athematic</MDI>
-      <MDI key="STATISTICS_MAXIMUM">0.098821431398392</MDI>
-      <MDI key="STATISTICS_MEAN">0.0089706585042992</MDI>
+      <MDI key="STATISTICS_MAXIMUM">0.020428748801351</MDI>
+      <MDI key="STATISTICS_MEAN">0.00053505284752605</MDI>
       <MDI key="STATISTICS_MINIMUM">0</MDI>
-      <MDI key="STATISTICS_STDDEV">0.012454829198305</MDI>
+      <MDI key="STATISTICS_STDDEV">0.0023814889223508</MDI>
     </Metadata>
   </PAMRasterBand>
   <PAMRasterBand band="3">
     <Description>Layer_3</Description>
     <Metadata>
       <MDI key="LAYER_TYPE">athematic</MDI>
-      <MDI key="STATISTICS_MAXIMUM">0.11322773247957</MDI>
-      <MDI key="STATISTICS_MEAN">0.010301619079297</MDI>
+      <MDI key="STATISTICS_MAXIMUM">0.024337835609913</MDI>
+      <MDI key="STATISTICS_MEAN">0.00075307844128437</MDI>
       <MDI key="STATISTICS_MINIMUM">0</MDI>
-      <MDI key="STATISTICS_STDDEV">0.014265565350308</MDI>
+      <MDI key="STATISTICS_STDDEV">0.002891553929366</MDI>
     </Metadata>
   </PAMRasterBand>
   <PAMRasterBand band="4">
     <Description>Layer_4</Description>
     <Metadata>
       <MDI key="LAYER_TYPE">athematic</MDI>
-      <MDI key="STATISTICS_MAXIMUM">0.11092678457499</MDI>
-      <MDI key="STATISTICS_MEAN">0.010133173493802</MDI>
+      <MDI key="STATISTICS_MAXIMUM">0.02452046237886</MDI>
+      <MDI key="STATISTICS_MEAN">0.00083444949966788</MDI>
       <MDI key="STATISTICS_MINIMUM">0</MDI>
-      <MDI key="STATISTICS_STDDEV">0.014067835302343</MDI>
+      <MDI key="STATISTICS_STDDEV">0.002807379353515</MDI>
     </Metadata>
   </PAMRasterBand>
   <PAMRasterBand band="5">
     <Description>Layer_5</Description>
     <Metadata>
       <MDI key="LAYER_TYPE">athematic</MDI>
-      <MDI key="STATISTICS_MAXIMUM">0.097773000597954</MDI>
-      <MDI key="STATISTICS_MEAN">0.0077730398709075</MDI>
+      <MDI key="STATISTICS_MAXIMUM">0.02615836635232</MDI>
+      <MDI key="STATISTICS_MEAN">0.00080112690737747</MDI>
       <MDI key="STATISTICS_MINIMUM">0</MDI>
-      <MDI key="STATISTICS_STDDEV">0.010867453644028</MDI>
+      <MDI key="STATISTICS_STDDEV">0.0024749478943167</MDI>
     </Metadata>
   </PAMRasterBand>
   <PAMRasterBand band="6">
     <Description>Layer_6</Description>
     <Metadata>
       <MDI key="LAYER_TYPE">athematic</MDI>
-      <MDI key="STATISTICS_MAXIMUM">0.070615112781525</MDI>
-      <MDI key="STATISTICS_MEAN">0.0045664305256487</MDI>
+      <MDI key="STATISTICS_MAXIMUM">0.025631614029408</MDI>
+      <MDI key="STATISTICS_MEAN">0.00025977002168953</MDI>
       <MDI key="STATISTICS_MINIMUM">0</MDI>
-      <MDI key="STATISTICS_STDDEV">0.0083371425862581</MDI>
+      <MDI key="STATISTICS_STDDEV">0.0011225642325113</MDI>
     </Metadata>
   </PAMRasterBand>
   <PAMRasterBand band="7">
     <Description>Layer_7</Description>
     <Metadata>
       <MDI key="LAYER_TYPE">athematic</MDI>
-      <MDI key="STATISTICS_MAXIMUM">0.088907554745674</MDI>
-      <MDI key="STATISTICS_MEAN">0.0040743617509614</MDI>
+      <MDI key="STATISTICS_MAXIMUM">0.016993412747979</MDI>
+      <MDI key="STATISTICS_MEAN">0.00016273147648444</MDI>
       <MDI key="STATISTICS_MINIMUM">0</MDI>
-      <MDI key="STATISTICS_STDDEV">0.0090981997103091</MDI>
+      <MDI key="STATISTICS_STDDEV">0.0010242918353491</MDI>
     </Metadata>
   </PAMRasterBand>
   <PAMRasterBand band="8">
     <Description>Layer_8</Description>
     <Metadata>
       <MDI key="LAYER_TYPE">athematic</MDI>
-      <MDI key="STATISTICS_MAXIMUM">0.10468733310699</MDI>
-      <MDI key="STATISTICS_MEAN">0.0039037789590034</MDI>
+      <MDI key="STATISTICS_MAXIMUM">0.025552377104759</MDI>
+      <MDI key="STATISTICS_MEAN">0.0003704773788796</MDI>
       <MDI key="STATISTICS_MINIMUM">0</MDI>
-      <MDI key="STATISTICS_STDDEV">0.0099305059087104</MDI>
+      <MDI key="STATISTICS_STDDEV">0.0020875604691027</MDI>
     </Metadata>
   </PAMRasterBand>
   <PAMRasterBand band="9">
     <Description>Layer_9</Description>
     <Metadata>
       <MDI key="LAYER_TYPE">athematic</MDI>
-      <MDI key="STATISTICS_MAXIMUM">0.10436473041773</MDI>
-      <MDI key="STATISTICS_MEAN">0.0043489766997781</MDI>
+      <MDI key="STATISTICS_MAXIMUM">0.027696596458554</MDI>
+      <MDI key="STATISTICS_MEAN">0.00070537746533143</MDI>
       <MDI key="STATISTICS_MINIMUM">0</MDI>
-      <MDI key="STATISTICS_STDDEV">0.011034297946351</MDI>
+      <MDI key="STATISTICS_STDDEV">0.0031750056068459</MDI>
     </Metadata>
   </PAMRasterBand>
   <PAMRasterBand band="10">
     <Description>Layer_10</Description>
     <Metadata>
       <MDI key="LAYER_TYPE">athematic</MDI>
-      <MDI key="STATISTICS_MAXIMUM">0.10834254324436</MDI>
-      <MDI key="STATISTICS_MEAN">0.0059234606940692</MDI>
+      <MDI key="STATISTICS_MAXIMUM">0.032008331269026</MDI>
+      <MDI key="STATISTICS_MEAN">0.0013138856595296</MDI>
       <MDI key="STATISTICS_MINIMUM">0</MDI>
-      <MDI key="STATISTICS_STDDEV">0.012107739367796</MDI>
+      <MDI key="STATISTICS_STDDEV">0.0039154148773496</MDI>
     </Metadata>
   </PAMRasterBand>
   <PAMRasterBand band="11">
     <Description>Layer_11</Description>
     <Metadata>
       <MDI key="LAYER_TYPE">athematic</MDI>
-      <MDI key="STATISTICS_MAXIMUM">0.094180881977081</MDI>
-      <MDI key="STATISTICS_MEAN">0.0083821015677526</MDI>
+      <MDI key="STATISTICS_MAXIMUM">0.02926291897893</MDI>
+      <MDI key="STATISTICS_MEAN">0.0014412313340136</MDI>
       <MDI key="STATISTICS_MINIMUM">0</MDI>
-      <MDI key="STATISTICS_STDDEV">0.012367016802261</MDI>
+      <MDI key="STATISTICS_STDDEV">0.0039494544958266</MDI>
     </Metadata>
   </PAMRasterBand>
   <PAMRasterBand band="12">
     <Description>Layer_12</Description>
     <Metadata>
       <MDI key="LAYER_TYPE">athematic</MDI>
-      <MDI key="STATISTICS_MAXIMUM">0.10729502141476</MDI>
-      <MDI key="STATISTICS_MEAN">0.0089077428947235</MDI>
+      <MDI key="STATISTICS_MAXIMUM">0.029029835015535</MDI>
+      <MDI key="STATISTICS_MEAN">0.0014849172149361</MDI>
       <MDI key="STATISTICS_MINIMUM">0</MDI>
-      <MDI key="STATISTICS_STDDEV">0.012848925009233</MDI>
+      <MDI key="STATISTICS_STDDEV">0.0040029094427133</MDI>
     </Metadata>
   </PAMRasterBand>
 </PAMDataset>

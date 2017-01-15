@@ -203,14 +203,7 @@ c     call critical_value(f3)
 !     ------------------------------------------------
 !     
       call tetens (temp,es)     !-71.1<temp<+38.2
-!     
 
-
-      es2 = es*100.0
-      vpd64 = (rh*es2)/1000. !----------- incorporada no umidade relativa
-      vpd = real(vpd64, 4)
-
-C      call critical_value(vpd)
 !     Saturated mixing ratio (kg/kg)
 !     -----------------------------
 !     
@@ -239,7 +232,7 @@ c     call critical_value(jc)
       if (LIGTH_LIMIT) then
          aux_ipar= ipar   
       else
-         aux_ipar = ipar - (ipar * 0.25)
+         aux_ipar = ipar - (ipar * 0.20)
       endif
       
       jl = p4*(1.0-p5)*aux_ipar*((ci-mgama)/(ci+(p6*mgama)))
@@ -285,9 +278,13 @@ C     call critical_value2(jp)
 !     Soil water
 !     ==========      
 
-      wa = (w/wmax) * ocp_pft
+      es2 = es*100.0
+!     vpd64 = (rh*es2)/1000.    ! incorporada no umidaderelativa
+      vpd64 = (((100.0-rh)/100.0)*(es2))/1000.0 !kPa
+      vpd = real(vpd64, 4)
+      wa = (w/wmax)
       
-      call canopy_resistence(pft , vpd64, f1a, ocp_pft, rc)
+      call canopy_resistence(pft , vpd64, f1a, rc)
 
       
 !     Water stress response modifier (dimensionless)
@@ -299,9 +296,9 @@ C     call critical_value2(jp)
       gm = 3.26 * 86400.           !(*86400 transform mm/s to mm/dia)
       
       if(rc .gt. 1.0) then
-         gc = (1./rc) * 86400000. !*86400000 transfor m/s to mm/dia)
+         gc = (1./rc) * 1.15741e-08 ! transfor s/m  to dia/mm) sera?
       else
-         gc =  86400000. ! BIANCA E HELENA - Mudei este esquema..   
+         gc =  1.15741e-08 ! BIANCA E HELENA - Mudei este esquema..   
       endif                     ! tentem entender o algoritmo
                                 ! e tenham certeza que faz sentido ecologico
 
@@ -356,7 +353,7 @@ C     call critical_value2(jp)
 !     (0.012 converts molCO2 to kgC)
 !     (31557600 converts seconds to year [with 365.25 days])
       ph64 = 0.012*31557600.0*f1*f4sun*f4shade
-      ph = real(ph64, 4)       ! kg m-2 year-1
+      ph = real(ph64, 4) * ocp_pft       ! kg m-2 year-1
 
 c     ============================================================
 c     Autothrophic respiration
@@ -382,13 +379,13 @@ c     Autothrophic respiration
 
       
       rml64 = (ncl * cl1) * 27. * exp(0.03*temp)
-      rml =  real(rml64,4) * ocp_pft
+      rml =  real(rml64,4)
 
       rmf64 = (ncf * cf1) * 27. * exp(0.03*temp)
-      rmf =  real(rmf64,4) * ocp_pft
+      rmf =  real(rmf64,4)
 
       rms64 = (ncs * csa) * 27. * exp(0.03*temp)
-      rms = real(rms64,4) * ocp_pft
+      rms = real(rms64,4) 
        
       rm64 = (rml64 + rmf64 + rms64)
       rm = real(rm64, 4)
@@ -399,16 +396,16 @@ c     2003; Levis et al. 2004)
       csai =  (beta_awood * 0.05)
 
       rgl64 = 0.25 * beta_leaf * 365.
-      rgl = real(rgl64,4) * ocp_pft
+      rgl = real(rgl64,4) 
 
       rgf64 =  0.25* beta_froot * 365.
-      rgf = real(rgf64,4) * ocp_pft
+      rgf = real(rgf64,4) 
 
       rgs64 = (0.25 * csai * 365.)
-      rgs = real(rgs64,4) * ocp_pft
+      rgs = real(rgs64,4) 
      
       rg64 = (rgl64 + rgf64 + rgs64)
-      rg = real(rg64,4) * ocp_pft
+      rg = real(rg64,4) 
      
       if (rg.lt.0) then
          rg = 0.0
@@ -419,7 +416,7 @@ c     2003; Levis et al. 2004)
 !     -------------------------------------------     
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
          ar64 = rm64 + rg64
-         ar = real(ar64,4)
+         ar = real(ar64,4) * ocp_pft
          if(ar .lt. 0.00001) ar = 0.0
       else
          ar = 0.0               !Temperature above/below respiration windown
@@ -443,7 +440,7 @@ c     -----------------------------------------------------------------
 
       
 !     ==================================================================
-      subroutine canopy_resistence(m,vpd_in,f1_in,ocp_pft1,rc2_in)
+      subroutine canopy_resistence(m,vpd_in,f1_in,rc2_in)
       
 !     Variables
 !     =========
@@ -460,7 +457,8 @@ c     -----------------------------------------------------------------
       
 !     Internal
 !     --------
-      real g1(7) 
+      real g1(7)
+      real rcmax
       double precision f1b      !Photosynthesis (micromolCO2/m2/s)
       double precision gs2      !Canopy conductance (m/s)
       double precision gs       !Canopy conductance (molCO2/m2/s)
@@ -473,6 +471,7 @@ c     -----------------------------------------------------------------
       f1b = (f1_in*10e5)        ! Helena - Mudei algumas coisas aqui
       aa = (f1b/363.)           ! Entenda o algoritmo e tenha certeza de que  
       g0 = 0.01                 ! condiz com a realidade esperada =)
+      rcmax = 550.0
       
       if(vpd_in .gt. 0.0) then
          goto 10
@@ -488,8 +487,9 @@ c     -----------------------------------------------------------------
          gs = g0 + 1.6 * (1. + (g1(m)/D1)) * (aa) !Based on Medlyn et al. 2011
       endif
  100  continue
-      gs2 = gs/41.     
-      rc2_in = real((1./gs2),4) * ocp_pft1
+      gs2 = (gs/41.)
+      rc2_in = real((gs2**(-1)),4)
+      
       
       return
       end subroutine canopy_resistence
