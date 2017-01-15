@@ -294,7 +294,7 @@ c      Calculating annual npp
             do k=1,12
 !     Photosynthetically active radiation (IPAR:Ein/m2/s)
 !     Observed data from ISLSCP2
-               rhs(i,j,k) = rhaux(60,41,10) / 100.0 !Humidade relativa de manaus em outubro
+               rhs(i,j,k) = (rhaux(60,41,10) / 100.0) - 0.1 !Humidade relativa de manaus em outubro
 c               print*,rhs(i,j,k)
                par(i,j,k) = ipar(i,j,k)/2.18E5 !Converting to Ein/m2/s
                temp(i,j,k) = t(i,j,k) !+ant(i,j,k) !uncomment to use future anomalies
@@ -1181,16 +1181,16 @@ c     inputs
       integer i6, kk, k
       
       real :: nppot
-      real :: sensitivity !!!!!!!! -------- sensitivity2 foi eliminado pq antes conseguia rodar tantas vezes o spinup. agora consegue
+      real :: sensitivity
 
 c     outputs
       real :: cleafini(npfts)
       real :: cawoodini(npfts)
       real :: cfrootini(npfts)
 
-      real cleafi_aux(nt)
-      real cfrooti_aux(nt)
-      real cawoodi_aux(nt)
+      real*8 cleafi_aux(nt)
+      real*8 cfrooti_aux(nt)
+      real*8 cawoodi_aux(nt)
 
     
       real aleaf(npfts)             !npp percentage alocated to leaf compartment
@@ -1210,7 +1210,7 @@ c     outputs
 
  
       sensitivity = 1.10
-
+      if(nppot .le. 0.0) goto 200
       do i6=1,npfts
          do k=1,nt
             if (k.eq.1) then
@@ -1239,24 +1239,33 @@ c     outputs
                   
 
                
-               kk =  int(k*0.66)
-               if((cfrooti_aux(k)/cfrooti_aux(kk).lt.sensitivity)
-     $              .and.(cleafi_aux(k)/cleafi_aux(kk).lt.sensitivity)
-     $              .and.(cawoodi_aux(k)/cawoodi_aux(kk).lt.
-     $             sensitivity)) then
-                                
-                  cleafini(i6) = cleafi_aux(k) ! carbon content (kg m-2)
-                  cfrootini(i6) = cfrooti_aux(k)
-                  if(aawood(i6) .gt. 0.0) then
-                     cawoodini(i6) = cawoodi_aux(k)
-                  else
+               kk =  nint(k*0.66)
+               if(cawoodi_aux(kk) .gt. 0.0) then
+                  if((cfrooti_aux(k)/cfrooti_aux(kk).lt.sensitivity)
+     $                .and.(cleafi_aux(k)/cleafi_aux(kk).lt.sensitivity)
+     $                .and.(cawoodi_aux(k)/cawoodi_aux(kk).lt.
+     $                sensitivity)) then
+                     
+                     cleafini(i6) = real(cleafi_aux(k),4) ! carbon content (kg m-2)
+                     cfrootini(i6) = real(cfrooti_aux(k),4)
+                     cawoodini(i6) = real(cawoodi_aux(k),4)
+                     exit
+                  ENDIF
+               else
+                  if((cfrooti_aux(k)/cfrooti_aux(kk).lt.sensitivity)
+     $                .and.(cleafi_aux(k)
+     &                /cleafi_aux(kk).lt.sensitivity)) then
+                     
+                     cleafini(i6) = real(cleafi_aux(k),4) ! carbon content (kg m-2)
+                     cfrootini(i6) = real(cfrooti_aux(k),4)
                      cawoodini(i6) = 0.0
-                  endif
-                  exit
+                     exit
+                  endif   
                endif
             endif
          enddo
       enddo
+ 200  continue
       return
       end subroutine spinup
 !     ================================
