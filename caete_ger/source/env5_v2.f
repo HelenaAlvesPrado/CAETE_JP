@@ -294,7 +294,8 @@ c      Calculating annual npp
             do k=1,12
 !     Photosynthetically active radiation (IPAR:Ein/m2/s)
 !     Observed data from ISLSCP2
-               rhs(i,j,k) = rhaux(i,j,k) / 100.0
+               rhs(i,j,k) = rhaux(60,41,10) / 100.0 !Humidade relativa de manaus em outubro
+c               print*,rhs(i,j,k)
                par(i,j,k) = ipar(i,j,k)/2.18E5 !Converting to Ein/m2/s
                temp(i,j,k) = t(i,j,k) !+ant(i,j,k) !uncomment to use future anomalies
                p0(i,j,k) = ps(i,j,k) * 0.01 ! transforamando de pascal pra mbar (kPa)
@@ -1135,13 +1136,13 @@ C     preparando o terreno pra salvar as variaveis
 
 !     PFT         1       2       3       4       5       6       7      
       data dt1/3.37,   4.645,   7.18,   2.98,   4.35,   4.64,   4.22/
-      data dt2/3.2E-5, 3.1E-5, 3.8E-5, 5.5E-5, 8.0E-5, 4.0E-5, 4.5E-5/      
-      data dt3/0.40,   0.35,   0.30,   0.25,   0.55,   0.35,   0.40/
-      data dt4/0.35,   0.25,   0.15,   0.10,   0.0,    0.00,   0.15/
-      data dt5/0.25,   0.40,   0.55,   0.65,   0.45,   0.65,   0.45/
-      data dt6/2.0,    0.5,    1.0,    1.0,    1.5,    1.0,    1.0/
-      data dt7/50.0,   50.0,   35.0,   30.0,   0.0,    0.0,    30.5/
-      data dt8/3.0,    2.0,    1.0,    1.5,    1.0,    1.0,    1.5/ 
+      data dt2/3.2E-5, 3.1E-5, 3.8E-5, 5.5E-5, 7.4E-5, 4.0E-5, 4.5E-5/      
+      data dt3/0.40,   0.35,   0.30,   0.25,   0.60,   0.425,   0.40/
+      data dt4/0.35,   0.25,   0.15,   0.10,   0.0,    0.0,   0.15/
+      data dt5/0.25,   0.40,   0.55,   0.65,   0.40,   0.575,   0.45/
+      data dt6/3.0,    3.5,    1.0,    1.0,    1.5,    1.8,    1.5/
+      data dt7/50.0,   55.0,   35.0,   30.0,   0.0,    0.0,    30.5/
+      data dt8/3.0,    2.0,    1.0,    1.5,    1.8,    1.2,    1.5/ 
      
       if(par .eq. 1 ) then      ! g1
          dt(:) = dt1(:)
@@ -1218,12 +1219,24 @@ c     outputs
                cfrooti_aux(k) = afroot(i6)*(nppot)
 
             else
-               cleafi_aux(k) = ((aleaf(i6)*(nppot))-
-     &              (cleafi_aux(k-1)/(tleaf(i6)))) + cleafi_aux(k-1)
-               cawoodi_aux(k) = ((aawood(i6)*(nppot))-
-     &              (cawoodi_aux(k-1)/(tawood(i6)))) + cawoodi_aux(k-1)
-               cfrooti_aux(k) = ((afroot(i6)*(nppot))-
-     &              (cfrooti_aux(k-1)/(tfroot(i6)))) + cfrooti_aux(k-1)
+               if(aawood(i6) .gt. 0.0) then
+                  cleafi_aux(k) = ((aleaf(i6)*(nppot))-
+     &                (cleafi_aux(k-1)/(tleaf(i6)))) + cleafi_aux(k-1)
+                  cawoodi_aux(k) = ((aawood(i6)*(nppot))-
+     &                (cawoodi_aux(k-1)/(tawood(i6)))) + cawoodi_aux(k
+     &                -1)
+                  cfrooti_aux(k) = ((afroot(i6)*(nppot))-
+     &                (cfrooti_aux(k-1)/(tfroot(i6)))) + cfrooti_aux(k
+     &                -1)
+               else
+                  cleafi_aux(k) = ((aleaf(i6)*(nppot))-
+     &                (cleafi_aux(k-1)/(tleaf(i6)))) + cleafi_aux(k-1)
+                  cawoodi_aux(k) = 0.0
+                  cfrooti_aux(k) = ((afroot(i6)*(nppot))-
+     &                (cfrooti_aux(k-1)/(tfroot(i6)))) + cfrooti_aux(k
+     &                -1)
+               endif
+                  
 
                
                kk =  int(k*0.66)
@@ -1232,12 +1245,14 @@ c     outputs
      $              .and.(cawoodi_aux(k)/cawoodi_aux(kk).lt.
      $             sensitivity)) then
                                 
-                  cleafini(i6) = cleafi_aux(k) ! carbon content (kg m-2) 
-                  cawoodini(i6) = cawoodi_aux(k)
+                  cleafini(i6) = cleafi_aux(k) ! carbon content (kg m-2)
                   cfrootini(i6) = cfrooti_aux(k)
-
+                  if(aawood(i6) .gt. 0.0) then
+                     cawoodini(i6) = cawoodi_aux(k)
+                  else
+                     cawoodini(i6) = 0.0
+                  endif
                   exit
-                  
                endif
             endif
          enddo
