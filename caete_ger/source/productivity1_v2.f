@@ -4,12 +4,11 @@ c234567
 ! Productivity1: Photosynthesis, Plant Respiration and NPP
 ! Carbon2: Microbial Respiration
 !
-! Code written by David Lapola and Helena Alves do Prado
-! Last update: 10/2016
-!
-! A "bug" has been found on Sep/2007: when the water soil is between 0.205 and 0.265, NPP
-! unrealistically drops to a level below those when wsoil is lesser than 0.205 (because of f5)
-!=============================================================================================
+!     Code written by David Lapola and Helena Alves do Prado
+!     revised and modified by jpdarela 
+!     Last update: 16/1/2017
+!     tetens no more uses tetens equation... now it uses buck equation. 16-01-2017  jp
+!!=============================================================================================
 !
       subroutine productivity1 (pft,ocp_pft,LIGTH_LIMIT,temp, p0, w,
      &    wmax, ca,ipar,rh,cl1, ca1, cf1, beta_leaf, beta_awood,        !!!!!!!! rh adicionado
@@ -25,7 +24,8 @@ c234567
 !     -----
 !     
       integer pft
-      real ocp_pft,temp         !Mean monthly temperature (oC)
+      real ocp_pft              !PFT area occupation (%)
+      real temp                 !Mean monthly temperature (oC)
       real p0                   !Mean surface pressure (hPa)
       real wa,w,wmax            !Soil moisture (dimensionless)
       real ca                   !Atmospheric CO2 concentration (Pa)

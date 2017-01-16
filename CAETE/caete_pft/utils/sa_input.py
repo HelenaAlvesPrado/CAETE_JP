@@ -13,12 +13,12 @@ xright = -29.75
 llcorner = (xleft, ylow)
 
 #mask0 = gdal.Open('../inputs/lsmk.bin').ReadAsArray()
-#npp0 = gdal.Open('../inputs/npp.bin').ReadAsArray()
+npp0 = gdal.Open('../inputs/npp.bin').ReadAsArray()
 #rsds = gdal.Open('../inputs/rsds.bin').ReadAsArray()
 #tas = gdal.Open('../inputs/tas.bin').ReadAsArray()
 #pr = gdal.Open('../inputs/pr.bin').ReadAsArray()
 #ps = gdal.Open('../inputs/ps.bin').ReadAsArray()
-hurs = gdal.Open('../inputs/hurs.bin').ReadAsArray()
+#hurs = gdal.Open('../inputs/hurs.bin').ReadAsArray()
 #txt_file = 'la_mask.txt'
 #np.savetxt(txt_file, mask0[135:295,180:300], fmt='%.10f')
 
@@ -45,6 +45,6 @@ def crop_array(arr, filename):
 #crop_array(ps, 'la_ps.txt')
 #crop_array(rsds,'la_rsds.txt')
 #crop_array(tas,'la_tas.txt')
-#crop_array(npp0,'la_npp.txt')
-crop_array(hurs,'la_hurs.txt')
+crop_array(npp0,'la_npp.txt')
+#crop_array(hurs,'la_hurs.txt')
                 
