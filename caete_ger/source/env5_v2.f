@@ -292,19 +292,16 @@ c      Calculating annual npp
 !     ------------------------------------------
                
             do k=1,12
-!     Photosynthetically active radiation (IPAR:Ein/m2/s)
-!     Observed data from ISLSCP2
-               rhs(i,j,k) = (rhaux(60,41,10) / 100.0) !Humidade relativa de manaus em outubro
-c               print*,rhs(i,j,k)
+               rhs(i,j,k) =  rhaux(i,j,k) / 100. !(rhaux(60,41,10) / 100.0) !Humidade relativa de manaus em outubro
                par(i,j,k) = ipar(i,j,k)/2.18E5 !Converting to Ein/m2/s
                temp(i,j,k) = t(i,j,k) !+ant(i,j,k) !uncomment to use future anomalies
                p0(i,j,k) = ps(i,j,k) * 0.01 ! transforamando de pascal pra mbar (kPa)
                prec(i,j,k) = pr(i,j,k) !+anpr(i,j,k) !+pr(i,j,k)*0.2 !uncomment to use future anomalies
-               if (prec(i,j,k).lt.0.0) prec (i,j,k) = 0.0  
+c               if (prec(i,j,k).lt.0.0) prec (i,j,k) = 0.0  
             enddo
          enddo
       enddo
-         
+      
 !     Atmospheric CO2 pressure (Pa) !Ppmv / Pa
       ca= 363/9.901             !Pa (=363 ppmv; 1981-2010)
 

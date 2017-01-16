@@ -40,7 +40,7 @@ c234567
       real ph,rc                !Canopy gross photosynthesis (kgC/m2/yr)
       real laia                 !Autotrophic respiration (kgC/m2/yr)
       real ar                   !Leaf area index (m2 leaf/m2 area)
-      real nppa, vpd            !Net primary productivity (kgC/m2/yr)
+      real nppa, vpd   !Net primary productivity (kgC/m2/yr)
       real f5
       real*16 :: f5_64
       real rm, rml, rmf, rms, rg, rgl, rgf, rgs
@@ -61,8 +61,8 @@ c234567
       double precision rl       !Leaf respiration (kgC/m2/yr)
       double precision rp       !Non-leaf parts respiration (kgC/m2/yr)
       double precision sunlai,shadelai !Sunlai/Shadelai
-      double precision vpd64,d  !Vapor pressure deficit (kPa)
-!     
+      double precision vpd64,d, vpd_real  !Vapor pressure deficit (kPa)
+      real*16 vpd_sat, z1,z2,z3,z4,z5,z6
 !     Rubisco, light and transport limited photosynthesis rate
 !     --------------------------------------------------------
 !     
@@ -163,25 +163,24 @@ c     HELENA____________________________________________________
       delta2   = 0.0
       sunlai   = 0.0
       shadelai = 0.0
-!     
+
+
+!     getting pft parameters
+      call pft_par(2, p21)
+      call pft_par(6, tleaf)
+
 !     ==============
 !     Photosynthesis 
 !     ==============
       
 !     Rubisco maximum carboxylaton rate (molCO2/m2/s)
 !     -----------------------------------------------
-!     getting pft parameters
-      call pft_par(2, p21)
-      call pft_par(6, tleaf)
+      
+      vm = (p21(pft)) ! ------------ alterado! vm completamente variante.
 
-      vm = (p21(pft)) ! ------------ alterado! vm completamente variante. Nao é mais p21. Coloquei assim momentanemante pra facilitar
-
-!      vm = (p21(pft)*(p22**(p10*(temp-p11))))/ !Free-range parameter --> 0.0358>vm>840 (micromol)
-!     &    (1.0+exp(p23*(temp-p24)))
-!
-c      if (vm .gt. 0.00001) print*, vm
-!     
-c     call critical_value(vm)
+c      vm = (p21(pft)*(p22**(p10*(temp-p11))))/ !Free-range parameter --> 0.0358>vm>840 (micromol)
+c     &    (1.0+exp(p23*(temp-p24)))
+      
 !     Photo-respiration compensation point (Pa)
 !     -----------------------------------------
 !     
@@ -236,33 +235,24 @@ c     call critical_value(jc)
       endif
       
       jl = p4*(1.0-p5)*aux_ipar*((ci-mgama)/(ci+(p6*mgama)))
-      
-c     call critical_value(jl)
-!     
+     
 !     Transport limited photosynthesis rate (molCO2/m2/s)
 !     ---------------------------------------------------
-!     
+
       je = p7*vm
-c     call critical_value(je)
 !     
 !     Jp (minimum between jc and jl)
-!     ------------------------------
-!     
+!     ------------------------------   
       a = 0.83
       b = (-1.)*(jc+jl)
-C     call critical_value(b)
       c = jc*jl
-c     call critical_value(c)
       delta = (b**2)-4.0*a*c
-c     call critical_value(c)
-!     
+    
       jp1=(-b-(sqrt(delta)))/(2.0*a)
       jp2=(-b+(sqrt(delta)))/(2.0*a)
       jp= amin1(jp1,jp2)
       
-C     call critical_value2(jp)
-      
-!     1
+   
 !     Leaf level gross photosynthesis (minimum between jc, jl and je)
 !     ---------------------------------------------------------------
 !     
@@ -275,30 +265,49 @@ C     call critical_value2(jp)
       j2=(-b2+(sqrt(delta2)))/(2.0*a2)
       f1a = amin1(j1,j2)
 !
+!     VPD
+!     ===
+!     2 buck equation...references:
+!     http://www.hygrometers.com/wp-content/uploads/CR-1A-users-manual-2009-12.pdf
+!     Hartmann 1994 - Global Physical Climatology p.351
+!     https://en.wikipedia.org/wiki/Arden_Buck_equation#CITEREFBuck1996
+      
+!     ES2 = VPD-POTENTIAL - Saturation Vapor Pressure
+      if(temp .gt. 0.0) then
+         es2 = 6.1121 * exp((18.678-(temp/234.5))*(temp/(257.14+temp)))
+      else
+         es2 = 6.1115 * exp((23.036-(temp/333.7))*(temp/(279.82+temp)))
+      endif
+      
+!     VPD-REAL = Actual vapor pressure
+      vpd_real = es2 * rh       ! RESULTS are IN hPa == mbar! we want kPa (DIVIDE by 10.)
+
+!     Vapor Pressure Deficit
+      vpd64 = (es2 - VPD_REAL) / 10. 
+      vpd = real(vpd64, 4)
+C     if(vpd .gt. 0.5) print*, vpd64, 'vpd'
+      
 !     Soil water
 !     ==========      
 
-      es2 = es*100.0
-!     vpd64 = (rh*es2)/1000.    ! incorporada no umidaderelativa
-      vpd64 = (((100.0-rh)/100.0)*(es2))/1000.0 !kPa
-      vpd = real(vpd64, 4)
       wa = (w/wmax)
       
       call canopy_resistence(pft , vpd64, f1a, rc)
-
+C      if(vpd .gt. 0.5) print*, rc, 'rc2'
       
 !     Water stress response modifier (dimensionless)
 !     ----------------------------------------------     
-
+      
       csru = 0.5 
       pt = csru * (cf1 * 1000.) * wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
       alfm = 1.391
       gm = 3.26 * 86400.           !(*86400 transform mm/s to mm/dia)
       
-      if(rc .gt. 1.0) then
-         gc = (1./rc) * 1.15741e-08 ! transfor s/m  to dia/mm) sera?
+      if(rc .gt. 0.001) then
+         gc = rc * 1.15741e-08 ! transfor s/m  to dia/mm)
+         gc = (1./gc)  ! molCO2/mm2/dia
       else
-         gc =  1.15741e-08 ! BIANCA E HELENA - Mudei este esquema..   
+         gc =  1.0/0.001 ! BIANCA E HELENA - Mudei este esquema..   
       endif                     ! tentem entender o algoritmo
                                 ! e tenham certeza que faz sentido ecologico
 
@@ -471,25 +480,35 @@ c     -----------------------------------------------------------------
       f1b = (f1_in*10e5)        ! Helena - Mudei algumas coisas aqui
       aa = (f1b/363.)           ! Entenda o algoritmo e tenha certeza de que  
       g0 = 0.01                 ! condiz com a realidade esperada =)
-      rcmax = 550.0
+      rcmax = 550.00000000000
+      rcmin = 100.00000000000
       
-      if(vpd_in .gt. 0.0) then
+      if(vpd_in .gt. 0.1) then
          goto 10
       else
-         gs = 1.5
-         goto 100
+         rc2_in = rcmin
+         goto 110
+c         gs = 1.5
+c         goto 100
       endif
  10   continue
-      if (vpd_in.lt.0.25) then
-         gs = 1.5
+      if (vpd_in .gt. 0.80) then
+         rc2_in = rcmax
+         goto 110
       else
          D1 = sqrt(vpd_in)
          gs = g0 + 1.6 * (1. + (g1(m)/D1)) * (aa) !Based on Medlyn et al. 2011
+         IF(GS .EQ. 0.0) PRINT*, 'GS DANDO 0 ZERO'
+         if(gs .le. 0.0) then
+            rc2_in = rcmax
+            goto 110
+         endif
       endif
- 100  continue
-      gs2 = (gs/41.)
-      rc2_in = real((gs2**(-1)),4)
       
+      gs2 = (gs/41.)
+      if(gs2 .le. 0.0) rc2_in = rcmax
+      if(gs2 .gt. 0.0) rc2_in = real((gs2**(-1)),4)
+ 110  continue
       
       return
       end subroutine canopy_resistence
@@ -686,13 +705,9 @@ C23456
 
 
 
-
-
-
 !     =========================================================
 !     
       subroutine penman (spre,temp,ur,rn,rc2,evap)
-!     Desconfio seriamente que temos que revisar esta subrotina
 !     
 !     Inputs
 !     ------
@@ -731,8 +746,8 @@ C23456
       call tetens (temp,es)
       delta_e = es*(1. - ur)    !mb
 !     
-      if ((delta_e.ge.(1./h5)-0.5).or.(rc2.ge.4500)) evap = 0.
-      if ((delta_e.lt.(1./h5)-0.5).or.(rc2.lt.4500)) then
+      if ((delta_e.ge.(1./h5)-0.5).or.(rc2.ge.545.0)) evap = 0.
+      if ((delta_e.lt.(1./h5)-0.5).or.(rc2.lt.545.0)) then
 !     
 !     Gama and gama2
 !     --------------
@@ -771,7 +786,7 @@ C23456
 !     Parameters
 !     ----------
       real ra, rcmin, t1, t2, es, es1, es2, delta_e
-      real gama, gama2
+      real gama, gama2, rc
 !     
       ra      = 100.            !s/m
       rcmin   = 100.            !s/m
@@ -828,14 +843,16 @@ c      roff64 = 11.5*(wa**6.6) * 1000. !From NCEP-NCAR Reanalysis data
 !     
 !     =================================================================
 !     ====
-!     
-      subroutine tetens (t,es)  !SVP (kpa)!
+
+     
+      subroutine tetens (t,es)  !Saturation Vapor Pressure (kPa)!
       real t,es
       if (t.ge.0.) then
-         es = 6.1078*exp((7.5*t/(237.3+t))*log(10.))
+         es = 6.1121 * exp((18.678-(t/234.5))*(t/(257.14+t))) ! mbar == hPa
       else
-         es = 6.1078*exp((9.5*t/(265.5+t))*log(10.))
-      endif                                                             
+         es = 6.1115 * exp((23.036-(t/333.7))*(t/(279.82+t))) ! mbar == hPa
+      endif
+c      es = es/10. ! converting to kPa
 !     
       return
       end        
@@ -857,7 +874,7 @@ c
       integer, parameter :: npfts = 7
       integer pft   
       real npp                  !potential npp (KgC/m2/yr)
-      real npp_aux              !auxiliary variable to calculate potential npp in KgC/m2/day
+      real*16 npp_aux           !auxiliary variable to calculate potential npp in KgC/m2/day
       real scl1                  !previous day carbon content on leaf compartment (KgC/m2)
       real scl2                  !final carbon content on leaf compartment (KgC/m2)
       real sca1                  !previous day carbon content on aboveground woody biomass compartment(KgC/m2)
@@ -883,8 +900,8 @@ c
 c     
 c     
 c     initialization
-      if((scl1 .lt. 0.0000001) .or. (scf1 .lt. 0.0000001)) then
-         IF(NPP .lt. 0.0000001) THEN
+      if((scl1 .lt. 0.00001) .or. (scf1 .lt. 0.00001)) then
+         IF(NPP .lt. 0.00001) THEN
             scl2 = 0.0
             scf2 = 0.0
             sca2 = 0.0 

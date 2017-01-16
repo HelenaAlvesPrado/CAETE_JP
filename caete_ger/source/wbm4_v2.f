@@ -558,7 +558,6 @@ c      rh    = 0.685
 !     Maximum evapotranspiration   (emax)
 !     ================================= 
          call evpot2 (p0,temp,rh,ae,emax)
-         call critical_value(emax)
 
          do p = 1,npft    
 !     Productivity (ph, aresp, vpd, rc2 & etc.) for each PFT
@@ -592,10 +591,7 @@ c     Carbon allocation (carbon content on each compartment)
             call allocation (p, nppa(p), cl1(p), ca1(p), !output !input
      &          cf1(p),cl2(p), ca2(p), cf2(p)) 
 
-c            call critical_value(cl2(p))
-c            call critical_value(ca2(p))
-c            call critical_value(cf2(p))
-
+            
             alfa_leaf(p)  = amax1((cl2(p) - cl1(p)), 0.0) 
             alfa_awood(p) = amax1((ca2(p) - ca1(p)), 0.0)
             alfa_froot(p) = amax1((cf2(p) - cf1(p)), 0.0)
@@ -633,6 +629,7 @@ c            call critical_value(cf2(p))
      
                wapft = (w(p)/wmax)
                call runoff (wapft,roff(p))       !Soil moisture runoff (roff, mm/day)
+
                call penman (p0,temp,rh,ae,rc2(p),evap(p)) !Actual evapotranspiration (evap, mm/day)
                dw(p) = prain + smelt(p) - evap(p) - roff(p)
                w(p) = w(p) + dw(p)
