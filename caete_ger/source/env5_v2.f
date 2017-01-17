@@ -1100,7 +1100,7 @@ C     preparando o terreno pra salvar as variaveis
 
       
       subroutine pft_par(par, dt) !!!!!!!!!  mudamos os valores de dt
-      
+      implicit none
 !     input
       integer, parameter :: vars = 7 
       integer :: par            ! parameter number 
@@ -1168,7 +1168,6 @@ c     ==================================================
       subroutine spinup(nppot,
      &     cleafini,cfrootini,cawoodini)
 c     &     cbwoodini,cstoini,cotherini,crepini) 
-
       IMPLICIT NONE
 
       integer, parameter :: nt=10000

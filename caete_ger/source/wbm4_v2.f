@@ -7,8 +7,7 @@ C23456
      &    ,betal,betaw,betaf)
       
 
-      
-!     implicit none
+      implicit none
 
 
 !     =================================================================
@@ -20,12 +19,7 @@ C23456
 !     05 Jul 2005, MDO: ae, rh & runoff are changed
 !     11 Jul 2005, MDO: wsoil2 is written (for testing purpose)
 !     31 Ago 2006, DML: carbon cycle is included
-!     31 dez 2016, DML, HAP, BR and JP- several changes 
-C     MODIFIED BY HAP AND JPDF 15-12-2016 -- ADAPTING TO CAETE TROIA
-C       passagem tranquila-JP 
-        ! CARBON2 PASSA A SE CHAMAR PRODUCTIVITY1
-C     MODIFIED BY BR AND JPDF 27-12-2016 -- ADAPTING TO CAETE BIANCA + TROIA
-C       
+!     31 dez 2016, DML, HAP, BR and JP- several changes        
 !     =================================================================
 
 !     Variables
@@ -352,7 +346,7 @@ c     finalize nx loop
      &    ,rmlavg,rmfavg,rmsavg,rmavg,rglavg,rgfavg,rgsavg,rgavg
      &    ,cleafavg_pft,cawoodavg_pft,cfrootavg_pft,ocpavg,betalavg
      &    ,betawavg,betafavg)
-
+      implicit none
 
       integer, parameter :: npft = 7
 
@@ -400,7 +394,7 @@ c     finalize nx loop
       real ocpavg(npft), betalavg(npft), betawavg(npft), betafavg(npft)
       
 !     -----------------------Internal Variables------------------------
-      integer p
+      integer p,i
       
       real alfa_leaf(npft), alfa_awood(npft), alfa_froot(npft)
       real beta_leaf(npft), beta_awood(npft), beta_froot(npft)
@@ -558,10 +552,10 @@ c      rh    = 0.685
 !     Maximum evapotranspiration   (emax)
 !     ================================= 
          call evpot2 (p0,temp,rh,ae,emax)
-
-         do p = 1,npft    
+             
 !     Productivity (ph, aresp, vpd, rc2 & etc.) for each PFT
 !     ================================= 
+         do p = 1,npft
             
             call productivity1 (p,ocp_coeffs(p),OCP_WOOD(P),temp,p0,w(p)
      &          ,wmax,ca,ipar,rh,cl1(p),ca1(p),cf1(p),beta_leaf(p)
@@ -569,22 +563,6 @@ c      rh    = 0.685
      &          ,nppa(p),laia(p),f5(p),f1(p),vpd(p),rm(p),rml(p)
      &          ,rmf(p),rms(p),rg(p),rgl(p),rgf(p),rgs(p),rc2(p))
 
-c            call critical_value(ph(p))
-c            call critical_value(ar(p))
-c            call critical_value(nppa(p))
-c            call critical_value(laia(p))
-c            call critical_value(f5(p))
-c            call critical_value(f1(p))
-c            call critical_value(vpd(p))
-c            call critical_value(rm(p))
-c            call critical_value(rml(p))
-c            call critical_value(rmf(p))
-c            call critical_value(rms(p))
-c            call critical_value(rg(p))
-c            call critical_value(rgl(p))
-c            call critical_value(rgf(p))
-c            call critical_value(rgs(p))
-c            call critical_value(rc2(p))
             
 c     Carbon allocation (carbon content on each compartment)
 !     =====================================================
@@ -712,6 +690,9 @@ c     Carbon allocation (carbon content on each compartment)
          rgfavg(p) = (rgfavg(p)/365.0) * 12.0 
          rgsavg(p) = (rgsavg(p)/365.0) * 12.0 
          rgavg(p) = (rgavg(p)/365.0) * 12.0
+         betalavg(p) = (betalavg(p)/365.0) * 12.0   
+         betawavg(p) = (betawavg(p)/365.0) * 12.0 
+         betafavg(p) = (betafavg(p)/365.0) * 12.0 
          ocpavg(p) = ocp_coeffs(p) * 100.
       enddo
       return

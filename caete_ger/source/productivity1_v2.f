@@ -1,28 +1,25 @@
 c234567
-!
-!==============================================================================================
-! Productivity1: Photosynthesis, Plant Respiration and NPP
-! Carbon2: Microbial Respiration
-!
+
+!     =================================================================
+!     Productivity1: Photosynthesis, Plant Respiration and NPP
+!     Carbon2: Microbial Respiration
+
 !     Code written by David Lapola and Helena Alves do Prado
-!     revised and modified by jpdarela 
-!     Last update: 16/1/2017
-!     tetens no more uses tetens equation... now it uses buck equation. 16-01-2017  jp
-!!=============================================================================================
-!
-      subroutine productivity1 (pft,ocp_pft,LIGTH_LIMIT,temp, p0, w,
-     &    wmax, ca,ipar,rh,cl1, ca1, cf1, beta_leaf, beta_awood,        !!!!!!!! rh adicionado
-     &    beta_froot,emax, ph,ar, nppa, laia, f5, f1, vpd, rm, rml, 
-     &    rmf, rms, rg,rgl,rgf,rgs,rc)
-!
-!     implicit none
-!     
+!     revised and modified by jpdarela
+!     LAST UPDATE: Ter 17 Jan 2017 00:37:49 BRST JP 
+!     =================================================================
+
+      subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,
+     &    wmax,ca,ipar,rh,cl1,ca1,cf1,beta_leaf,beta_awood,      
+     &    beta_froot,emax, ph,ar,nppa,laia,f5,f1,vpd,rm,rml, 
+     &    rmf,rms,rg,rgl,rgf,rgs,rc)
+
+      implicit none
+
 !     Variables
 !     =========
-!     
 !     Input
-!     -----
-!     
+!     -----     
       integer pft
       real ocp_pft              !PFT area occupation (%)
       real temp                 !Mean monthly temperature (oC)
@@ -30,82 +27,73 @@ c234567
       real wa,w,wmax            !Soil moisture (dimensionless)
       real ca                   !Atmospheric CO2 concentration (Pa)
       real ipar                 !Incident photosynthetic active radiation (w/m2)'
-      real rh                   !Relative humidity ---------- adicionado
-      real cl1, cf1, ca1
-      real beta_leaf, beta_awood, beta_froot
-      LOGICAL LIGTH_LIMIT
+      real rh                   !Relative humidity
+      real cl1, cf1, ca1        !Carbon in plant tissues (kg/m2)
+      real beta_leaf            !npp allocation to carbon pools (kg/m2/day)
+      real beta_awood
+      real beta_froot
+      logical ligth_limit       !True for no ligth limitation
+      
 !     Output
 !     ------
-!     
-      real ph,rc                !Canopy gross photosynthesis (kgC/m2/yr)
+      real ph                   !Canopy gross photosynthesis (kgC/m2/yr)
+      real rc                   !Stomatal resistence (not scaled to canopy!) (s/m)
       real laia                 !Autotrophic respiration (kgC/m2/yr)
       real ar                   !Leaf area index (m2 leaf/m2 area)
-      real nppa, vpd   !Net primary productivity (kgC/m2/yr)
-      real f5
-      real*16 :: f5_64
-      real rm, rml, rmf, rms, rg, rgl, rgf, rgs
-      
+      real nppa, vpd            !Net primary productivity (kgC/m2/yr)
+      real f5                   !Water stress response modifier (unitless)
+      real*16 :: f5_64          !f5 auxiliar (more precision) 
+      real rm, rml, rmf, rms    !autothrophic respiration (kgC/m2/day)
+      real rg, rgl, rgf, rgs 
       
 !     Internal
 !     --------
-!     
-      double precision vm      !Rubisco maximum carboxylaton rate (molCO2/m2/s)
-
+      real es, es2              !Saturation partial pressure (hPa) == mbar
+      real aux_ipar
+      double precision vm       !Rubisco maximum carboxylaton rate (molCO2/m2/s)
       double precision mgama    !Photo-respiration compensation point (Pa)
-      REAL es, es2              !Saturation partial pressure (Pa?)
       double precision rmax     !Saturated mixing ratio (kg/kg)
       double precision r        !Moisture deficit at leaf level (kg/kg)
       double precision ci       !Internal leaf CO2 partial pressure (Pa)
       double precision a,b,c,a2,b2,c2 !Auxiliars
       double precision delta,delta2 !Auxiliars
-      double precision rl       !Leaf respiration (kgC/m2/yr)
-      double precision rp       !Non-leaf parts respiration (kgC/m2/yr)
       double precision sunlai,shadelai !Sunlai/Shadelai
-      double precision vpd64,d, vpd_real  !Vapor pressure deficit (kPa)
-      real*16 vpd_sat, z1,z2,z3,z4,z5,z6
+      double precision vpd64,d, vpd_real !Vapor pressure deficit (kPa)
+      double precision laia64, ph64, ar64, rm64, rms64, rml64
+      double precision rmf64, rg64, rgf64, rgs64, rgl64
+      
+      
 !     Rubisco, light and transport limited photosynthesis rate
 !     --------------------------------------------------------
-!     
       double precision jc,jl,je,jp,jp1,jp2,j1,j2 !Auxiliars
-!     
+      
 !     Functions
 !     ---------
-!     
       double precision f1       !Leaf level gross photosynthesis (molCO2/m2/s)
       double precision f1a      !auxiliar_f1
-      double precision f1b      !Leaf level gross photosynthesis (micromolCO2/m2/s)
       double precision f2       !Michaelis-Menton CO2 constant (Pa)
       double precision f3       !Michaelis-Menton O2 constant (Pa)
-      double precision f4,f4sun,f4shade !Scaling-up to canopy level (dimensionless)
+      double precision f4,f4sun,f4shade !Scaling-up LAI to canopy level (dimensionless)
       
-! BIANCA ___________________________________________________
       real tleaf(7)             !leaf turnover time (yr)
       real p21(7)
-      double precision sla      !specific leaf area (m2/kg)      real cl2                  !leaf compartment's carbon content (kgC/m2)
+      real emax                 !potential evapotranspiration (mm/dia)
+      double precision sla      !specific leaf area (m2/kg)
       double precision csa      !sapwood compartment´s carbon content (5% of woody tissues) (kgC/m2)
       double precision ncl      !leaf N:C ratio (gN/gC)
       double precision ncf      !fine roots N:C ratio (gN/gC)
       double precision ncs      !sapwood N:C ratio(gN/gC)
       double precision csai 
-      double precision pt                   !taxa potencial de fornecimento para
-c     transpiração (mm/dia)
-      double precision csru    !Specific root water uptake (0.5 mm/gC/dia; based in Pavlick et al (2013))
-      real emax                 !potential evapotranspiration (mm/dia)
-      double precision alfm     !maximum Priestley-Taylor coefficient (based in Gerten et al. 2004; used to calculate ad)
-      double precision gm       !scaling conductance (mm/dia)(based in Gerten et al. 2004; used to calculate ad)
-      double precision gc       !Canopy conductance (mm/dia)(based in Gerten et al. 2004; used to calculate ad)
-      double precision laia64, ph64, ar64, rm64, rms64, rml64
-      double precision rmf64
-      double precision rg64, rgf64, rgs64, rgl64
-      
-c     HELENA____________________________________________________
-!     Parameters 
-!     ----------
-!     
+      double precision pt       !taxa potencial de fornecimento para transpiração (mm/dia)
+      double precision csru     !Specific root water uptake (0.5 mm/gC/dia; based in jedi
+      double precision alfm     !maximum Priestley-Taylor coefficient (based in Gerten et al. 2004
+      double precision gm       !scaling conductance (dia/mm)(based in Gerten et al. 2004;
+      double precision gc       !Canopy conductance (dia/mm)(based in Gerten et al. 2004;
+
+!     MODEL PARAMETERS
       DOUBLE PRECISION p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14
      &    ,p15,p19,p20,p22,p23,p24,p25,p26,p27,p28,p29,p30,p31
-
-!     
+     
       a   = 0.8300              !Photosynthesis co-limitation coefficient
       a2  = 0.930               !Photosynthesis co-limitation coefficient
       p3  = 21200.0             !Atmospheric oxygen concentration (Pa)
@@ -133,36 +121,6 @@ c     HELENA____________________________________________________
       p29 = 0.205               !Soil moisture at wilting point
       p30 = 0.015               !Ratio of respiration to Rubisco carboxylation rates
       p31 = 3.850               !Whole plant to leaf respiration ratio
-!     
-!     Initialize
-!     ----------
-!     
-      vm       = 0.0
-      rmax     = 0.0
-      r        = 0.0
-      es       = 0.0
-      ci       = 0.0
-      mgama    = 0.0
-      jc       = 0.0
-      jl       = 0.0
-      je       = 0.0
-      jp       = 0.0
-      rl       = 0.0
-      rp       = 0.0
-      f4sun    = 0.0
-      f4shade  = 0.0
-      f1a      = 0.0
-      f1b      = 0.0
-      a        = 0.0
-      b        = 0.0
-      c        = 0.0
-      a2       = 0.0
-      b2       = 0.0
-      c2       = 0.0
-      delta    = 0.0
-      delta2   = 0.0
-      sunlai   = 0.0
-      shadelai = 0.0
 
 
 !     getting pft parameters
@@ -175,72 +133,58 @@ c     HELENA____________________________________________________
       
 !     Rubisco maximum carboxylaton rate (molCO2/m2/s)
 !     -----------------------------------------------
-      
-      vm = (p21(pft)) ! ------------ alterado! vm completamente variante.
-
+      vm = (p21(pft))
 c      vm = (p21(pft)*(p22**(p10*(temp-p11))))/ !Free-range parameter --> 0.0358>vm>840 (micromol)
 c     &    (1.0+exp(p23*(temp-p24)))
+
       
 !     Photo-respiration compensation point (Pa)
 !     -----------------------------------------
-!     
       mgama = p3/(p8*(p9**(p10*(temp-p11))))
-!     call critical_value(mgama)
+
+      
 !     Michaelis-Menton CO2 constant (Pa)
-!     ----------------------------------
-!     
+!     ----------------------------------     
       f2 = p12*(p13**(p10*(temp-p11)))
-c     call critical_value(f2)
-!     
+
+
 !     Michaelis-Menton O2 constant (Pa)
 !     ---------------------------------
-!     
       f3 = p14*(p15**(p10*(temp-p11)))
-c     call critical_value(f3)
+
+      
 !     Saturation partial pressure of water vapour (Pa)
-!     
-!     ------------------------------------------------
-!     
-      call tetens (temp,es)     !-71.1<temp<+38.2
+      call tetens(temp,es)
 
 !     Saturated mixing ratio (kg/kg)
-!     -----------------------------
-!     
+!     -----------------------------     
       rmax = 0.622*(es/(p0-es))
-c     call critical_value(rmax)
-!     
+     
 !     Moisture deficit at leaf level (kg/kg)
-!     --------------------------------------
-!     
+!     --------------------------------------    
       r = -0.315*rmax
-c     call critical_value(r)
-!     
+
 !     Internal leaf CO2 partial pressure (Pa)
-!     ---------------------------------------
-!     
+!     ---------------------------------------     
       ci = p19* (1.-(r/p20)) * (ca-mgama) + mgama
-c     call critical_value(ci)
+
 !     Rubisco carboxilation limited photosynthesis rate (molCO2/m2/s)
-!     ---------------------------------------------------------------
-!     
+!     ---------------------------------------------------------------     
       jc = vm*((ci-mgama)/(ci+(f2*(1.+(p3/f3)))))
-c     call critical_value(jc)
-!     
+
 !     Light limited photosynthesis rate (molCO2/m2/s)
 !     -----------------------------------------------
-      if (LIGTH_LIMIT) then
+      if (ligth_limit) then
          aux_ipar= ipar   
       else
          aux_ipar = ipar - (ipar * 0.20)
       endif
-      
       jl = p4*(1.0-p5)*aux_ipar*((ci-mgama)/(ci+(p6*mgama)))
      
 !     Transport limited photosynthesis rate (molCO2/m2/s)
 !     ---------------------------------------------------
-
       je = p7*vm
-!     
+
 !     Jp (minimum between jc and jl)
 !     ------------------------------   
       a = 0.83
@@ -251,33 +195,27 @@ c     call critical_value(jc)
       jp1=(-b-(sqrt(delta)))/(2.0*a)
       jp2=(-b+(sqrt(delta)))/(2.0*a)
       jp= amin1(jp1,jp2)
-      
-   
+         
 !     Leaf level gross photosynthesis (minimum between jc, jl and je)
 !     ---------------------------------------------------------------
-!     
       a2 = 0.93
       b2 = (-1.)*(jp+je)
       c2 = jp*je
       delta2 = (b2**2)-4.0*a2*c2
-!     
+
       j1=(-b2-(sqrt(delta2)))/(2.0*a2)
       j2=(-b2+(sqrt(delta2)))/(2.0*a2)
       f1a = amin1(j1,j2)
-!
+
 !     VPD
 !     ===
-!     2 buck equation...references:
+!     buck equation...references:
 !     http://www.hygrometers.com/wp-content/uploads/CR-1A-users-manual-2009-12.pdf
 !     Hartmann 1994 - Global Physical Climatology p.351
 !     https://en.wikipedia.org/wiki/Arden_Buck_equation#CITEREFBuck1996
       
-!     ES2 = VPD-POTENTIAL - Saturation Vapor Pressure
-      if(temp .gt. 0.0) then
-         es2 = 6.1121 * exp((18.678-(temp/234.5))*(temp/(257.14+temp)))
-      else
-         es2 = 6.1115 * exp((23.036-(temp/333.7))*(temp/(279.82+temp)))
-      endif
+!     ES2 = VPD-POTENTIAL - Saturation Vapor Pressure (millibar)
+      call tetens(temp, es2)
       
 !     VPD-REAL = Actual vapor pressure
       vpd_real = es2 * rh       ! RESULTS are IN hPa == mbar! we want kPa (DIVIDE by 10.)
@@ -285,23 +223,21 @@ c     call critical_value(jc)
 !     Vapor Pressure Deficit
       vpd64 = (es2 - VPD_REAL) / 10. 
       vpd = real(vpd64, 4)
-C     if(vpd .gt. 0.5) print*, vpd64, 'vpd'
       
 !     Soil water
 !     ==========      
-
       wa = (w/wmax)
       
+!     Stomatal resistence
+!     ===================
       call canopy_resistence(pft , vpd64, f1a, rc)
-C      if(vpd .gt. 0.5) print*, rc, 'rc2'
       
 !     Water stress response modifier (dimensionless)
 !     ----------------------------------------------     
-      
       csru = 0.5 
-      pt = csru * (cf1 * 1000.) * wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
+      pt = csru*(cf1*1000.)*wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
       alfm = 1.391
-      gm = 3.26 * 86400.           !(*86400 transform mm/s to mm/dia)
+      gm = 3.26 * 86400.           !(*86400 transform s/mm to dia/mm)
       
       if(rc .gt. 0.001) then
          gc = rc * 1.15741e-08 ! transfor s/m  to dia/mm)
@@ -310,9 +246,7 @@ C      if(vpd .gt. 0.5) print*, rc, 'rc2'
          gc =  1.0/0.001 ! BIANCA E HELENA - Mudei este esquema..   
       endif                     ! tentem entender o algoritmo
                                 ! e tenham certeza que faz sentido ecologico
-
       d =(emax*alfm)/(1. + gm/gc) !(based in Gerten et al. 2004)
-
 !     BIanca- Eu alterei a estrutura desta equacao para evitar erros
 !     Isso faz a mesma coisa que o calculo que vc implementou - jp
       if(d .gt. 0.0) then
@@ -385,8 +319,7 @@ c     Autothrophic respiration
       ncl = 0.021               !(gN/gC) 
       ncf = 0.004               !(gN/gC)
       ncs = 0.003               !(gN/gC)
-
-      
+ 
       rml64 = (ncl * cl1) * 27. * exp(0.03*temp)
       rml =  real(rml64,4)
 
@@ -450,7 +383,7 @@ c     -----------------------------------------------------------------
       
 !     ==================================================================
       subroutine canopy_resistence(m,vpd_in,f1_in,rc2_in)
-      
+      implicit none
 !     Variables
 !     =========
       
@@ -467,7 +400,7 @@ c     -----------------------------------------------------------------
 !     Internal
 !     --------
       real g1(7)
-      real rcmax
+      real rcmax, rcmin
       double precision f1b      !Photosynthesis (micromolCO2/m2/s)
       double precision gs2      !Canopy conductance (m/s)
       double precision gs       !Canopy conductance (molCO2/m2/s)
@@ -480,25 +413,26 @@ c     -----------------------------------------------------------------
       f1b = (f1_in*10e5)        ! Helena - Mudei algumas coisas aqui
       aa = (f1b/363.)           ! Entenda o algoritmo e tenha certeza de que  
       g0 = 0.01                 ! condiz com a realidade esperada =)
-      rcmax = 550.00000000000
-      rcmin = 100.00000000000
-      
+      rcmax = 553.000
+      rcmin = 100.000
+
+      if(f1_in .le. 0.0) then 
+         rc2_in = rcmax
+         goto 110
+      endif
       if(vpd_in .gt. 0.1) then
          goto 10
       else
          rc2_in = rcmin
          goto 110
-c         gs = 1.5
-c         goto 100
       endif
  10   continue
-      if (vpd_in .gt. 0.80) then
+      if (vpd_in .gt. 0.95) then
          rc2_in = rcmax
          goto 110
       else
          D1 = sqrt(vpd_in)
          gs = g0 + 1.6 * (1. + (g1(m)/D1)) * (aa) !Based on Medlyn et al. 2011
-         IF(GS .EQ. 0.0) PRINT*, 'GS DANDO 0 ZERO'
          if(gs .le. 0.0) then
             rc2_in = rcmax
             goto 110
@@ -517,9 +451,9 @@ c         goto 100
 !     Microbial (heterotrophic) respiration
 !     =====================================
       
-      subroutine carbon2 (tsoil,f5,evap,laia, !Inputs
+      subroutine carbon2 (tsoil,f5c,evap,laia, !Inputs
      &    cl,cs,hr)             !Outputs
-!     
+      implicit none
 !     Variables
 !     =========
 !     
@@ -527,7 +461,7 @@ c         goto 100
 !     ------
       
       real tsoil                !Mean monthly soil temperature (oC)
-      real f5                   !Stress response to soil moisture (dimensionless)
+      real f5c                 !Stress response to soil moisture (dimensionless)
       real evap                 !Actual evapotranspiration (mm/day)
       real laia
 
@@ -595,14 +529,14 @@ C      call critical_value(cl)
 !     Soil carbon(kgC/m2)
 !     -------------------
 !     
-      cs = ((p34*cl)/(p35*f7))*f5
+      cs = ((p34*cl)/(p35*f7))*f5c
 C      call critical_value(cs)
 !     
 !     Respiration minimum and maximum temperature
 !     -------------------------------------------
 !     
       if ((tsoil.ge.-10.0).and.(tsoil.le.50.0)) then
-         hr = p36*(cl*(f6**2)+(cs*f5*evap*(f7**2))) !Litter and Soil respectively
+         hr = p36*(cl*(f6**2)+(cs*f5c*evap*(f7**2))) !Litter and Soil respectively
 C         call critical_value(hr)
       else
          hr = 0.0               !Temperature above/below respiration windown
@@ -646,14 +580,14 @@ C         call critical_value(hr)
 
       return
       end subroutine critical_value3
-
+!     =================================================================
 
 c23456
       SUBROUTINE PFT_AREA_FRAC(CLEAF, CFROOT, CAWOOD, OCP_COEFFS,
      &    OCP_WOOD)
-c     esta subrotina calcula a areA DE CADA pft  
-c     a partir do conteudo de carbono nos compartimentos vegetais no 
-c     dia anterior 
+
+      IMPLICIT NONE
+ 
       INTEGER, PARAMETER :: NPFT = 7
       INTEGER :: P, MAX_INDEX(1), I
       REAL :: CLEAF(NPFT), CFROOT(NPFT), CAWOOD(NPFT)
@@ -672,19 +606,17 @@ c     dia anterior
       
 
       DO P = 1,NPFT
-         TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P) ! biomassa total no dia i
+         TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P)
          TOTAL_BIOMASS = TOTAL_BIOMASS + TOTAL_BIOMASS_PFT(P)
          TOTAL_WOOD = TOTAL_WOOD + CAWOOD(P)
          TOTAL_W_PFT(P) = CAWOOD(P)
-      ENDDO                 ! end p loop
+      ENDDO
 
 !     GRID CELL OCCUPATION COEFFICIENTS
       IF(TOTAL_BIOMASS .GT. 0.0) THEN
          DO P = 1,NPFT   
             OCP_COEFFS(P) = TOTAL_BIOMASS_PFT(P) / TOTAL_BIOMASS
             IF(OCP_COEFFS(P) .LT. 0.0) OCP_COEFFS(P) = 0.0
-c            CALL CRITICAL_VALUE(OCP_COEFFS(P))
-c            PRINT*, OCP_COEFFS(P), 'ocp'
          ENDDO
       ELSE
          DO P = 1,NPFT
@@ -698,17 +630,13 @@ c            PRINT*, OCP_COEFFS(P), 'ocp'
          I = MAX_INDEX(1)
          OCP_WOOD(I) = .TRUE.
       ENDIF
-      
-C23456
+
       RETURN
       END SUBROUTINE PFT_AREA_FRAC
-
-
-
 !     =========================================================
-!     
+     
       subroutine penman (spre,temp,ur,rn,rc2,evap)
-!     
+      implicit none
 !     Inputs
 !     ------
 !     
@@ -726,7 +654,7 @@ C23456
 !     
 !     Parameters
 !     ----------
-      real ra, h5, t1, t2, es, es1, es2, delta_e
+      real ra, h5, t1, t2, es, es1, es2, delta_e, delta
       real gama, gama2
       ra = 100.                  !s/m
       h5 = 0.0275               !mb-1
@@ -746,30 +674,27 @@ C23456
       call tetens (temp,es)
       delta_e = es*(1. - ur)    !mb
 !     
-      if ((delta_e.ge.(1./h5)-0.5).or.(rc2.ge.545.0)) evap = 0.
-      if ((delta_e.lt.(1./h5)-0.5).or.(rc2.lt.545.0)) then
+      if ((delta_e.ge.(1./h5)-0.5).or.(rc2.ge.450.0)) evap = 0.
+      if ((delta_e.lt.(1./h5)-0.5).or.(rc2.lt.450.0)) then
 !     
 !     Gama and gama2
 !     --------------
-!     
          gama  = spre*(1004.)/(2.45e6*0.622)
          gama2 = gama*(ra + rc2)/ra
-!     
+
 !     Real evapotranspiration
-!     -----------------------
-!     
-         evap = (delta*rn + (1.20*1004./ra)*delta_e)/(delta+gama2) !W/m2
+!     -----------------------     
+         evap = (delta* rn + (1.20*1004./ra)*delta_e)/(delta+gama2) !W/m2
          evap = evap*(86400./2.45e6) !mm/day
          evap = amax1(evap,0.)  !Eliminates condensation
       endif
-!     
+
       return
-      end
-!     
+      end subroutine penman     
 !     ============================================
 !     
       subroutine evpot2 (spre,temp,ur,rn,evap) 
-!     
+      implicit none
 !     Inputs
 !     ------
 !     
@@ -785,7 +710,7 @@ C23456
 !     
 !     Parameters
 !     ----------
-      real ra, rcmin, t1, t2, es, es1, es2, delta_e
+      real ra, rcmin, t1, t2, es, es1, es2, delta_e, delta
       real gama, gama2, rc
 !     
       ra      = 100.            !s/m
@@ -831,6 +756,7 @@ C23456
 !     ===
 !     
       subroutine runoff (wa,roff)
+      implicit none
       real*8 :: wa
       real :: roff
       real*16 :: roff64
@@ -845,7 +771,8 @@ c      roff64 = 11.5*(wa**6.6) * 1000. !From NCEP-NCAR Reanalysis data
 !     ====
 
      
-      subroutine tetens (t,es)  !Saturation Vapor Pressure (kPa)!
+      subroutine tetens (t,es)  !Saturation Vapor Pressure (hPa)!
+      implicit none
       real t,es
       if (t.ge.0.) then
          es = 6.1121 * exp((18.678-(t/234.5))*(t/(257.14+t))) ! mbar == hPa
@@ -868,7 +795,7 @@ c=====================================================================
       
       subroutine allocation (pft, npp ,scl1,sca1,scf1,
      &    scl2,sca2,scf2)          !output
-c     
+      implicit none
 c     
 !     variables
       integer, parameter :: npfts = 7
@@ -932,4 +859,4 @@ c     initialization
  10   continue
       return
       end
-c    
+c
