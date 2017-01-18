@@ -99,7 +99,9 @@ C      WARNING - NEW VARIABLES ---
 c     variaveis do spinup
       real, dimension(q) :: aux1, aux2, aux3
       real npp_pot(nx,ny,12)
-      real, dimension(nx,ny) :: aux_npp
+      real, dimension(nx,ny) :: aux_npp, tempmin, tempmax, prannual,
+     &    snppmin, urmax, urmin
+      real tma, tmi, rma, rmi, smin, prann
       real npp_sca  
 
 c     -----FIM DA DEFINICAO DE VARIAVEIS PARA RODAR O MODELO--
@@ -170,7 +172,7 @@ C     -------END DECLARATION----------------------------------------
      &     form='unformatted',access='direct',recl=4*nx*ny)
 
       open(26,file='../inputs/npp_sa.bin',status='old',
-     &     form='unformatted',access='direct',recl=4*nx*ny)
+     &    form='unformatted',access='direct',recl=4*nx*ny)
 
 c      open(27,file='../spinup/clini.bin',status='old',
 c     &    form='unformatted',access='direct',recl=4*nx*ny)
@@ -180,10 +182,35 @@ c     &    form='unformatted',access='direct',recl=4*nx*ny)
 c
 c      open(29,file='../spinup/cwini.bin',status='old',
 c     &    form='unformatted',access='direct',recl=4*nx*ny)
+      
+      open(30,file='../inputs/pr_annual_sa.bin',status='old',
+     &     form='unformatted',access='direct',recl=4*nx*ny)
+
+      open(31,file='../inputs/tasmax_sa.bin',status='old',
+     &    form='unformatted',access='direct',recl=4*nx*ny)
+      
+      open(32,file='../inputs/tasmin_sa.bin',status='old',
+     &    form='unformatted',access='direct',recl=4*nx*ny)
+      
+      open(33,file='../inputs/rhmax_sa.bin',status='old',
+     &     form='unformatted',access='direct',recl=4*nx*ny)
+
+      open(34,file='../inputs/rhmin_sa.bin',status='old',
+     &     form='unformatted',access='direct',recl=4*nx*ny)
+
+      open(35,file='../inputs/snpp.bin',status='old',
+     &     form='unformatted',access='direct',recl=4*nx*ny)
+
 !     Read data
 !     =========
       
-       read (9,rec=1) lsmk
+      read (9,rec=1) lsmk
+      read (30,rec=1) prannual
+      read (31,rec=1) tempmax
+      read (32,rec=1) tempmin
+      read (33,rec=1) urmax
+      read (34,rec=1) urmin
+      read (35,rec=1) snppmin
 
        call readx(10,ps,12)
        call readx(11,pr,12)
@@ -208,7 +235,12 @@ c       call readx(29,cawoodin,q)
 c       close(27)
 c       close(28)
 c       close(29)
-       
+       close(30)
+       close(31)
+       close(32)
+       close(33)
+       close(34)
+       close(35)
 
 c      Calculating annual npp
        do i =1,nx
@@ -230,15 +262,21 @@ c      Calculating annual npp
          do j=1,ny
             if (nint(lsmk(i,j)) .ne. 0) then
                npp_sca = aux_npp(i,j)
+               tma = tempmax(i,j)
+               tmi = tempmin(i,j)
+               rma = urmax(i,j)
+               rmi = urmin(i,j)
+               smin = snppmin(i,j)
+               prann = prannual(i,j)
                
                do p=1,q   
                   aux1(p) = 0.0
                   aux2(p) = 0.0
                   aux3(p) = 0.0
-                  gridcell_ocp(i,j,p) = 0.0
                enddo
                
-               call spinup(npp_sca, aux1, aux2, aux3)
+               call spinup(npp_sca, aux1, aux2, aux3,tma,tmi,rma,rmi
+     &             ,smin,prann)
 
                do p=1,q   
                   cleafin(i,j,p)  = aux1(p)
@@ -1105,17 +1143,23 @@ C     preparando o terreno pra salvar as variaveis
       integer, parameter :: vars = 7 
       integer :: par            ! parameter number 
       real, dimension(vars) :: dt,dt1,dt2,dt3,dt4,dt5,dt6
-     &    ,dt7,dt8
+     &    ,dt7,dt8,dt9,dt10,dt11,dt12,dt13,dt14
       
       
 !     dt1 = g1
 !     dt2 = p21 
-!     dt3 = aleaf
+!     dt3 = aleaf 
 !     dt4 = aawood
 !     dt5 = afroot
 !     dt6 = tleaf
 !     dt7 = tawood
 !     dt8 = tfroot
+!     dt9 = tmax
+!     dt10 = tmin
+!     dt11 = rhmax
+!     dt12 = rhmin
+!     dt13 = snppmin
+!     dt14 = precmin
       
 !     PFTS
       
@@ -1124,23 +1168,28 @@ C     preparando o terreno pra salvar as variaveis
 !     1 = tropical evergreen tree
 !     2 = tropical deciduous-forest-tree
 !     3 = tropical woody-savana-tree
-!     4 = tropical savana
-!     5 = tropical herb
-!     6 = tropical grass
-!     7 = Shrub
-!     8 = temperate tree
-!     9 = temperate herb
+!     4 = herb
+!     5 = tropical grass
+!     6 = sub-tropical grass
+!     7 = sub-tropical tree
 
 !     PFT         1       2       3       4       5       6       7      
-      data dt1/3.37,   4.645,   7.18,   2.98,   4.35,   4.64,   4.22/
+      data dt1/3.37,   4.645,  7.18,   2.98,   4.35,   4.64,   4.22/
       data dt2/3.2E-5, 3.1E-5, 3.8E-5, 5.5E-5, 7.4E-5, 4.0E-5, 4.5E-5/      
-      data dt3/0.40,   0.35,   0.30,   0.25,   0.60,   0.425,   0.40/
-      data dt4/0.35,   0.25,   0.15,   0.10,   0.0,    0.0,   0.15/
-      data dt5/0.25,   0.40,   0.55,   0.65,   0.40,   0.575,   0.45/
-      data dt6/3.0,    3.5,    1.0,    1.0,    1.5,    1.8,    1.5/
-      data dt7/50.0,   55.0,   35.0,   30.0,   0.0,    0.0,    30.5/
-      data dt8/3.0,    2.0,    1.0,    1.5,    1.8,    1.2,    1.5/ 
-     
+      data dt3/0.70,   0.65,   0.80,   0.62,   0.75,   0.82,   0.80/
+      data dt4/0.10,   0.15,   0.05,   0.08,   0.0,    0.0,    0.10/
+      data dt5/0.20,   0.20,   0.15,   0.30,   0.25,   0.18,   0.10/
+      data dt6/8.8,    6.7,    3.4,    3.2,    3.2,    4.2,    8.9/
+      data dt7/41.8,   38.0,   18.6,   12.0,   0.0,    0.0,    22.5/
+      data dt8/5.8,    4.0,    2.0,    2.5,    2.1,    2.2,    3.5/
+!     novas variaveis definindo padroes fisicos limitantes para os pfts
+      data dt9/28.0,   28.4,   28.7,   27.0,   30.0,   22.0,   24.0/ ! TMAX
+      data dt10/22.0,  20.0,   18.0,   2.0,    16.0,   2.0,    4.0/  ! TMIN
+      data dt11/0.96,  0.85,   0.76,   0.95,   0.76,   0.70,   0.70/ ! RHMAX
+      data dt12/0.70,  0.65,   0.45,   0.30,   0.45,   0.15,   0.22/ ! RHMIN
+      data dt13/0.5,   0.6,    0.8,    0.85,   0.95,   0.77,   0.80/ ! snppmax
+      data dt14/2.1E3, 1.9E3,  900.,   1200.,  900.,   1800.,  1500./ ! precmin
+      
       if(par .eq. 1 ) then      ! g1
          dt(:) = dt1(:)
       else if(par .eq. 2) then  ! p21
@@ -1157,6 +1206,18 @@ C     preparando o terreno pra salvar as variaveis
          dt(:) = dt7(:)
       else if(par .eq. 8) then  ! tfroot
          dt(:) = dt8(:)
+      else if(par .eq. 9) then  ! tmax
+         dt(:) = dt9(:)
+      else if(par .eq. 10) then  ! tmin
+         dt(:) = dt10(:)
+      else if(par .eq. 11) then  ! rhmax
+         dt(:) = dt11(:)
+      else if(par .eq. 12) then  ! rhmin
+         dt(:) = dt12(:)
+      else if(par .eq. 13) then  ! SNPPMAX
+         dt(:) = dt13(:)
+      else if(par .eq. 14) then  ! PRECMIN
+         dt(:) = dt14(:)
       else
          print*, "your search failed"
       endif
@@ -1165,19 +1226,20 @@ C     preparando o terreno pra salvar as variaveis
       end subroutine pft_par
       
 c     ==================================================
-      subroutine spinup(nppot,
-     &     cleafini,cfrootini,cawoodini)
-c     &     cbwoodini,cstoini,cotherini,crepini) 
+      subroutine spinup(nppot,cleafini,cfrootini,cawoodini,th,tl,uh,ul,s
+     &    ,pm)
+      
       IMPLICIT NONE
 
       integer, parameter :: nt=10000
       integer, parameter :: npfts=7
       
 c     inputs
-      integer i6, kk, k
-      
       real :: nppot
-      real :: sensitivity
+      real pm              !TOTAL ANNUAL PRECIPITATION
+      real th,tl
+      real s                 !NPP SEASONALITY INDEX
+      real uh,ul                 ! relative humidity
 
 c     outputs
       real :: cleafini(npfts)
@@ -1189,78 +1251,113 @@ c     outputs
       real*8 cfrooti_aux(nt)
       real*8 cawoodi_aux(nt)
 
-    
+
+!     INTERNAL VARS
+      integer i6, kk, k      
+      real :: sensitivity
       real aleaf(npfts)             !npp percentage alocated to leaf compartment
       real aawood (npfts)           !npp percentage alocated to aboveground woody biomass compartment
       real afroot(npfts)            !npp percentage alocated to fine roots compartmentc 
       real tleaf(npfts)             !turnover time of the leaf compartment (yr)
       real tawood (npfts)           !turnover time of the aboveground woody biomass compartment (yr)
-      real tfroot(npfts)            !turnover time of the fine roots compartment
+      real tfroot(npfts)        !turnover time of the fine roots compartment
+      real,dimension(npfts) :: tmax,tmin,rhmax,rhmin,snpp,precm
 
-
-      call pft_par(3, aleaf)
-      call pft_par(4, aawood)
-      call pft_par(5, afroot)
-      call pft_par(6, tleaf)
-      call pft_par(7, tawood)
-      call pft_par(8, tfroot)
+      
+      call pft_par(3,  aleaf)
+      call pft_par(4,  aawood)
+      call pft_par(5,  afroot)
+      call pft_par(6,  tleaf)
+      call pft_par(7,  tawood)
+      call pft_par(8,  tfroot)
+      call pft_par(9,  tmax)
+      call pft_par(10, tmin)
+      call pft_par(11, rhmax)
+      call pft_par(12, rhmin)
+      call pft_par(13, snpp)
+      call pft_par(14, precm)
 
  
       sensitivity = 1.10
-      if(nppot .le. 0.0) goto 200
+      
+      if(nppot .le. 0.0) then
+         do i6 = 1,npfts
+            cleafini(i6) = 0.0
+            cleafini(i6) = 0.0
+            cleafini(i6) = 0.0
+         enddo
+         goto 200
+      endif
+
       do i6=1,npfts
-         do k=1,nt
-            if (k.eq.1) then
-               cleafi_aux (k) =  aleaf(i6)*(nppot)
-               cawoodi_aux(k) = aawood(i6)*(nppot)
-               cfrooti_aux(k) = afroot(i6)*(nppot)
-
-            else
-               if(aawood(i6) .gt. 0.0) then
-                  cleafi_aux(k) = ((aleaf(i6)*(nppot))-
-     &                (cleafi_aux(k-1)/(tleaf(i6)))) + cleafi_aux(k-1)
-                  cawoodi_aux(k) = ((aawood(i6)*(nppot))-
-     &                (cawoodi_aux(k-1)/(tawood(i6)))) + cawoodi_aux(k
-     &                -1)
-                  cfrooti_aux(k) = ((afroot(i6)*(nppot))-
-     &                (cfrooti_aux(k-1)/(tfroot(i6)))) + cfrooti_aux(k
-     &                -1)
-               else
-                  cleafi_aux(k) = ((aleaf(i6)*(nppot))-
-     &                (cleafi_aux(k-1)/(tleaf(i6)))) + cleafi_aux(k-1)
-                  cawoodi_aux(k) = 0.0
-                  cfrooti_aux(k) = ((afroot(i6)*(nppot))-
-     &                (cfrooti_aux(k-1)/(tfroot(i6)))) + cfrooti_aux(k
-     &                -1)
-               endif
+         if(( tl .gt. tmin(i6))   .and.
+c     &       (th .le. tmax(i6)+1)    .and.
+     &       (ul .gt. rhmin(i6))   .and.
+c     &       (uh .le. rhmax(i6)+5)   .and.
+     &       (s  .le. snpp(i6))  .and.
+     &       (pm .ge. precm(i6))
+     &       ) then
+c            print*, 'pft allowed'
+            do k=1,nt
+               if (k.eq.1) then
+                  cleafi_aux (k) =  aleaf(i6)*(nppot)
+                  cawoodi_aux(k) = aawood(i6)*(nppot)
+                  cfrooti_aux(k) = afroot(i6)*(nppot)
                   
-
-               
-               kk =  nint(k*0.66)
-               if(cawoodi_aux(kk) .gt. 0.0) then
-                  if((cfrooti_aux(k)/cfrooti_aux(kk).lt.sensitivity)
-     $                .and.(cleafi_aux(k)/cleafi_aux(kk).lt.sensitivity)
-     $                .and.(cawoodi_aux(k)/cawoodi_aux(kk).lt.
-     $                sensitivity)) then
-                     
-                     cleafini(i6) = real(cleafi_aux(k),4) ! carbon content (kg m-2)
-                     cfrootini(i6) = real(cfrooti_aux(k),4)
-                     cawoodini(i6) = real(cawoodi_aux(k),4)
-                     exit
-                  ENDIF
                else
-                  if((cfrooti_aux(k)/cfrooti_aux(kk).lt.sensitivity)
-     $                .and.(cleafi_aux(k)
-     &                /cleafi_aux(kk).lt.sensitivity)) then
-                     
-                     cleafini(i6) = real(cleafi_aux(k),4) ! carbon content (kg m-2)
-                     cfrootini(i6) = real(cfrooti_aux(k),4)
-                     cawoodini(i6) = 0.0
-                     exit
-                  endif   
+                  if(aawood(i6) .gt. 0.0) then
+                     cleafi_aux(k) = ((aleaf(i6)*(nppot))-
+     &                   (cleafi_aux(k-1)/(tleaf(i6)))) + cleafi_aux(k
+     &                   -1)
+                     cawoodi_aux(k) = ((aawood(i6)*(nppot))-
+     &                   (cawoodi_aux(k-1)/(tawood(i6)))) +
+     &                   cawoodi_aux(k-1)
+                     cfrooti_aux(k) = ((afroot(i6)*(nppot))-
+     &                   (cfrooti_aux(k-1)/(tfroot(i6)))) +
+     &                   cfrooti_aux(k-1)
+                  else
+                     cleafi_aux(k) = ((aleaf(i6)*(nppot))-
+     &                   (cleafi_aux(k-1)/(tleaf(i6)))) + cleafi_aux(k
+     &                   -1)
+                     cawoodi_aux(k) = 0.0
+                     cfrooti_aux(k) = ((afroot(i6)*(nppot))-
+     &                   (cfrooti_aux(k-1)/(tfroot(i6)))) +
+     &                   cfrooti_aux(k-1)
+                  endif
+                  
+                  
+                  
+                  kk =  nint(k*0.66)
+                  if(cawoodi_aux(kk) .gt. 0.0) then
+                     if((cfrooti_aux(k)/cfrooti_aux(kk).lt.sensitivity)
+     $                   .and.(cleafi_aux(k)
+     &                   /cleafi_aux(kk).lt.sensitivity).and.
+     &                   (cawoodi_aux(k)
+     &                   /cawoodi_aux(kk).lt.sensitivity)) then
+                        
+                        cleafini(i6) = real(cleafi_aux(k),4) ! carbon content (kg m-2)
+                        cfrootini(i6) = real(cfrooti_aux(k),4)
+                        cawoodini(i6) = real(cawoodi_aux(k),4)
+                        exit
+                     ENDIF
+                  else
+                     if((cfrooti_aux(k)/cfrooti_aux(kk).lt.sensitivity)
+     $                   .and.(cleafi_aux(k)
+     &                   /cleafi_aux(kk).lt.sensitivity)) then
+                        
+                        cleafini(i6) = real(cleafi_aux(k),4) ! carbon content (kg m-2)
+                        cfrootini(i6) = real(cfrooti_aux(k),4)
+                        cawoodini(i6) = 0.0
+                        exit
+                     endif   
+                  endif
                endif
-            endif
-         enddo                  !nt
+            enddo               ! nt
+         else ! pft don't populate this cell
+            cleafini(i6) = 0.0
+            cleafini(i6) = 0.0
+            cleafini(i6) = 0.0
+         endif
       enddo                     ! npfts 
       call pft_area_frac(cleafini, cfrootini, cawoodini, ocp, inutil)
       do i6 = 1,npfts

@@ -271,23 +271,31 @@ c     &    (1.0+exp(p23*(temp-p24)))
 
 !     Leaf area index (m2/m2)
 !     ---------------------------------
+      ncl = 0.038               !(gN/gC) 
+      ncf = 0.035               !(gN/gC)
+      ncs = 0.003               !(gN/gC)
+
 !     Specifc Leaf Area----------------
-      sla=((0.0300*1000.)*((365./(((tleaf(pft))/365.)/12.))**(-0.46)))    
+      sla=((0.0300 * 1e3)*((365./(((tleaf(pft))/365.)/12.))**(-0.46)))
+         
       laia64 = (cl1 * 365.0 * sla)
+      if(isnan(laia64)) laia64 = 0.0
+c      if (sla .gt. 0.0) print*, sla, laia64, cl1   
 !     LAI
 !     ------
       sunlai = (1.0-(exp(-p26*laia64)))/p26
 !     --------
       shadelai = laia64 - sunlai
 
+c      laia = real(laia64,4)
 !     Scaling-up to canopy level (dimensionless)
 !     ------------------------------------------
       f4 = (1.0-(exp(-p26*laia64)))/p26 !Sun 90 degrees in the whole canopy, to be used for respiration
       
 !     Sun/Shade approach to canopy scaling !Based in de Pury & Farquhar (1997)
 !     ------------------------------------------------------------------------
-      f4sun = ((1.0-(exp(-p26*sunlai)))/p26) !sun 90 degrees
-      f4shade = ((1.0-(exp(-p27*shadelai)))/p27) !sun ~20 degrees
+      f4sun = real(((1.0-(exp(-p26*sunlai)))/p26),8) !sun 90 degrees
+      f4shade = real(((1.0-(exp(-p27*shadelai)))/p27),8) !sun ~20 degrees
 
       laia  = real((f4sun + f4shade), 4) ! pra mim faz sentido que a laia final seja
                                          ! a soma da lai em nivel de dossel (sun + shade) - jp
@@ -316,9 +324,7 @@ c     Autothrophic respiration
 !     eu esqueço as vezes =P. Mas eu desconfio que essa eh a origem do bug que
 !     nao deixa a bia editar o codigo no notepad++ 
       
-      ncl = 0.021               !(gN/gC) 
-      ncf = 0.004               !(gN/gC)
-      ncs = 0.003               !(gN/gC)
+
  
       rml64 = (ncl * cl1) * 27. * exp(0.03*temp)
       rml =  real(rml64,4)
@@ -334,21 +340,21 @@ c     Autothrophic respiration
 
 c     Growth respiration (KgC/m2/yr)(based in Ryan 1991; Sitch et al.
 c     2003; Levis et al. 2004)         
-       
+      
       csai =  (beta_awood * 0.05)
 
-      rgl64 = 0.25 * beta_leaf * 365.
+      rgl64 = amax1((0.25 * beta_leaf * 365.),0.0)
       rgl = real(rgl64,4) 
 
-      rgf64 =  0.25* beta_froot * 365.
+      rgf64 =  amax1((0.25* beta_froot * 365.),0.0)
       rgf = real(rgf64,4) 
 
-      rgs64 = (0.25 * csai * 365.)
+      rgs64 = amax1((0.25 * csai * 365.), 0.0)
       rgs = real(rgs64,4) 
      
       rg64 = (rgl64 + rgf64 + rgs64)
       rg = real(rg64,4) 
-     
+      
       if (rg.lt.0) then
          rg = 0.0
       endif
@@ -503,13 +509,13 @@ c     -----------------------------------------------------------------
       p35 = 0.05
       p36 = 0.25
 !     
-!     Litter decayment function                                             !Controlled by annual evapotranspiration
+!     Litter decayment function  !Controlled by annual evapotranspiration
 !     -------------------------
 !     
       f6 = 1.16*10.**(-1.4553+0.0014175*(evap*365.0))
 C      call critical_value(f6)
 !     
-!     Soil carbon storage function                                          !Controlled by temperature
+!     Soil carbon storage function !Controlled by temperature
 !     ----------------------------
 !     
       f7 = p32**(p10*(tsoil-p11))
@@ -613,8 +619,10 @@ c23456
       ENDDO
 
 !     GRID CELL OCCUPATION COEFFICIENTS
-      IF(TOTAL_BIOMASS .GT. 0.0) THEN
-         DO P = 1,NPFT   
+      IF(TOTAL_BIOMASS .GT. 0.1) THEN
+         DO P = 1,NPFT
+            if(isnan(total_biomass_pft(p))) 
+     &        total_biomass_pft(p) = 0.0
             OCP_COEFFS(P) = TOTAL_BIOMASS_PFT(P) / TOTAL_BIOMASS
             IF(OCP_COEFFS(P) .LT. 0.0) OCP_COEFFS(P) = 0.0
          ENDDO
@@ -827,13 +835,22 @@ c
 c     
 c     
 c     initialization
-      if((scl1 .lt. 0.00001) .or. (scf1 .lt. 0.00001)) then
-         IF(NPP .lt. 0.00001) THEN
-            scl2 = 0.0
-            scf2 = 0.0
-            sca2 = 0.0 
-            goto 10
-         ENDIF
+      if(scl1 .le. 0.0 .or. scf1 .le. 0.0) then
+         scl2 = 0.0
+         scf2 = 0.0
+         sca2 = 0.0
+         goto 10
+      endif
+
+      IF(NPP .lt. 0.0000001) THEN         
+         scl2 =  scl1 - scl1 / (tleaf(pft)*365.0)
+         scf2 =  scf1 - scf1 / (tfroot(pft)*365.0)
+         if(tawood(pft) .gt. 0.0) then
+            sca2 =  sca1 - sca1 / (tawood(pft)*365.0)
+         else
+            sca2= 0.0
+         endif
+         goto 10
       endif   
       npp_aux = npp/365.0       !transform (KgC/m2/yr) in (KgC/m2/day)
       scl2_128 = scl1 + (aleaf(pft) * npp_aux) -(scl1 /(tleaf(pft)

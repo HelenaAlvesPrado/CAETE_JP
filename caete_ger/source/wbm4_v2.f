@@ -8,8 +8,6 @@ C23456
       
 
       implicit none
-
-
 !     =================================================================
 !     Water balance model (WBM).
 !     From monthly climatologies of precipitation and surface
@@ -80,7 +78,6 @@ c     NOVOS OUTPUTS DA BIANCA
       real betal(nx,ny,12,q)
       real betaw(nx,ny,12,q)
       real betaf(nx,ny,12,q)
-
 c     --------------------------------E N D----------------------------
 
 c     ------------------------- internal variables---------------------
@@ -126,7 +123,7 @@ c     ------------------------- internal variables---------------------
 !     ================      
 !     Soil temperature
 !     ================
-
+      call srand(2343)
 !     For all grid points
 !     -------------------
       do i=1,nx
@@ -176,6 +173,8 @@ c     Write to track program execution
      &          write(*,*) 'working: ', (real(i)/real(nx))*100.0, '%' 
           
 !     Initialize variables
+
+c999  continue
             do k=1,12
                wg0  (i,j,k) = no_data !Soil water content in preceeding year integration
                emaxm(i,j,k) = no_data !Maximum evapotranspiration
@@ -248,7 +247,7 @@ c     Write to track program execution
 
                call budget (mes,wini,gini,sini,td,ta,pr,spre,ae
      &             ,ca,ipar,ru,cleaf1_pft,cawood1_pft,cfroot1_pft
-     &             ,wfim,gfim, sfim,smes,rmes,emes,epmes,phmes,armes
+     &             ,wfim,gfim,sfim,smes,rmes,emes,epmes,phmes,armes
      &             ,nppmes,laimes,clmes,csmes,hrmes,rcmes,rmlmes,rmfmes
      &             ,rmsmes,rmmes,rglmes,rgfmes,rgsmes,rgmes,cleafmes
      &             ,cawoodmes,cfrootmes, gridocpmes,betalmes, betawmes
@@ -287,9 +286,9 @@ c     Write to track program execution
                   cawood1_pft(p) = cawoodmes(p)
                   cfroot1_pft(p) = cfrootmes(p)
 
-                  betal(i,j,k,p) = betalmes(p)
-                  betaw(i,j,k,p) = betawmes(p)
-                  betaf(i,j,k,p) = betafmes(p)
+                  betal(i,j,k,p) = betalmes(p) * 1e7 ! leaf biomass change g/ha 
+                  betaw(i,j,k,p) = betawmes(p) * 1e7 ! awood biomass change g/ha
+                  betaf(i,j,k,p) = betafmes(p) * 1e7 ! froot biomass change g/ha
                   
                   if(k .eq. 12) then
                       cleaf_pft (i,j,p) = cleafmes(p)
@@ -514,9 +513,11 @@ c      rh    = 0.685
          emax  = 0.0
          do p=1,npft
             cl1(p) = cl1_pft(p)
+            if(isnan(cl1(p))) cl1(p) = 0.0
             ca1(p) = ca1_pft(p)
+            if(isnan(ca1(p))) ca1(p) = 0.0
             cf1(p) = cf1_pft(p)
-            
+            if(isnan(cf1(p))) cf1(p) = 0.0
             beta_leaf(p) = alfa_leaf(p)
             beta_awood(p) = alfa_awood(p)
             beta_froot(p) = alfa_froot(p)
@@ -570,9 +571,9 @@ c     Carbon allocation (carbon content on each compartment)
      &          cf1(p),cl2(p), ca2(p), cf2(p)) 
 
             
-            alfa_leaf(p)  = amax1((cl2(p) - cl1(p)), 0.0) 
-            alfa_awood(p) = amax1((ca2(p) - ca1(p)), 0.0)
-            alfa_froot(p) = amax1((cf2(p) - cf1(p)), 0.0)
+            alfa_leaf(p)  = cl2(p) - cl1(p) 
+            alfa_awood(p) = ca2(p) - ca1(p)
+            alfa_froot(p) = cf2(p) - cf1(p)
             
 !     Snow budget
 !     ===========     
@@ -606,9 +607,10 @@ c     Carbon allocation (carbon content on each compartment)
                endif
      
                wapft = (w(p)/wmax)
-               call runoff (wapft,roff(p))       !Soil moisture runoff (roff, mm/day)
 
+               call runoff (wapft,roff(p))       !Soil moisture runoff (roff, mm/day)
                call penman (p0,temp,rh,ae,rc2(p),evap(p)) !Actual evapotranspiration (evap, mm/day)
+
                dw(p) = prain + smelt(p) - evap(p) - roff(p)
                w(p) = w(p) + dw(p)
                if (w(p).gt.wmax) then
