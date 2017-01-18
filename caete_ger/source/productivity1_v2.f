@@ -59,9 +59,10 @@ c234567
       double precision delta,delta2 !Auxiliars
       double precision sunlai,shadelai !Sunlai/Shadelai
       double precision vpd64,d, vpd_real !Vapor pressure deficit (kPa)
-      double precision laia64, ph64, ar64, rm64, rms64, rml64
+      double precision laia64, ar64, rm64, rms64, rml64
       double precision rmf64, rg64, rgf64, rgs64, rgl64
-      
+      real*16 ph64,npp64
+      DOUBLE PRECISION  leaf_t_months,leaf_turnover,leaf_t_coeff
       
 !     Rubisco, light and transport limited photosynthesis rate
 !     --------------------------------------------------------
@@ -73,16 +74,17 @@ c234567
       double precision f1a      !auxiliar_f1
       double precision f2       !Michaelis-Menton CO2 constant (Pa)
       double precision f3       !Michaelis-Menton O2 constant (Pa)
-      double precision f4,f4sun,f4shade !Scaling-up LAI to canopy level (dimensionless)
+      double precision f4, f4sun, f4shade
+      real*16 f4sun128,f4shade128             !Scaling-up LAI to canopy level (dimensionless)
       
       real tleaf(7)             !leaf turnover time (yr)
       real p21(7)
       real emax                 !potential evapotranspiration (mm/dia)
       double precision sla      !specific leaf area (m2/kg)
       double precision csa      !sapwood compartment´s carbon content (5% of woody tissues) (kgC/m2)
-      double precision ncl      !leaf N:C ratio (gN/gC)
-      double precision ncf      !fine roots N:C ratio (gN/gC)
-      double precision ncs      !sapwood N:C ratio(gN/gC)
+      real ncl(7)      !leaf N:C ratio (gN/gC)
+      real ncf(7)      !fine roots N:C ratio (gN/gC)
+      real ncs(7)      !sapwood N:C ratio(gN/gC)
       double precision csai 
       double precision pt       !taxa potencial de fornecimento para transpiração (mm/dia)
       double precision csru     !Specific root water uptake (0.5 mm/gC/dia; based in jedi
@@ -126,6 +128,9 @@ c234567
 !     getting pft parameters
       call pft_par(2, p21)
       call pft_par(6, tleaf)
+      call pft_par(15,ncl)
+      call pft_par(16,ncf)
+      call pft_par(17,ncs)
 
 !     ==============
 !     Photosynthesis 
@@ -271,32 +276,66 @@ c     &    (1.0+exp(p23*(temp-p24)))
 
 !     Leaf area index (m2/m2)
 !     ---------------------------------
-      ncl = 0.038               !(gN/gC) 
-      ncf = 0.035               !(gN/gC)
-      ncs = 0.003               !(gN/gC)
+      ! vou transformar em vars de pfts
+c      ncl = 0.028               !(gN/gC) 
+c      ncf = 0.005               !(gN/gC)
+c      ncs = 0.004               !(gN/gC)
 
 !     Specifc Leaf Area----------------
-      sla=((0.0300 * 1e3)*((365./(((tleaf(pft))/365.)/12.))**(-0.46)))
-         
-      laia64 = (cl1 * 365.0 * sla)
-      if(isnan(laia64)) laia64 = 0.0
+
+      leaf_t_months = (tleaf(pft)*365.)/(365./30.0) ! turnover time in months
+      leaf_t_coeff = leaf_t_months/150. ! 150 months
+      if (leaf_t_coeff .gt. 1.) leaf_t_coeff = 1. 
+      leaf_turnover =  (365.0/12.0) * (10. **(2.0*leaf_t_coeff))
+      sla = 3e-2 * ((365.0/leaf_turnover)**(-0.46)) * 1.0 * ! sla correlated with foliar N  
+     &    exp(ncl(pft)) 
+      
+c      sla=((0.0300*1e3)*((365./(((tleaf(pft))/365.)/12.))**(-0.46)))
+      
+      laia64 = (cl1 * 365. * sla) 
+      
+      if(laia64 .le. 1.0e-7) then
+         laia64 = 0.0
+         f4 = 0.0
+         sunlai = 0.0
+         shadelai = 0.0
+         f4sun = 0.0
+         f4shade = 0.0
+         goto 234
+      else
+         f4 = (1.0-(exp(-p26*laia64)))/p26 !Sun 90 degrees in the whole canopy, to be used for respiration
+      endif
 c      if (sla .gt. 0.0) print*, sla, laia64, cl1   
 !     LAI
 !     ------
       sunlai = (1.0-(exp(-p26*laia64)))/p26
+      if(sunlai .le. 0.0) sunlai = 0.0
 !     --------
       shadelai = laia64 - sunlai
-
+      if(shadelai .le. 0.0) shadelai = 0.0
+      if(shadelai .gt. 470.)shadelai = 470.
+      if(sunlai .le. 0.0 .or. shadelai.le. 0.0) then
+         f4sun = 0.0
+         f4shade = 0.0
+         goto 234
+      endif
 c      laia = real(laia64,4)
 !     Scaling-up to canopy level (dimensionless)
 !     ------------------------------------------
-      f4 = (1.0-(exp(-p26*laia64)))/p26 !Sun 90 degrees in the whole canopy, to be used for respiration
+
       
 !     Sun/Shade approach to canopy scaling !Based in de Pury & Farquhar (1997)
-!     ------------------------------------------------------------------------
-      f4sun = real(((1.0-(exp(-p26*sunlai)))/p26),8) !sun 90 degrees
-      f4shade = real(((1.0-(exp(-p27*shadelai)))/p27),8) !sun ~20 degrees
-
+!     ------------------------------------------------------------------
+      f4sun128 = exp(-p26*sunlai)
+      f4sun128 = 1.0 - f4sun128
+      f4sun128 = f4sun128 / p26 !sun 90 degrees
+      
+      f4shade128 = exp(-p27*shadelai)
+      f4shade128 = 1.0 - f4shade128 !sun ~20 degrees
+      f4shade128 = f4shade128/p27 
+      f4sun =  real(f4sun128,8)
+      f4shade =  real(f4shade128,8)
+ 234  continue
       laia  = real((f4sun + f4shade), 4) ! pra mim faz sentido que a laia final seja
                                          ! a soma da lai em nivel de dossel (sun + shade) - jp
 !     Canopy gross photosynthesis (kgC/m2/yr)
@@ -304,7 +343,14 @@ c      laia = real(laia64,4)
 !     (0.012 converts molCO2 to kgC)
 !     (31557600 converts seconds to year [with 365.25 days])
       ph64 = 0.012*31557600.0*f1*f4sun*f4shade
-      ph = real(ph64, 4) * ocp_pft       ! kg m-2 year-1
+      if(ph64 .le. 0.0) then
+         ph64 = 0.0
+         goto 235
+      endif
+      ph64 = ph64 * ocp_pft
+      if(ph64 .lt. 1e-9) ph64 = 0.0
+ 235  continue
+      ph = real(ph64, 4)        ! kg m-2 year-1
 
 c     ============================================================
 c     Autothrophic respiration
@@ -326,13 +372,13 @@ c     Autothrophic respiration
       
 
  
-      rml64 = (ncl * cl1) * 27. * exp(0.03*temp)
+      rml64 = (ncl(pft) * cl1) * 27. * exp(0.03*temp)
       rml =  real(rml64,4)
 
-      rmf64 = (ncf * cf1) * 27. * exp(0.03*temp)
+      rmf64 = (ncf(pft) * cf1) * 27. * exp(0.03*temp)
       rmf =  real(rmf64,4)
 
-      rms64 = (ncs * csa) * 27. * exp(0.03*temp)
+      rms64 = (ncs(pft) * csa) * 27. * exp(0.03*temp)
       rms = real(rms64,4) 
        
       rm64 = (rml64 + rmf64 + rms64)
@@ -364,7 +410,8 @@ c     2003; Levis et al. 2004)
 !     -------------------------------------------     
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
          ar64 = rm64 + rg64
-         ar = real(ar64,4) * ocp_pft
+         ar64 = ar64 * ocp_pft
+         ar = real(ar64,4)
          if(ar .lt. 0.00001) ar = 0.0
       else
          ar = 0.0               !Temperature above/below respiration windown
@@ -377,7 +424,8 @@ c     -----------------------------------------------------------------
 !     ============
 !     Net primary productivity(kgC/m2/yr)
 !     ====================================
-      nppa = ph - ar
+      npp64 = ph64 - ar64 
+      nppa = real(npp64,4)
       if(nppa .lt. 0.0) nppa = 0.0 
 !     No futuro proximo poderiamos usar uma npp negativa para indicar uma perda de carbono
 !     dos tecidos vegetais... e uma possivel extincao do pft/pls da celula de grid.
@@ -816,7 +864,11 @@ c
       real sca2                  !final carbon content on aboveground woody biomass compartment (KgC/m2)
       real scf1                  !previous day carbon content on fine roots compartment (KgC/m2)
       real scf2                  !final carbon content on fine roots compartment (KgC/m2)      
-      real*16 scf2_128, sca2_128, scl2_128
+
+      real*16 :: scf2_128 = 0.0
+      real*16 :: sca2_128 = 0.0
+      real*16 :: scl2_128 = 0.0
+      
       real aleaf(npfts)             !npp percentage allocated compartment
       real aawood(npfts)
       real afroot(npfts)
@@ -858,16 +910,16 @@ c     initialization
       scf2_128 = scf1 +(afroot(pft) * npp_aux)-(scf1 /(tfroot(pft)
      &    *365.0))
       if(aawood(pft) .gt. 0.0) then
-         sca2_128 = sca1 +(aawood(pft)*npp_aux)-(sca1/(tawood(pft)
-     &       *365.0))
+         sca2_128 = aawood(pft) * npp_aux
+         sca2_128 = sca2_128 - (sca1/(tawood(pft)))
+         sca2_128 = sca2_128 * 365.0
+         sca2 = real(sca2_128,4)
       else
          sca2 = 0.0
       endif
-
+      
       scf2 = real(scf2_128,4)
-      sca2 = real(sca2_128,4)
       scl2 = real(scl2_128,4)
-
 
       if(scl2 .lt. 0.0) scl2 = 0.0
       if(scf2 .lt. 0.0) scf2 = 0.0
@@ -876,4 +928,4 @@ c     initialization
  10   continue
       return
       end
-c
+

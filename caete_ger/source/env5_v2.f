@@ -100,8 +100,8 @@ c     variaveis do spinup
       real, dimension(q) :: aux1, aux2, aux3
       real npp_pot(nx,ny,12)
       real, dimension(nx,ny) :: aux_npp, tempmin, tempmax, prannual,
-     &    snppmin, urmax, urmin
-      real tma, tmi, rma, rmi, smin, prann
+     &    snppmin,urmin
+      real tma, tmi, rmi, smin, prann
       real npp_sca  
 
 c     -----FIM DA DEFINICAO DE VARIAVEIS PARA RODAR O MODELO--
@@ -192,9 +192,6 @@ c     &    form='unformatted',access='direct',recl=4*nx*ny)
       open(32,file='../inputs/tasmin_sa.bin',status='old',
      &    form='unformatted',access='direct',recl=4*nx*ny)
       
-      open(33,file='../inputs/rhmax_sa.bin',status='old',
-     &     form='unformatted',access='direct',recl=4*nx*ny)
-
       open(34,file='../inputs/rhmin_sa.bin',status='old',
      &     form='unformatted',access='direct',recl=4*nx*ny)
 
@@ -208,7 +205,6 @@ c     &    form='unformatted',access='direct',recl=4*nx*ny)
       read (30,rec=1) prannual
       read (31,rec=1) tempmax
       read (32,rec=1) tempmin
-      read (33,rec=1) urmax
       read (34,rec=1) urmin
       read (35,rec=1) snppmin
 
@@ -238,7 +234,6 @@ c       close(29)
        close(30)
        close(31)
        close(32)
-       close(33)
        close(34)
        close(35)
 
@@ -264,7 +259,6 @@ c      Calculating annual npp
                npp_sca = aux_npp(i,j)
                tma = tempmax(i,j)
                tmi = tempmin(i,j)
-               rma = urmax(i,j)
                rmi = urmin(i,j)
                smin = snppmin(i,j)
                prann = prannual(i,j)
@@ -275,7 +269,7 @@ c      Calculating annual npp
                   aux3(p) = 0.0
                enddo
                
-               call spinup(npp_sca, aux1, aux2, aux3,tma,tmi,rma,rmi
+               call spinup(npp_sca, aux1, aux2, aux3,tma,tmi,rmi
      &             ,smin,prann)
 
                do p=1,q   
@@ -1143,7 +1137,7 @@ C     preparando o terreno pra salvar as variaveis
       integer, parameter :: vars = 7 
       integer :: par            ! parameter number 
       real, dimension(vars) :: dt,dt1,dt2,dt3,dt4,dt5,dt6
-     &    ,dt7,dt8,dt9,dt10,dt11,dt12,dt13,dt14
+     &    ,dt7,dt8,dt9,dt10,dt12,dt13,dt14,dt15,dt16,dt17
       
       
 !     dt1 = g1
@@ -1156,10 +1150,13 @@ C     preparando o terreno pra salvar as variaveis
 !     dt8 = tfroot
 !     dt9 = tmax
 !     dt10 = tmin
-!     dt11 = rhmax
 !     dt12 = rhmin
 !     dt13 = snppmin
 !     dt14 = precmin
+!     dt15 = ncl
+!     dt16 = ncf
+!     dt17 = ncs
+      
       
 !     PFTS
       
@@ -1172,23 +1169,27 @@ C     preparando o terreno pra salvar as variaveis
 !     5 = tropical grass
 !     6 = sub-tropical grass
 !     7 = sub-tropical tree
-
+!     ------------------------------------------------------------------
 !     PFT         1       2       3       4       5       6       7      
-      data dt1/3.37,   4.645,  7.18,   2.98,   4.35,   4.64,   4.22/
-      data dt2/3.2E-5, 3.1E-5, 3.8E-5, 5.5E-5, 7.4E-5, 4.0E-5, 4.5E-5/      
-      data dt3/0.70,   0.65,   0.80,   0.62,   0.75,   0.82,   0.80/
-      data dt4/0.10,   0.15,   0.05,   0.08,   0.0,    0.0,    0.10/
-      data dt5/0.20,   0.20,   0.15,   0.30,   0.25,   0.18,   0.10/
-      data dt6/8.8,    6.7,    3.4,    3.2,    3.2,    4.2,    8.9/
-      data dt7/41.8,   38.0,   18.6,   12.0,   0.0,    0.0,    22.5/
-      data dt8/5.8,    4.0,    2.0,    2.5,    2.1,    2.2,    3.5/
+      data dt1/3.37,   4.645,  7.18,   2.98,   4.35,   4.64,   4.22/    !g1
+      data dt2/3.2E-5, 3.1E-5, 3.8E-5, 5.5E-5, 7.4E-5, 4.0E-5, 4.5E-5/  !p21
+      data dt3/0.70,   0.65,   0.80,   0.62,   0.75,   0.82,   0.80/    !aleaf
+      data dt4/0.10,   0.15,   0.05,   0.08,   0.0,    0.0,    0.10/    !aawood
+      data dt5/0.20,   0.20,   0.15,   0.30,   0.25,   0.18,   0.10/    !afroot
+      data dt6/4.8,    3.7,    1.4,    2.2,    1.2,    1.2,    2.9/     !tleaf
+      data dt7/80.,    58.0,   38.6,   12.0,   0.0,    0.0,    22.5/    !tawood
+      data dt8/5.8,    4.0,    2.0,    2.5,    2.1,    2.2,    3.5/     !tfroot
 !     novas variaveis definindo padroes fisicos limitantes para os pfts
-      data dt9/28.0,   28.4,   28.7,   27.0,   30.0,   22.0,   24.0/ ! TMAX
-      data dt10/22.0,  20.0,   18.0,   2.0,    16.0,   2.0,    4.0/  ! TMIN
-      data dt11/0.96,  0.85,   0.76,   0.95,   0.76,   0.70,   0.70/ ! RHMAX
-      data dt12/0.70,  0.65,   0.45,   0.30,   0.45,   0.15,   0.22/ ! RHMIN
-      data dt13/0.5,   0.6,    0.8,    0.85,   0.95,   0.77,   0.80/ ! snppmax
-      data dt14/2.1E3, 1.9E3,  900.,   1200.,  900.,   1800.,  1500./ ! precmin
+      data dt9/30.9,   30.4,   30.7,   30.5,   30.0,   24.0,   24.0/    !TMAX
+      data dt10/14.0,  12.0,   6.0,    1.0,    0.0,    -2.0,   -1.0/    !TMIN
+      data dt12/0.70,  0.65,   0.25,   0.27,   0.22,   0.19,   0.19/    !RHMIN
+      data dt13/0.67,  0.74,   0.97,   0.95,   1.0,    1.0,    1.0/     !snppmax
+      data dt14/2.4E3, 1.0E3,  300.,   250.,   150.,   170.,   200./    !precmin
+!     leaves/fine roots/ sapwood N to C Ratio
+      data dt15/3.3e-2,2.8e-2, 2.3e-2, 2.5e-2, 2.2e-2, 2.2e-2, 2.5e-2/  !ncl 
+      data dt16/5e-3,  5e-3,   4e-3,   5.7e-3, 5.7e-3, 4.9e-3, 6.9e-3/  !ncf
+      data dt17/3e-3,  4e-3,   3e-3,   3e-3,   4e-3,   4e-3,   5e-3/    !ncs
+
       
       if(par .eq. 1 ) then      ! g1
          dt(:) = dt1(:)
@@ -1210,14 +1211,18 @@ C     preparando o terreno pra salvar as variaveis
          dt(:) = dt9(:)
       else if(par .eq. 10) then  ! tmin
          dt(:) = dt10(:)
-      else if(par .eq. 11) then  ! rhmax
-         dt(:) = dt11(:)
       else if(par .eq. 12) then  ! rhmin
          dt(:) = dt12(:)
       else if(par .eq. 13) then  ! SNPPMAX
          dt(:) = dt13(:)
       else if(par .eq. 14) then  ! PRECMIN
          dt(:) = dt14(:)
+      else if(par .eq. 15) then  ! ncl
+         dt(:) = dt15(:)
+      else if(par .eq. 16) then  ! ncf
+         dt(:) = dt16(:)         
+      else if(par .eq. 17) then  ! ncs
+         dt(:) = dt17(:)
       else
          print*, "your search failed"
       endif
@@ -1226,7 +1231,7 @@ C     preparando o terreno pra salvar as variaveis
       end subroutine pft_par
       
 c     ==================================================
-      subroutine spinup(nppot,cleafini,cfrootini,cawoodini,th,tl,uh,ul,s
+      subroutine spinup(nppot,cleafini,cfrootini,cawoodini,th,tl,ul,s
      &    ,pm)
       
       IMPLICIT NONE
@@ -1239,7 +1244,7 @@ c     inputs
       real pm              !TOTAL ANNUAL PRECIPITATION
       real th,tl
       real s                 !NPP SEASONALITY INDEX
-      real uh,ul                 ! relative humidity
+      real ul                 ! relative humidity
 
 c     outputs
       real :: cleafini(npfts)
@@ -1261,7 +1266,7 @@ c     outputs
       real tleaf(npfts)             !turnover time of the leaf compartment (yr)
       real tawood (npfts)           !turnover time of the aboveground woody biomass compartment (yr)
       real tfroot(npfts)        !turnover time of the fine roots compartment
-      real,dimension(npfts) :: tmax,tmin,rhmax,rhmin,snpp,precm
+      real,dimension(npfts) :: tmax,tmin,rhmin,snpp,precm
 
       
       call pft_par(3,  aleaf)
@@ -1272,7 +1277,6 @@ c     outputs
       call pft_par(8,  tfroot)
       call pft_par(9,  tmax)
       call pft_par(10, tmin)
-      call pft_par(11, rhmax)
       call pft_par(12, rhmin)
       call pft_par(13, snpp)
       call pft_par(14, precm)
@@ -1291,9 +1295,8 @@ c     outputs
 
       do i6=1,npfts
          if(( tl .gt. tmin(i6))   .and.
-c     &       (th .le. tmax(i6)+1)    .and.
+     &       (th .le. tmax(i6)+5.)    .and.
      &       (ul .gt. rhmin(i6))   .and.
-c     &       (uh .le. rhmax(i6)+5)   .and.
      &       (s  .le. snpp(i6))  .and.
      &       (pm .ge. precm(i6))
      &       ) then

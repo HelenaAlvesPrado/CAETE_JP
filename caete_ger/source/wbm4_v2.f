@@ -123,7 +123,6 @@ c     ------------------------- internal variables---------------------
 !     ================      
 !     Soil temperature
 !     ================
-      call srand(2343)
 !     For all grid points
 !     -------------------
       do i=1,nx
@@ -139,7 +138,7 @@ c     ------------------------- internal variables---------------------
 !     -------------------------!     
             if (nint(lsmk(i,j)).ne.0) then
                t0 = 0.          !Initialization
-               do n = 1,1200    !1200 months run to attain equilibrium
+               do n = 1,1200    !Run to attain equilibrium
                   k = mod(n,12)
                   if (k.eq.0) k = 12
                   t1 = t0*exp(-1.0/tau)+(1.0-exp(-1.0/tau))*temp(i,j,k) 
