@@ -684,7 +684,7 @@ c     Carbon allocation (carbon content on each compartment)
          csavg(p) = (csavg(p)/365.0) * 12.0 !kgC/m2
          hravg(p) = (hravg(p)/365.0) * 12.0 !kgC/m2/yr
          rmlavg(p) = (rmlavg(p)/365.0) * 12.0 
-         rmfavg(p) = (rmfavg(p)/365.0) * 12.0
+         rmfavg(p) = real((rmfavg(p)/365.0) * 12.0, 4)
          rmsavg(p) = (rmsavg(p)/365.0) * 12.0
          rmavg(p) = (rmavg(p)/365.0) * 12.0 
          rglavg(p) = (rglavg(p)/365.0) * 12.0 

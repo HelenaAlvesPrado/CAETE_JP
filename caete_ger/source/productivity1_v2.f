@@ -287,8 +287,8 @@ c      ncs = 0.004               !(gN/gC)
       leaf_t_coeff = leaf_t_months/150. ! 150 months
       if (leaf_t_coeff .gt. 1.) leaf_t_coeff = 1. 
       leaf_turnover =  (365.0/12.0) * (10. **(2.0*leaf_t_coeff))
-      sla = 3e-2 * ((365.0/leaf_turnover)**(-0.46)) * 1.0 * ! sla correlated with foliar N  
-     &    exp(ncl(pft)) 
+      sla = 3e-2 * ((365.0/leaf_turnover)**(-0.46)) !* 1.0 * ! sla correlated with foliar N  
+c     &    exp(ncl(pft)) 
       
 c      sla=((0.0300*1e3)*((365./(((tleaf(pft))/365.)/12.))**(-0.46)))
       
@@ -376,6 +376,7 @@ c     Autothrophic respiration
       rml =  real(rml64,4)
 
       rmf64 = (ncf(pft) * cf1) * 27. * exp(0.03*temp)
+      if(rmf64 .lt. 1e-12) rmf64 = 0.0
       rmf =  real(rmf64,4)
 
       rms64 = (ncs(pft) * csa) * 27. * exp(0.03*temp)

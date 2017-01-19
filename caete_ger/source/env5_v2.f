@@ -148,6 +148,8 @@ C     NEW OUTPUTS (AUTOTRF RESPIRATION, ALLOCATION)
       real, dimension(nx,ny,12) :: rgf!, rgf1, rgf2, rgf3
       real, dimension(nx,ny,12) :: rgs!, rgs1, rgs2, rgs3
       real, dimension(nx,ny,12) :: rg!,  rg1,  rg2,  rg3 
+
+      real :: start, finish
       
 C     -------END DECLARATION----------------------------------------
       
@@ -237,6 +239,8 @@ c       close(29)
        close(34)
        close(35)
 
+       call cpu_time(start)
+      
 c      Calculating annual npp
        do i =1,nx
           do j=1,ny
@@ -287,6 +291,9 @@ c      Calculating annual npp
          enddo
 !     if(mod(nx,10) .eq. 0)print*, (real(i)/real(nx))*100.0, '%'
       enddo
+      call cpu_time(finish)
+      print '("execution time = ",f6.3," seconds.")',finish-start
+
 
       call nan2ndt(cleafin, q) !!! --------- incorporado essa subroutina
       open(10,file='../spinup/clini.bin',
@@ -1127,19 +1134,18 @@ C     preparando o terreno pra salvar as variaveis
       
       stop
       end program env
-
 !     ==================================================
-
+!     CONTAINS
       
-      subroutine pft_par(par, dt) !!!!!!!!!  mudamos os valores de dt
+      subroutine pft_par(par, dt)
       implicit none
 !     input
       integer, parameter :: vars = 7 
       integer :: par            ! parameter number 
       real, dimension(vars) :: dt,dt1,dt2,dt3,dt4,dt5,dt6
      &    ,dt7,dt8,dt9,dt10,dt12,dt13,dt14,dt15,dt16,dt17
-      
-      
+
+!     PFT PARAMETERS      
 !     dt1 = g1
 !     dt2 = p21 
 !     dt3 = aleaf 
@@ -1156,12 +1162,8 @@ C     preparando o terreno pra salvar as variaveis
 !     dt15 = ncl
 !     dt16 = ncf
 !     dt17 = ncs
-      
-      
+
 !     PFTS
-      
-!     PFTS
-      
 !     1 = tropical evergreen tree
 !     2 = tropical deciduous-forest-tree
 !     3 = tropical woody-savana-tree
@@ -1171,24 +1173,24 @@ C     preparando o terreno pra salvar as variaveis
 !     7 = sub-tropical tree
 !     ------------------------------------------------------------------
 !     PFT         1       2       3       4       5       6       7      
-      data dt1/3.37,   4.645,  7.18,   2.98,   4.35,   4.64,   4.22/    !g1
+      data dt1/3.37,   4.645,  7.18,   2.98,   2.35,   3.64,   4.22/    !g1
       data dt2/3.2E-5, 3.1E-5, 3.8E-5, 5.5E-5, 7.4E-5, 4.0E-5, 4.5E-5/  !p21
-      data dt3/0.70,   0.65,   0.80,   0.62,   0.75,   0.82,   0.80/    !aleaf
+      data dt3/0.70,   0.65,   0.80,   0.62,   0.55,   0.82,   0.80/    !aleaf
       data dt4/0.10,   0.15,   0.05,   0.08,   0.0,    0.0,    0.10/    !aawood
-      data dt5/0.20,   0.20,   0.15,   0.30,   0.25,   0.18,   0.10/    !afroot
-      data dt6/4.8,    3.7,    1.4,    2.2,    1.2,    1.2,    2.9/     !tleaf
-      data dt7/80.,    58.0,   38.6,   12.0,   0.0,    0.0,    22.5/    !tawood
-      data dt8/5.8,    4.0,    2.0,    2.5,    2.1,    2.2,    3.5/     !tfroot
+      data dt5/0.20,   0.20,   0.15,   0.30,   0.45,   0.18,   0.10/    !afroot
+      data dt6/4.8,    3.7,    1.4,     2.2,    0.4,    0.8,    1.9/     !tleaf
+      data dt7/80.,    58.0,   38.6,    8.0,    0.0,    0.0,    42.5/    !tawood
+      data dt8/2.8,    2.0,    2.0,     1.5,    1.4,    1.2,    3.0/     !tfroot
 !     novas variaveis definindo padroes fisicos limitantes para os pfts
-      data dt9/30.9,   30.4,   30.7,   30.5,   30.0,   24.0,   24.0/    !TMAX
-      data dt10/14.0,  12.0,   6.0,    1.0,    0.0,    -2.0,   -1.0/    !TMIN
-      data dt12/0.70,  0.65,   0.25,   0.27,   0.22,   0.19,   0.19/    !RHMIN
-      data dt13/0.67,  0.74,   0.97,   0.95,   1.0,    1.0,    1.0/     !snppmax
-      data dt14/2.4E3, 1.0E3,  300.,   250.,   150.,   170.,   200./    !precmin
+      data dt9/30.9,   30.4,   28.5,   30.5,   29.0,   18.0,   25.0/    !TMAX
+      data dt10/14.0,  12.0,   16.0,   -2.0,   16.0,   -2.0,   0.0/     !TMIN
+      data dt12/0.70,  0.65,   0.25,   0.19,   0.22,   0.19,   0.19/    !RHMIN
+      data dt13/0.67,  0.74,   0.97,   1.0,    1.0,    1.0,    1.0/     !snppmax
+      data dt14/2.4E3, 1.0E3,  300.,   150.,   150.,   150.,   250./    !precmin
 !     leaves/fine roots/ sapwood N to C Ratio
       data dt15/3.3e-2,2.8e-2, 2.3e-2, 2.5e-2, 2.2e-2, 2.2e-2, 2.5e-2/  !ncl 
-      data dt16/5e-3,  5e-3,   4e-3,   5.7e-3, 5.7e-3, 4.9e-3, 6.9e-3/  !ncf
-      data dt17/3e-3,  4e-3,   3e-3,   3e-3,   4e-3,   4e-3,   5e-3/    !ncs
+      data dt16/5e-3,  5e-3,   4e-3,   5.7e-3, 1.7e-2, 2.9e-3, 5e-3/    !ncf
+      data dt17/3e-3,  4e-3,   3e-3,   3e-3,   0.0,    0.0,    3e-3/    !ncs
 
       
       if(par .eq. 1 ) then      ! g1
@@ -1236,7 +1238,7 @@ c     ==================================================
       
       IMPLICIT NONE
 
-      integer, parameter :: nt=10000
+      integer, parameter :: nt=100000
       integer, parameter :: npfts=7
       
 c     inputs
@@ -1268,7 +1270,7 @@ c     outputs
       real tfroot(npfts)        !turnover time of the fine roots compartment
       real,dimension(npfts) :: tmax,tmin,rhmin,snpp,precm
 
-      
+
       call pft_par(3,  aleaf)
       call pft_par(4,  aawood)
       call pft_par(5,  afroot)
@@ -1280,7 +1282,7 @@ c     outputs
       call pft_par(12, rhmin)
       call pft_par(13, snpp)
       call pft_par(14, precm)
-
+      
  
       sensitivity = 1.10
       
@@ -1294,9 +1296,10 @@ c     outputs
       endif
 
       do i6=1,npfts
-         if(( tl .gt. tmin(i6))   .and.
-     &       (th .le. tmax(i6)+5.)    .and.
-     &       (ul .gt. rhmin(i6))   .and.
+         if(( tl .gt. tmin(i6) .and. (th .le. tmax(i6)))
+     &       .and.
+     >    
+     &       (ul .gt. rhmin(i6)) .and.
      &       (s  .le. snpp(i6))  .and.
      &       (pm .ge. precm(i6))
      &       ) then
