@@ -105,8 +105,7 @@ c     variaveis do spinup
       real npp_sca  
 
 c     -----FIM DA DEFINICAO DE VARIAVEIS PARA RODAR O MODELO--
-C
-c     variaveis anuais -
+c     variaveis anuais
       real, dimension(nx,ny) :: ave_ph = 0.0
       real, dimension(nx,ny) :: ave_ar = 0.0
       real, dimension(nx,ny) :: ave_npp = 0.0
@@ -354,10 +353,7 @@ c               if (prec(i,j,k).lt.0.0) prec (i,j,k) = 0.0
      &     clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,
      &     evapm_pft,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft
      &    ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft, cfroot_pft
-     &    ,gridcell_ocp,betal,betaw,betaf)   
-
-
-
+     &    ,gridcell_ocp,betal,betaw,betaf)
       
 !     SAVE RESULTS TO FILES
       call nan2ndt(gridcell_ocp, q)
@@ -1173,20 +1169,20 @@ C     preparando o terreno pra salvar as variaveis
 !     7 = sub-tropical tree
 !     ------------------------------------------------------------------
 !     PFT         1       2       3       4       5       6       7      
-      data dt1/3.37,   4.645,  7.18,   2.98,   2.35,   3.64,   4.22/    !g1
-      data dt2/3.2E-5, 3.1E-5, 3.8E-5, 5.5E-5, 7.4E-5, 4.0E-5, 4.5E-5/  !p21
+      data dt1/3.37,   4.645,  7.18,   2.98,   2.35,   4.64,   4.22/    !g1
+      data dt2/3.2E-5, 3.1E-5, 3.8E-5, 5.5E-5, 5.4E-5, 4.0E-5, 4.5E-5/  !p21
       data dt3/0.70,   0.65,   0.80,   0.62,   0.55,   0.82,   0.80/    !aleaf
       data dt4/0.10,   0.15,   0.05,   0.08,   0.0,    0.0,    0.10/    !aawood
       data dt5/0.20,   0.20,   0.15,   0.30,   0.45,   0.18,   0.10/    !afroot
-      data dt6/4.8,    3.7,    1.4,     2.2,    0.4,    0.8,    1.9/     !tleaf
+      data dt6/4.8,    3.7,    1.4,     2.2,    0.8,    0.8,    1.9/     !tleaf
       data dt7/80.,    58.0,   38.6,    8.0,    0.0,    0.0,    42.5/    !tawood
       data dt8/2.8,    2.0,    2.0,     1.5,    1.4,    1.2,    3.0/     !tfroot
 !     novas variaveis definindo padroes fisicos limitantes para os pfts
-      data dt9/30.9,   30.4,   28.5,   30.5,   29.0,   18.0,   25.0/    !TMAX
+      data dt9/30.9,   30.4,   32.5,   30.5,   30.0,   18.0,   22.0/    !TMAX
       data dt10/14.0,  12.0,   16.0,   -2.0,   16.0,   -2.0,   0.0/     !TMIN
       data dt12/0.70,  0.65,   0.25,   0.19,   0.22,   0.19,   0.19/    !RHMIN
-      data dt13/0.67,  0.74,   0.97,   1.0,    1.0,    1.0,    1.0/     !snppmax
-      data dt14/2.4E3, 1.0E3,  300.,   150.,   150.,   150.,   250./    !precmin
+      data dt13/0.67,  0.74,   0.995,   1.0,    1.0,    1.0,    1.0/     !snppmax
+      data dt14/2.4E3, 1.0E3,  200.,   150.,   150.,   150.,   250./    !precmin
 !     leaves/fine roots/ sapwood N to C Ratio
       data dt15/3.3e-2,2.8e-2, 2.3e-2, 2.5e-2, 2.2e-2, 2.2e-2, 2.5e-2/  !ncl 
       data dt16/5e-3,  5e-3,   4e-3,   5.7e-3, 1.7e-2, 2.9e-3, 5e-3/    !ncf
@@ -1238,7 +1234,7 @@ c     ==================================================
       
       IMPLICIT NONE
 
-      integer, parameter :: nt=100000
+      integer, parameter :: nt=30000
       integer, parameter :: npfts=7
       
 c     inputs
@@ -1284,7 +1280,7 @@ c     outputs
       call pft_par(14, precm)
       
  
-      sensitivity = 1.10
+      sensitivity = 1.0000001
       
       if(nppot .le. 0.0) then
          do i6 = 1,npfts
@@ -1358,7 +1354,9 @@ c            print*, 'pft allowed'
                      endif   
                   endif
                endif
+c               print*, k, kk, i6
             enddo               ! nt
+           
          else ! pft don't populate this cell
             cleafini(i6) = 0.0
             cleafini(i6) = 0.0
