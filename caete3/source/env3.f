@@ -118,23 +118,22 @@ c     variaveis anuais -
       real, dimension(nx,ny) :: ave_wsoil = 0.0    
       
 C     THESE WILL RECEIVE MEANS BETWEEN q PFTs and for each pft (ex. ph to mean; ph1 to pft 1)
-      real, dimension(nx,ny,12) :: ph, ph1, ph2, ph3  
+      real, dimension(nx,ny,12) :: ph!, ph1, ph2, ph3  
 c, ph4, ph5, ph6, ph7
-      real, dimension(nx,ny,12) :: ar, ar1, ar2, ar3
-c, ar4, ar5, ar6, ar7
-      real, dimension(nx,ny,12) :: npp,npp1,npp2,npp3
+      real, dimension(nx,ny,12) :: ar!, ar1, ar2, ar3, ar4, ar5, ar6, ar7
+      real, dimension(nx,ny,12) :: npp!,npp1,npp2,npp3
 c,npp4,npp5,npp6,npp7
-      real, dimension(nx,ny,12) :: lai, lai1, lai2, lai3
+      real, dimension(nx,ny,12) :: lai!, lai1, lai2, lai3
 c lai4, lai5,lai6, lai7
-      real, dimension(nx,ny,12) :: clit, clit1, clit2, clit3
+      real, dimension(nx,ny,12) :: clit!, clit1, clit2, clit3
 c clit4,   &    clit5, clit6, clit7
-      real, dimension(nx,ny,12) :: csoil, csoil1, csoil2, csoil3
+      real, dimension(nx,ny,12) :: csoil!, csoil1, csoil2, csoil3
 c, csoil4    &    , csoil5, csoil6, csoil7
-      real, dimension(nx,ny,12) :: hr, hr1, hr2, hr3
+      real, dimension(nx,ny,12) :: hr!, hr1, hr2, hr3
 c, hr4, hr5, hr6, hr7
-      real, dimension(nx,ny,12) :: rcm, rcm1, rcm2, rcm3
+      real, dimension(nx,ny,12) :: rcm!, rcm1, rcm2, rcm3
 c, rcm4, rcm5,    &    rcm6, rcm7
-      real, dimension(nx,ny,12) :: evaptr, et1, et2, et3
+      real, dimension(nx,ny,12) :: evaptr!, et1, et2, et3
 c, et4, et5, et6,    &    et7
       real, dimension(nx,ny,12) :: wsoil
       real, dimension(nx,ny,12) :: runom!
