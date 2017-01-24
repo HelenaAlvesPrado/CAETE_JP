@@ -115,14 +115,14 @@ c     ------------------------- internal variables---------------------
       real t0,t1                !Soil temperature aux variables 
       real wsaux1,dwww,wmax     !auxiliar to equilibrium check
       real ae                   !Available energy     
-      real pr,spre,ta,td,ipar,ru
+      real pr,spre,ta,td,ipar,ru, I1,J1,K1
       
       real, parameter :: H = 1.0 !Soil layer(m) 
       real, parameter :: diffu = 4.e-7*(30.*86400.0) !Soil thermal diffusivity (m2/month)
       real, parameter :: tau = (H**2)/(2.0*diffu) !E-folding time (months)
       real, parameter :: auxs = -100.0 !Auxiliar for calculation of Snpp
-      
-!$omp parallel SHARED(nx,ny,q,no_data,CLEAF_PFT
+
+!     SHARED(nx,ny,q,no_data,CLEAF_PFT
 !    $ ,CAWOOD_PFT,CFROOT_PFT
 !    $ ,CAWOOD_INI,CFROOT_INI,WG0,EMAXM,tsoil,photo_pft,aresp_pft
 !    $ ,lai_pft,clit_pft,csoil_pft,hresp_pft,rcm_pft,runom_pft
@@ -134,9 +134,9 @@ c     ------------------------- internal variables---------------------
 !    & ,rmsmes,rmmes,rglmes,rgfmes,rgsmes,rgmes,cleafmes
 !    & ,cawoodmes,cfrootmes, gridocpmes,betalmes, betawmes
 !    & ,betafmes,epmes,phmes,armes,npp_pft,CA,evapm_pft
-!    & ,WSOIT,GSOILT,WMAX,CLEAF_INI),            
-!    $  PRIVATE(I,J,K,P,N,MES,SPRE
-!    & ,TD,TA,PR,IPAR,RU,AE,NERRO,KK,WAUX1,DWWW)
+!    & ,WSOIT,GSOILT,WMAX,CLEAF_INI
+
+      
       
 !     ================      
 !     Soil temperature
@@ -144,24 +144,24 @@ c     ------------------------- internal variables---------------------
 
 !     For all grid points
 !     -------------------
-      do i=1,nx
-         do j=1,ny
+      do i1=1,nx
+         do j1=1,ny
 
 !     Initialize soil temperature
 !     ---------------------------
-            do k=1,12
-               tsoil(i,j,k) = no_data
+            do k1=1,12
+               tsoil(i1,j1,k1) = no_data
             enddo
 
 !     Only for land grid points
 !     -------------------------!     
-            if (nint(lsmk(i,j)).ne.0) then
+            if (nint(lsmk(i1,j1)).ne.0) then
                t0 = 0.          !Initialization
                do n = 1,1200    !1200 months run to attain equilibrium
-                  k = mod(n,12)
-                  if (k.eq.0) k = 12
-                  t1 = t0*exp(-1.0/tau)+(1.0-exp(-1.0/tau))*temp(i,j,k) 
-                  tsoil(i,j,k) = (t0 + t1)/2.0
+                  k1 = mod(n,12)
+                  if (k1.eq.0) k = 12
+                t1 = t0*exp(-1.0/tau)+(1.0-exp(-1.0/tau))*temp(i1,j1,k1) 
+                  tsoil(i1,j1,k1) = (t0 + t1)/2.0
                   t0 = t1
                enddo
             endif     
@@ -175,7 +175,10 @@ c     ------------------------- internal variables---------------------
 !     For all grid points
 !     -------------------
 
-!$OMP DO SCHEDULE(STATIC) ORDERED
+!$OMP  PARALLEL DO
+!$OMP$ SCHEDULE(STATIC)
+!$OMP$ DEFAULT(SHARED)
+!$OMP$ PRIVATE(I,J,K,Ṕ,NERRO,KK,DWWW,WAUX1)
       
       do i=1,nx
          do j=1,ny
@@ -401,8 +404,7 @@ c     finalize ny loop
          enddo                  ! j
 c     finalize nx loop
       enddo                     ! I
-!$OMP END DO      
-!$OMP END PARALLEL
+!$OMP END PARALLEL DO 
       return
       end subroutine wbm
       
