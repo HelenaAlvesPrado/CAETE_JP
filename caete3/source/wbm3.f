@@ -80,7 +80,7 @@ c     NOVOS OUTPUTS DA BIANCA
       real betal(nx,ny,12,q)
       real betaw(nx,ny,12,q)
       real betaf(nx,ny,12,q)
-      real,dimension(q) :: bl = 0.0, bw = 0.0, bf = 0.0
+      real,dimension(q) :: bl = no_data, bw = no_data, bf = no_data
 
 c     --------------------------------E N D----------------------------
 
@@ -159,7 +159,24 @@ c     ------------------------- internal variables---------------------
 !     ============
 !     
 !     For all grid points
-!     -------------------     
+!     -------------------
+!$OMP PARALLEL SHARED(NO_DATA,NX,NY,Q,CLEAF1_PFT,CAWOOD1_PFT
+!    $ ,CFROOT1_PFT, CLEAF_PFT,CAWOOD_PFT,CFROOT_PFT,GRID_AREA
+!    $ ,CAWOOD_INI,CFROOT_INI,WG0,EMAXM,tsoil,photo_pft,aresp_pft
+!    $ ,lai_pft,clit_pft,csoil_pft,hresp_pft,rcm_pft,runom_pft
+!    & ,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft,rgf_pft
+!    & ,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft,grid_area
+!    & ,betal,betaw,betaf,GSOIL,SSOIL,WINI,GINI,SINI,BL,BW,BF
+!    & ,P0,TEMP,PREC,PAR,RHS,wfim,gfim, sfim,smes,rmes,emes,
+!    & ,nppmes,laimes,clmes,csmes,hrmes,rcmes,rmlmes,rmfmes
+!    & ,rmsmes,rmmes,rglmes,rgfmes,rgsmes,rgmes,cleafmes
+!    & ,cawoodmes,cfrootmes, gridocpmes,betalmes, betawmes
+!    & ,betafmes,epmes,phmes,armes,npp_pft,CA,evapm_pft
+!    & ,WSOIT,GSOILT,WMAX,CLEAF_INI)PRIVATE(I,J,K,P,N,MES,SPRE
+!    & ,TD,TA,PR,IPAR,RU,AE,NERRO,KK,WAUX1,DWWW)
+      
+!$OMP DO SCHEDULE(STATIC) ORDERED
+      
       do i=1,nx
          do j=1,ny
             do p = 1,q   
@@ -351,24 +368,24 @@ c
                
                do p = 1,q
                   if(p .eq. 3) then
-                     if(abs(bl(p)) .gt. 10.0) then !.or.
-!     $                   abs(bf(p)) .gt. 55.4) then
+                     if(abs(bl(p)) .gt. 10.0 .or.
+     $                  abs(bf(p)) .gt. 55.4) then
                         cleaf1_pft(p) =  cleafmes(p) + ((bl(p)*1e-6))
 c     &                      * 365.)
-c                        cfroot1_pft(p)= cfrootmes(p) + ((bf(p)*1e-6))
+                        cfroot1_pft(p)= cfrootmes(p) + ((bf(p)*1e-6))
 c     &                      * 365.)
 c     print*, abs(bl(p)),abs(bf(p)), abs(bw(p)), p, n
                         goto 10
                      ENDIF
                   else
-                     if(abs(bl(p)) .gt. 10.0) then !.or.
-c     $                   abs(bf(p)) .gt. 55.4 .or.
-c     $                   abs(bw(p)) .gt. 160.0) then
+                     if(abs(bl(p)) .gt. 10.0 .or.
+     $                   abs(bf(p)) .gt. 55.4 .or.
+     $                   abs(bw(p)) .gt. 160.0) then
                         cleaf1_pft(p) =  cleafmes(p) + ((bl(p)*1e-6))
 c     &                      * 365.)
-c                        cawood1_pft(p)= cawoodmes(p) + ((bw(p)*1e-6))
+                        cawood1_pft(p)= cawoodmes(p) + ((bw(p)*1e-6))
 c     &                      * 365.)
-c                        cfroot1_pft(p)= cfrootmes(p) + ((bf(p)*1e-6))
+                        cfroot1_pft(p)= cfrootmes(p) + ((bf(p)*1e-6))
 c     &                      * 365. )
 c                         print*, abs(bl(p)),abs(bf(p)), abs(bw(p)), p, n
                         goto 10 
@@ -383,7 +400,9 @@ c     &                'pft'
 c     finalize ny loop
          enddo                  ! j
 c     finalize nx loop
-      enddo                     ! k
+      enddo                     ! I
+!$OMP END DO      
+!$OMP END PARALLEL
       return
       end subroutine wbm
       
