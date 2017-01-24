@@ -89,14 +89,11 @@ C      WARNING - NEW VARIABLES ---
       
       real gridcell_ocp(nx,ny,q) !  final grid cell occupation for each pft (percentage of area)
       real betal(nx,ny,12,q)
-      real, dimension(nx,ny,12):: bl1,bl2,bl3
-c ,bl4,bl5,bl6,bl7 ! carbon allocated to growth (monthly sums) 
+      real, dimension(nx,ny,12):: bl1,bl2,bl3,bl4,bl5,bl6,bl7 ! carbon allocated to growth (monthly sums) 
       real betaw(nx,ny,12,q)
-      real, dimension(nx,ny,12):: bw1,bw2,bw3
-c ,bw4,bw5,bw6,bw7
+      real, dimension(nx,ny,12):: bw1,bw2,bw3,bw4,bw5,bw6,bw7
       real betaf(nx,ny,12,q)
-      real, dimension(nx,ny,12):: bf1,bf2,bf3
-c ,bf4,bf5,bf6,bf7
+      real, dimension(nx,ny,12):: bf1,bf2,bf3,bf4,bf5,bf6,bf7
 
       
 c     variaveis do spinup
@@ -652,115 +649,115 @@ cc                  rcm7(i,j,k) = rcm_pft(i,j,k,7)
                   bl1(i,j,k) = betal(i,j,k,1)
                   bl2(i,j,k) = betal(i,j,k,2)
                   bl3(i,j,k) = betal(i,j,k,3)
-c                  bl4(i,j,k) = betal(i,j,k,4)
-c                  bl5(i,j,k) = betal(i,j,k,5)
-c                  bl6(i,j,k) = betal(i,j,k,6)
-c                  bl7(i,j,k) = betal(i,j,k,7)
+                  bl4(i,j,k) = betal(i,j,k,4)
+                  bl5(i,j,k) = betal(i,j,k,5)
+                  bl6(i,j,k) = betal(i,j,k,6)
+                  bl7(i,j,k) = betal(i,j,k,7)
 
                   bw1(i,j,k) = betaw(i,j,k,1)
                   bw2(i,j,k) = betaw(i,j,k,2)
                   bw3(i,j,k) = betaw(i,j,k,3)
-c                  bw4(i,j,k) = betaw(i,j,k,4)
-c                  bw5(i,j,k) = betaw(i,j,k,5)
-c                  bw6(i,j,k) = betaw(i,j,k,6)
-c                  bw7(i,j,k) = betaw(i,j,k,7)
+                  bw4(i,j,k) = betaw(i,j,k,4)
+                  bw5(i,j,k) = betaw(i,j,k,5)
+                  bw6(i,j,k) = betaw(i,j,k,6)
+                  bw7(i,j,k) = betaw(i,j,k,7)
                   
                   bf1(i,j,k) = betaf(i,j,k,1)
                   bf2(i,j,k) = betaf(i,j,k,2)
                   bf3(i,j,k) = betaf(i,j,k,3)
-c                  bf4(i,j,k) = betaf(i,j,k,4)
-c                  bf5(i,j,k) = betaf(i,j,k,5)
-c                  bf6(i,j,k) = betaf(i,j,k,6)
-c                  bf7(i,j,k) = betaf(i,j,k,7)
+                  bf4(i,j,k) = betaf(i,j,k,4)
+                  bf5(i,j,k) = betaf(i,j,k,5)
+                  bf6(i,j,k) = betaf(i,j,k,6)
+                  bf7(i,j,k) = betaf(i,j,k,7)
                   
                else
-                  npp1(i,j,k) = no_data
-                  npp2(i,j,k) = no_data
-                  npp3(i,j,k) = no_data
-c                  npp4(i,j,k) = no_data
-c                  npp5(i,j,k) = no_data
-c                  npp6(i,j,k) = no_data
-c                  npp7(i,j,k) = no_data
-
-                  ph1(i,j,k) = no_data
-                  ph2(i,j,k) = no_data
-                  ph3(i,j,k) = no_data
-c                  ph4(i,j,k) = no_data
-c                  ph5(i,j,k) = no_data
-c                  ph6(i,j,k) = no_data
-c                  ph7(i,j,k) = no_data
-
-                  ar1(i,j,k) = no_data
-                  ar2(i,j,k) = no_data
-                  ar3(i,j,k) = no_data
-c                  ar4(i,j,k) = no_data
-c                  ar5(i,j,k) = no_data
-c                  ar6(i,j,k) = no_data
-c                  ar7(i,j,k) = no_data
-
-                  hr1(i,j,k) = no_data
-                  hr2(i,j,k) = no_data
-                  hr3(i,j,k) = no_data
-c                  hr4(i,j,k) = no_data
-c                  hr5(i,j,k) = no_data
-c                  hr6(i,j,k) = no_data
-c                  hr7(i,j,k) = no_data
-
-                  clit1(i,j,k) = no_data
-                  clit2(i,j,k) = no_data
-                  clit3(i,j,k) = no_data
-c                  clit4(i,j,k) = no_data
-c                  clit5(i,j,k) = no_data
-c                  clit6(i,j,k) = no_data
-c                  clit7(i,j,k) = no_data
-
-                  csoil1(i,j,k) = no_data
-                  csoil2(i,j,k) = no_data
-                  csoil3(i,j,k) = no_data
-c                  csoil4(i,j,k) = no_data
-c                  csoil5(i,j,k) = no_data
-c                  csoil6(i,j,k) = no_data
-c                  csoil7(i,j,k) = no_data
-
-                  et1(i,j,k) = no_data
-                  et2(i,j,k) = no_data
-                  et3(i,j,k) = no_data
-c                  et4(i,j,k) = no_data
-c                  et5(i,j,k) = no_data
-c                  et6(i,j,k) = no_data
-c                  et7(i,j,k) = no_data
-                  
-                  rcm1(i,j,k) = no_data
-                  rcm2(i,j,k) = no_data
-                  rcm3(i,j,k) = no_data
-c                  rcm4(i,j,k) = no_data
-c                  rcm5(i,j,k) = no_data
-c                  rcm6(i,j,k) = no_data
-c                  rcm7(i,j,k) = no_data
+c                  npp1(i,j,k) = no_data
+c                  npp2(i,j,k) = no_data
+c                  npp3(i,j,k) = no_data
+cc                  npp4(i,j,k) = no_data
+cc                  npp5(i,j,k) = no_data
+cc                  npp6(i,j,k) = no_data
+cc                  npp7(i,j,k) = no_data
+c
+c                  ph1(i,j,k) = no_data
+c                  ph2(i,j,k) = no_data
+c                  ph3(i,j,k) = no_data
+cc                  ph4(i,j,k) = no_data
+cc                  ph5(i,j,k) = no_data
+cc                  ph6(i,j,k) = no_data
+cc                  ph7(i,j,k) = no_data
+c
+c                  ar1(i,j,k) = no_data
+c                  ar2(i,j,k) = no_data
+c                  ar3(i,j,k) = no_data
+cc                  ar4(i,j,k) = no_data
+cc                  ar5(i,j,k) = no_data
+cc                  ar6(i,j,k) = no_data
+cc                  ar7(i,j,k) = no_data
+c
+c                  hr1(i,j,k) = no_data
+c                  hr2(i,j,k) = no_data
+c                  hr3(i,j,k) = no_data
+cc                  hr4(i,j,k) = no_data
+cc                  hr5(i,j,k) = no_data
+cc                  hr6(i,j,k) = no_data
+cc                  hr7(i,j,k) = no_data
+c
+c                  clit1(i,j,k) = no_data
+c                  clit2(i,j,k) = no_data
+c                  clit3(i,j,k) = no_data
+cc                  clit4(i,j,k) = no_data
+cc                  clit5(i,j,k) = no_data
+cc                  clit6(i,j,k) = no_data
+cc                  clit7(i,j,k) = no_data
+c
+c                  csoil1(i,j,k) = no_data
+c                  csoil2(i,j,k) = no_data
+c                  csoil3(i,j,k) = no_data
+cc                  csoil4(i,j,k) = no_data
+cc                  csoil5(i,j,k) = no_data
+cc                  csoil6(i,j,k) = no_data
+cc                  csoil7(i,j,k) = no_data
+c
+c                  et1(i,j,k) = no_data
+c                  et2(i,j,k) = no_data
+c                  et3(i,j,k) = no_data
+cc                  et4(i,j,k) = no_data
+cc                  et5(i,j,k) = no_data
+cc                  et6(i,j,k) = no_data
+cc                  et7(i,j,k) = no_data
+c                  
+c                  rcm1(i,j,k) = no_data
+c                  rcm2(i,j,k) = no_data
+c                  rcm3(i,j,k) = no_data
+cc                  rcm4(i,j,k) = no_data
+cc                  rcm5(i,j,k) = no_data
+cc                  rcm6(i,j,k) = no_data
+cc                  rcm7(i,j,k) = no_data
                   
                   bl1(i,j,k) = no_data
                   bl2(i,j,k) = no_data
                   bl3(i,j,k) = no_data
-c                  bl4(i,j,k) = no_data
-c                  bl5(i,j,k) = no_data
-c                  bl6(i,j,k) = no_data
-c                  bl7(i,j,k) = no_data
+                  bl4(i,j,k) = no_data
+                  bl5(i,j,k) = no_data
+                  bl6(i,j,k) = no_data
+                  bl7(i,j,k) = no_data
 
                   bw1(i,j,k) = no_data
                   bw2(i,j,k) = no_data
                   bw3(i,j,k) = no_data
-c                  bw4(i,j,k) = no_data
-c                  bw5(i,j,k) = no_data
-c                  bw6(i,j,k) = no_data
-c                  bw7(i,j,k) = no_data
+                  bw4(i,j,k) = no_data
+                  bw5(i,j,k) = no_data
+                  bw6(i,j,k) = no_data
+                  bw7(i,j,k) = no_data
                   
                   bf1(i,j,k) = no_data
                   bf2(i,j,k) = no_data
                   bf3(i,j,k) = no_data
-c                  bf4(i,j,k) = no_data
-c                  bf5(i,j,k) = no_data
-c                  bf6(i,j,k) = no_data
-c                  bf7(i,j,k) = no_data
+                  bf4(i,j,k) = no_data
+                  bf5(i,j,k) = no_data
+                  bf6(i,j,k) = no_data
+                  bf7(i,j,k) = no_data
                endif
             enddo
          enddo
@@ -1022,22 +1019,22 @@ cc      call save_file12(10, rcm7)
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)
       call save_file12(10, bl3)
-c      open(10,file='../outputs_pft/bl.4.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, bl4)
-c      open(10,file='../outputs_pft/bl.5.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, bl5)
-c      open(10,file='../outputs_pft/bl.6.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, bl6)
-c      open(10,file='../outputs_pft/bl.7.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, bl7)
+      open(10,file='../outputs_pft/bl.4.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bl4)
+      open(10,file='../outputs_pft/bl.5.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bl5)
+      open(10,file='../outputs_pft/bl.6.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bl6)
+      open(10,file='../outputs_pft/bl.7.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bl7)
 
 !     BAWOOD
       open(10,file='../outputs_pft/bw.1.bin',
@@ -1052,22 +1049,22 @@ c      call save_file12(10, bl7)
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)
       call save_file12(10, bw3)
-c      open(10,file='../outputs_pft/bw.4.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, bw4)
-c      open(10,file='../outputs_pft/bw.5.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, bw5)
-c      open(10,file='../outputs_pft/bw.6.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, bw6)
-c      open(10,file='../outputs_pft/bw.7.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, bw7)
+      open(10,file='../outputs_pft/bw.4.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bw4)
+      open(10,file='../outputs_pft/bw.5.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bw5)
+      open(10,file='../outputs_pft/bw.6.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bw6)
+      open(10,file='../outputs_pft/bw.7.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bw7)
 
 !     BFROOT
       open(10,file='../outputs_pft/bf.1.bin',
@@ -1082,22 +1079,22 @@ c      call save_file12(10, bw7)
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)
       call save_file12(10, bf3)
-c      open(10,file='../outputs_pft/bf.4.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, bf4)
-c      open(10,file='../outputs_pft/bf.5.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, bf5)
-c      open(10,file='../outputs_pft/bf.6.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, bf6)
-c       open(10,file='../outputs_pft/bf.7.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, bf7)
+      open(10,file='../outputs_pft/bf.4.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bf4)
+      open(10,file='../outputs_pft/bf.5.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bf5)
+      open(10,file='../outputs_pft/bf.6.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bf6)
+       open(10,file='../outputs_pft/bf.7.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      call save_file12(10, bf7)
 
       
       stop
