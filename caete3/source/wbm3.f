@@ -168,7 +168,7 @@ c     ------------------------- internal variables---------------------
 !    & ,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft,rgf_pft
 !    & ,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft,grid_area
 !    & ,betal,betaw,betaf,GSOIL,SSOIL,WINI,GINI,SINI,BL,BW,BF
-!    & ,P0,TEMP,PREC,PAR,RHS,wfim,gfim, sfim,smes,rmes,emes,
+!    & ,P0,TEMP,PREC,PAR,RHS,wfim,gfim, sfim,smes,rmes,emes
 !    & ,nppmes,laimes,clmes,csmes,hrmes,rcmes,rmlmes,rmfmes
 !    & ,rmsmes,rmmes,rglmes,rgfmes,rgsmes,rgmes,cleafmes
 !    & ,cawoodmes,cfrootmes, gridocpmes,betalmes, betawmes
