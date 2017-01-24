@@ -160,7 +160,8 @@ c     ------------------------- internal variables---------------------
 !     
 !     For all grid points
 !     -------------------
-!$OMP PARALLEL SHARED(NO_DATA,NX,NY,Q,CLEAF1_PFT,CAWOOD1_PFT
+!$OMP PARALLEL
+!$OMP&SHARED(NO_DATA,NX,NY,Q,CLEAF1_PFT,CAWOOD1_PFT
 !    $ ,CFROOT1_PFT, CLEAF_PFT,CAWOOD_PFT,CFROOT_PFT,GRID_AREA
 !    $ ,CAWOOD_INI,CFROOT_INI,WG0,EMAXM,tsoil,photo_pft,aresp_pft
 !    $ ,lai_pft,clit_pft,csoil_pft,hresp_pft,rcm_pft,runom_pft
@@ -172,7 +173,8 @@ c     ------------------------- internal variables---------------------
 !    & ,rmsmes,rmmes,rglmes,rgfmes,rgsmes,rgmes,cleafmes
 !    & ,cawoodmes,cfrootmes, gridocpmes,betalmes, betawmes
 !    & ,betafmes,epmes,phmes,armes,npp_pft,CA,evapm_pft
-!    & ,WSOIT,GSOILT,WMAX,CLEAF_INI)PRIVATE(I,J,K,P,N,MES,SPRE
+!    & ,WSOIT,GSOILT,WMAX,CLEAF_INI)
+!$OMP&PRIVATE(I,J,K,P,N,MES,SPRE
 !    & ,TD,TA,PR,IPAR,RU,AE,NERRO,KK,WAUX1,DWWW)
       
 !$OMP DO SCHEDULE(STATIC) ORDERED
