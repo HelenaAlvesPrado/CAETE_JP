@@ -122,8 +122,20 @@ c     ------------------------- internal variables---------------------
       real, parameter :: tau = (H**2)/(2.0*diffu) !E-folding time (months)
       real, parameter :: auxs = -100.0 !Auxiliar for calculation of Snpp
       
-            
-!$OMP PARALLEL  PRIVATE(I,J,K,P,N,MES,SPRE
+!$omp parallel SHARED(nx,ny,q,no_data,CLEAF_PFT
+!    $ ,CAWOOD_PFT,CFROOT_PFT
+!    $ ,CAWOOD_INI,CFROOT_INI,WG0,EMAXM,tsoil,photo_pft,aresp_pft
+!    $ ,lai_pft,clit_pft,csoil_pft,hresp_pft,rcm_pft,runom_pft
+!    & ,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft,rgf_pft
+!    & ,rgs_pft,rg_pft,grid_area
+!    & ,betal,betaw,betaf,GSOIL,SSOIL,WINI,GINI,SINI,BL,BW,BF
+!    & ,P0,TEMP,PREC,PAR,RHS,wfim,gfim,sfim,smes,rmes,emes
+!    & ,nppmes,laimes,clmes,csmes,hrmes,rcmes,rmlmes,rmfmes
+!    & ,rmsmes,rmmes,rglmes,rgfmes,rgsmes,rgmes,cleafmes
+!    & ,cawoodmes,cfrootmes, gridocpmes,betalmes, betawmes
+!    & ,betafmes,epmes,phmes,armes,npp_pft,CA,evapm_pft
+!    & ,WSOIT,GSOILT,WMAX,CLEAF_INI),            
+!    $  PRIVATE(I,J,K,P,N,MES,SPRE
 !    & ,TD,TA,PR,IPAR,RU,AE,NERRO,KK,WAUX1,DWWW)
       
 !     ================      
