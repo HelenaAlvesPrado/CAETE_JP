@@ -25,7 +25,7 @@ C23456
 !     Variables
 !     =========
 !     
-      integer ,parameter :: nx=720,ny=360,q=3
+      integer ,parameter :: nx=720,ny=360,q=7
       real ,parameter :: no_data = -9999.0
       
 c     --------------------------I N P U T S----------------------------
@@ -397,7 +397,7 @@ c     finalize nx loop
      &    ,betawavg,betafavg)
       implicit none
 
-      integer, parameter :: npft = 3
+      integer, parameter :: npft = 7
 
 !     ----------------------------INPUTS-------------------------------
 !        

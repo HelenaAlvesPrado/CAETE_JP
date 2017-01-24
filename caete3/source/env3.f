@@ -22,7 +22,7 @@ c     Reviewed by jpdarela  jan/2017
 !     ------------------------
 !     
       integer i,j,k,p
-      integer, parameter :: nx=720,ny=360,q=3
+      integer, parameter :: nx=720,ny=360,q=7
       real,parameter :: no_data = -9999.0
 !     
 !     Inputs
@@ -1109,7 +1109,7 @@ c      call save_file12(10, bf7)
       subroutine pft_par(par, dt) !!!!!!!!!  mudamos os valores de dt
       implicit none
 !     input
-      integer, parameter :: vars = 3 
+      integer, parameter :: vars = 7 
       integer :: par            ! parameter number 
       real, dimension(vars) :: dt,dt1,dt2,dt3,dt4,dt5,dt6
      &    ,dt7,dt8
@@ -1132,15 +1132,15 @@ c      call save_file12(10, bf7)
 
 
 !     PFT         1       2       3         
-      data dt1/3.72,   4.43,    4.34/   
-      data dt2/5.9E-5, 3.3E-5,  3.1E-5/       
-      data dt3/0.25,   0.30,    0.45/    !aleaf 
-      data dt4/0.50,   0.45,    0.00/    !aawood
-      data dt5/0.25,   0.25,    0.55/    !afroot
-      data dt6/8.2,    6.0,     3.3/     !tleaf
-      data dt7/50.0,   50.0,    0.0/     !tawood
-      data dt8/3.0,    3.0,     5.0/     !tfroot
-     
+      data dt1/3.37,   4.645,  7.18,   2.98,   2.35,   4.64,   4.22/ !g1
+      data dt2/3.2E-5, 3.1E-5, 3.8E-5, 5.5E-5, 5.4E-5, 4.0E-5, 4.5E-5/ !p21
+      data dt3/0.70,   0.65,   0.80,   0.62,   0.55,   0.82,   0.80/ !aleaf
+      data dt4/0.10,   0.15,   0.05,   0.08,   0.0,    0.0,    0.10/ !aawood
+      data dt5/0.20,   0.20,   0.15,   0.30,   0.45,   0.18,   0.10/ !afroot
+      data dt6/4.8,    3.7,    1.4,     2.2,    0.8,    0.8,    1.9/ !tleaf
+      data dt7/80.,    58.0,   38.6,    8.0,    0.0,    0.0,    42.5/ !tawood
+      data dt8/2.8,    2.0,    2.0,     1.5,    1.4,    1.2,    3.0/ !tfroot
+      
       if(par .eq. 1 ) then      ! g1
          dt(:) = dt1(:)
       else if(par .eq. 2) then  ! p21
@@ -1171,7 +1171,7 @@ c     &     cbwoodini,cstoini,cotherini,crepini)
       IMPLICIT NONE
 
       integer, parameter :: nt=10000
-      integer, parameter :: npfts=3
+      integer, parameter :: npfts=7
       
 c     inputs
       integer i6, kk, k
