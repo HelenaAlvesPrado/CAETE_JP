@@ -371,9 +371,9 @@ c
                
                
                do p = 1,q
-                  if(p .eq. 3) then
-                     if(abs(bl(p)) .gt. 10.0 .or.
-     $                  abs(bf(p)) .gt. 55.4) then
+                  if(p .eq. 5 .or. p .eq. 6) then
+                     if(abs(bl(p)) .gt. 20.0 .or.
+     $                  abs(bf(p)) .gt. 20.0) then
                         cleaf1_pft(p) =  cleafmes(p) + ((bl(p)*1e-6))
 c     &                      * 365.)
                         cfroot1_pft(p)= cfrootmes(p) + ((bf(p)*1e-6))
@@ -382,9 +382,9 @@ c     print*, abs(bl(p)),abs(bf(p)), abs(bw(p)), p, n
                         goto 10
                      ENDIF
                   else
-                     if(abs(bl(p)) .gt. 10.0 .or.
-     $                   abs(bf(p)) .gt. 55.4 .or.
-     $                   abs(bw(p)) .gt. 160.0) then
+                     if(abs(bl(p)) .gt. 20.0 .or.
+     $                   abs(bf(p)) .gt. 20.0 .or.
+     $                   abs(bw(p)) .gt. 100.0) then
                         cleaf1_pft(p) =  cleafmes(p) + ((bl(p)*1e-6))
 c     &                      * 365.)
                         cawood1_pft(p)= cawoodmes(p) + ((bw(p)*1e-6))
