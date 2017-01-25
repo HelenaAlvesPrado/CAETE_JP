@@ -1124,18 +1124,18 @@ cc      call save_file12(10, rcm7)
       
 !     1 = Temperate Broad-leaf Deciduous Tree         33          4.43
 !     2 = Tropical Broad-leaf Evergreen Tree          59	      3.72
-!     3 = C3 grass					                  31          4.50
+!     3 = C3 grass	      31          4.50
 
 
-!     PFT         1       2       3         
+!     PFT         1       2       3      4      5       6        7
       data dt1/3.37,   4.645,  7.18,   2.98,   2.35,   4.64,   4.22/ !g1
       data dt2/3.2E-5, 3.1E-5, 3.8E-5, 5.5E-5, 5.4E-5, 4.0E-5, 4.5E-5/ !p21
-      data dt3/0.70,   0.65,   0.80,   0.62,   0.55,   0.82,   0.80/ !aleaf
-      data dt4/0.10,   0.15,   0.05,   0.08,   0.0,    0.0,    0.10/ !aawood
-      data dt5/0.20,   0.20,   0.15,   0.30,   0.45,   0.18,   0.10/ !afroot
-      data dt6/4.8,    3.7,    1.4,     2.2,    0.8,    0.8,    1.9/ !tleaf
-      data dt7/80.,    58.0,   38.6,    8.0,    0.0,    0.0,    42.5/ !tawood
-      data dt8/2.8,    2.0,    2.0,     1.5,    1.4,    1.2,    3.0/ !tfroot
+      data dt3/0.70,   0.65,   0.70,   0.62,   0.55,   0.82,   0.60/ !aleaf
+      data dt4/0.10,   0.15,   0.15,   0.12,   0.0,    0.0,    0.10/ !aawood
+      data dt5/0.20,   0.20,   0.15,   0.26,   0.45,   0.18,   0.30/ !afroot
+      data dt6/6.8,    6.4,    2.4,     2.2,    2.8,    1.8,   4.9/ !tleaf
+      data dt7/80.,    58.0,   38.6,    8.0,    0.0,    0.0,   42.5/ !tawood
+      data dt8/2.8,    2.0,    2.0,     1.5,    1.4,    1.2,   3.0/ !tfroot
       
       if(par .eq. 1 ) then      ! g1
          dt(:) = dt1(:)

@@ -115,7 +115,8 @@ c     ------------------------- internal variables---------------------
       real t0,t1                !Soil temperature aux variables 
       real wsaux1,dwww,wmax     !auxiliar to equilibrium check
       real ae                   !Available energy     
-      real pr,spre,ta,td,ipar,ru, I1,J1,K1
+      real pr,spre,ta,td,ipar,ru
+      integer I1,J1,K1,k2
       
       real, parameter :: H = 1.0 !Soil layer(m) 
       real, parameter :: diffu = 4.e-7*(30.*86400.0) !Soil thermal diffusivity (m2/month)
@@ -149,8 +150,8 @@ c     ------------------------- internal variables---------------------
 
 !     Initialize soil temperature
 !     ---------------------------
-            do k1=1,12
-               tsoil(i1,j1,k1) = no_data
+            do k2=1,12
+               tsoil(i1,j1,k2) = no_data
             enddo
 
 !     Only for land grid points
@@ -178,7 +179,7 @@ c     ------------------------- internal variables---------------------
 !$OMP  PARALLEL DO
 !$OMP$ SCHEDULE(STATIC)
 !$OMP$ DEFAULT(SHARED)
-!$OMP$ PRIVATE(I,J,K,Ṕ,NERRO,KK,DWWW,WAUX1)
+!$OMP$ PRIVATE(I,J,K,P,NERRO,KK,DWWW,WSAUX1)
       
       do i=1,nx
          do j=1,ny
