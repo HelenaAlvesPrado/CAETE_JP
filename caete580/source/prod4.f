@@ -16,6 +16,8 @@ c234567
 
       implicit none
 
+!     parameter
+      integer,parameter ::  npft_prod = 580
 !     Variables
 !     =========
 !     Input
@@ -48,6 +50,7 @@ c234567
       
 !     Internal
 !     --------
+      
       real es, es2              !Saturation partial pressure (hPa) == mbar
       real aux_ipar
       double precision vm       !Rubisco maximum carboxylaton rate (molCO2/m2/s)
@@ -76,8 +79,8 @@ c234567
       double precision f3       !Michaelis-Menton O2 constant (Pa)
       double precision f4,f4sun,f4shade !Scaling-up LAI to canopy level (dimensionless)
       
-      real tleaf(7)             !leaf turnover time (yr)
-      real p21(7)
+      real tleaf(npft_prod)             !leaf turnover time (yr)
+      real p21(npft_prod)
       real emax                 !potential evapotranspiration (mm/dia)
       double precision sla      !specific leaf area (m2/kg)
       double precision csa      !sapwood compartment´s carbon content (5% of woody tissues) (kgC/m2)
@@ -123,10 +126,19 @@ c234567
       p30 = 0.015               !Ratio of respiration to Rubisco carboxylation rates
       p31 = 3.850               !Whole plant to leaf respiration ratio
 
+!     dt1 = aleaf
+!     dt2 = aawood
+!     dt3 = afroot
+!     dt4 = tleaf
+!     dt5 = tawood
+!     dt6 = tfroot
+!     dt7 = g1
+!     dt8 = p21
+!     DT9 = JMAX
 
 !     getting pft parameters
-      call pft_par(2, p21)
-      call pft_par(6, tleaf)
+      call pft_par(8, p21)
+      call pft_par(4, tleaf)
 
 !     ==============
 !     Photosynthesis 
@@ -333,9 +345,9 @@ c     Autothrophic respiration
 !     eu esqueço as vezes =P. Mas eu desconfio que essa eh a origem do bug que
 !     nao deixa a bia editar o codigo no notepad++ 
       
-      ncl = 0.021               !(gN/gC) 
-      ncf = 0.004               !(gN/gC)
-      ncs = 0.003               !(gN/gC)
+      ncl = 0.030               !(gN/gC) 
+      ncf = 0.030               !(gN/gC)
+      ncs = 0.004               !(gN/gC)
  
       rml64 = (ncl * cl1) * 27. * exp(0.03*temp)
       rml =  real(rml64,4)
@@ -416,7 +428,7 @@ c     -----------------------------------------------------------------
       
 !     Internal
 !     --------
-      real g1(7)
+      real g1(580)
       real rcmax, rcmin
       double precision f1b      !Photosynthesis (micromolCO2/m2/s)
       double precision gs2      !Canopy conductance (m/s)
@@ -424,8 +436,18 @@ c     -----------------------------------------------------------------
       double precision g0       !Residual stomatance conductance
       double precision D1       !kPA
       double precision aa
+      
+!     dt1 = aleaf
+!     dt2 = aawood
+!     dt3 = afroot
+!     dt4 = tleaf
+!     dt5 = tawood
+!     dt6 = tfroot
+!     dt7 = g1
+!     dt8 = p21
+!     DT9 = JMAX
 
-      call pft_par(1, g1)
+      call pft_par(7, g1)
       
       f1b = (f1_in*10e5)        ! Helena - Mudei algumas coisas aqui
       aa = (f1b/363.)           ! Entenda o algoritmo e tenha certeza de que  
@@ -605,7 +627,7 @@ c23456
 
       IMPLICIT NONE
  
-      INTEGER, PARAMETER :: NPFT = 7
+      INTEGER, PARAMETER :: NPFT = 580
       INTEGER :: P, MAX_INDEX(1), I
       REAL :: CLEAF(NPFT), CFROOT(NPFT), CAWOOD(NPFT)
       REAL :: TOTAL_BIOMASS_PFT(NPFT),OCP_COEFFS(NPFT)
@@ -815,7 +837,7 @@ c=====================================================================
       implicit none
 c     
 !     variables
-      integer, parameter :: npfts = 7
+      integer, parameter :: npfts = 580
       integer pft   
       real npp                  !potential npp (KgC/m2/yr)
       real*16 npp_aux           !auxiliary variable to calculate potential npp in KgC/m2/day

@@ -25,7 +25,7 @@ C23456
 !     Variables
 !     =========
 !     
-      integer ,parameter :: nx=720,ny=360,q=7
+      integer ,parameter :: nx=720,ny=360,q=580
       real ,parameter :: no_data = -9999.0
       
 c     --------------------------I N P U T S----------------------------
@@ -98,7 +98,7 @@ c     ------------------------- internal variables---------------------
       real sini(q), sfim(q)
       real wini(q), wfim(q)
       real gini(q), gfim(q)
-
+      real wood(q)
       real cleaf1_pft (q)
       real cawood1_pft(q)
       real cfroot1_pft(q)
@@ -362,10 +362,13 @@ c
                      BF(P) = BF(P) + BETAF(I,J,K,P)/12.
                   ENDDO
                ENDDO
-               
-               
+
+
+!     dt2 = aawood
+
+               call pft_par(2,wood) ! diferenciar gramineas de arboreas/arbustivas
                do p = 1,q
-                  if(p .eq. 5 .or. p .eq. 6) then
+                  if(wood(p) .le. 0.0) then
                      if(abs(bl(p)) .gt. 20.0 .or.
      $                  abs(bf(p)) .gt. 20.0) then
                         cleaf1_pft(p) =  cleafmes(p) + ((bl(p)*1e-6))
@@ -412,7 +415,7 @@ c     finalize nx loop
      &    ,betawavg,betafavg)
       implicit none
 
-      integer, parameter :: npft = 7
+      integer, parameter :: npft = 580
 
 !     ----------------------------INPUTS-------------------------------
 !        
@@ -624,7 +627,6 @@ c      rh    = 0.685
 !$OMP$ DEFAULT(SHARED)
 !$OMP$ PRIVATE(P) 
          do p = 1,npft
-            
             call productivity1 (p,ocp_coeffs(p),OCP_WOOD(P),temp,p0,w(p)
      &          ,wmax,ca,ipar,rh,cl1(p),ca1(p),cf1(p),beta_leaf(p)
      &          ,beta_awood(p),beta_froot(p),emax,ph(p),ar(p)

@@ -5,15 +5,15 @@ c234567
       implicit none
 !     
 !     =======================================================================
-!     CPTEC-PVM2
+!     CAETE-DV
 !     Adapted from env4.f.
 !     Code written by David Lapola and Helena Alves do Prado e Bianca Rius
-c     Reviewed by jpdarela  jan/2017
+c     &  jpdarela  
 
 !     Last update: jan/2017
 !     
-!     Compile with: g95 (or gfortran) env5TR.f wbm4TR.f productivity1.f 
-!     Execute with ./a.exe
+!     Compile with: g95 (or gfortran) -g -Wall -mcmodel=medium env4.f wbm4.f prod4.f 
+!     Execute with ./a.out
 !     =======================================================================
 
 
@@ -22,7 +22,7 @@ c     Reviewed by jpdarela  jan/2017
 !     ------------------------
 !     
       integer i,j,k,p
-      integer, parameter :: nx=720,ny=360,q=7
+      integer, parameter :: nx=720,ny=360,q=580
       real,parameter :: no_data = -9999.0
 !     
 !     Inputs
@@ -89,11 +89,11 @@ C      WARNING - NEW VARIABLES ---
       
       real gridcell_ocp(nx,ny,q) !  final grid cell occupation for each pft (percentage of area)
       real betal(nx,ny,12,q)
-      real, dimension(nx,ny,12):: bl1,bl2,bl3,bl4,bl5,bl6,bl7 ! carbon allocated to growth (monthly sums) 
+c      real, dimension(nx,ny,12):: bl1,bl2,bl3,bl4,bl5,bl6,bl7 ! carbon allocated to growth (monthly sums) 
       real betaw(nx,ny,12,q)
-      real, dimension(nx,ny,12):: bw1,bw2,bw3,bw4,bw5,bw6,bw7
+c      real, dimension(nx,ny,12):: bw1,bw2,bw3,bw4,bw5,bw6,bw7
       real betaf(nx,ny,12,q)
-      real, dimension(nx,ny,12):: bf1,bf2,bf3,bf4,bf5,bf6,bf7
+c      real, dimension(nx,ny,12):: bf1,bf2,bf3,bf4,bf5,bf6,bf7
 
       
 c     variaveis do spinup
@@ -258,25 +258,27 @@ c     Calculating annual npp
          enddo
 !     if(mod(nx,10) .eq. 0)print*, (real(i)/real(nx))*100.0, '%'
       enddo
+
+!     estes arquivos ficaram muito grandes ... pensar em uma estrategia melhor
       
-      call nan2ndt(cleafin, q)  !!! --------- incorporado essa subroutina
-      open(10,file='../spinup/clini.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call savex(10, cleafin, q)
-      
-      call nan2ndt(cfrootin, q)
-      open(10,file='../spinup/cfini.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call savex(10, cfrootin, q)
-      
-      call nan2ndt(cawoodin, q)
-      open(10,file='../spinup/cwini.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call savex(10, cawoodin, q)
-!     ===========
+c      call nan2ndt(cleafin, q) 
+c      open(10,file='../spinup/clini.bin',
+c     &    status='unknown',form='unformatted',
+c     &    access='direct',recl=4*nx*ny)
+c      call savex(10, cleafin, q)
+c      
+c      call nan2ndt(cfrootin, q)
+c      open(10,file='../spinup/cfini.bin',
+c     &    status='unknown',form='unformatted',
+c     &    access='direct',recl=4*nx*ny)
+c      call savex(10, cfrootin, q)
+c      
+c      call nan2ndt(cawoodin, q)
+c      open(10,file='../spinup/cwini.bin',
+c     &    status='unknown',form='unformatted',
+c     &    access='direct',recl=4*nx*ny)
+c      call savex(10, cawoodin, q)
+c!     ===========
       
       
       
@@ -323,30 +325,30 @@ c     if (prec(i,j,k).lt.0.0) prec (i,j,k) = 0.0
       
       
       
-!     SAVE RESULTS TO FILES
+!     SAVE RESULTS TO FILES ! arquivos gigantes > 700Mbytes
       call nan2ndt(gridcell_ocp, q)
       open(10,file='../outputs/gridcell_ocp.bin',
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)
       call savex(10, gridcell_ocp, q)
-      
-      call nan2ndt(cleaf_pft, q)
-      open(10,file='../outputs/cleaf.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call savex(10, cleaf_pft, q)
-      
-      call nan2ndt(cawood_pft, q)
-      open(10,file='../outputs/cawood.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call savex(10,cawood_pft,q)
-      
-      call nan2ndt(cfroot_pft, q)
-      open(10,file='../outputs/cfroot.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call savex(10, cfroot_pft,q)
+c      
+c      call nan2ndt(cleaf_pft, q)
+c      open(10,file='../outputs/cleaf.bin',
+c     &    status='unknown',form='unformatted',
+c     &    access='direct',recl=4*nx*ny)
+c      call savex(10, cleaf_pft, q)
+c      
+c      call nan2ndt(cawood_pft, q)
+c      open(10,file='../outputs/cawood.bin',
+c     &    status='unknown',form='unformatted',
+c     &    access='direct',recl=4*nx*ny)
+c      call savex(10,cawood_pft,q)
+c      
+c      call nan2ndt(cfroot_pft, q)
+c      open(10,file='../outputs/cfroot.bin',
+c     &    status='unknown',form='unformatted',
+c     &    access='direct',recl=4*nx*ny)
+c      call savex(10, cfroot_pft,q)
       
       do i = 1,nx
          do j = 1,ny
@@ -569,605 +571,35 @@ C     preparando o terreno pra salvar as variaveis
       close(50)
 
       
-      do i=1,nx
-         do j=1,ny
-            do k=1,12
-               if(nint(lsmk(i,j)) .ne. 0) then
-c                  npp1(i,j,k) = npp_pft(i,j,k,1)
-c                  npp2(i,j,k) = npp_pft(i,j,k,2)
-c                  npp3(i,j,k) = npp_pft(i,j,k,3)
-cc                  npp4(i,j,k) = npp_pft(i,j,k,4)
-cc                  npp5(i,j,k) = npp_pft(i,j,k,5)
-cc                  npp6(i,j,k) = npp_pft(i,j,k,6)
-cc                  npp7(i,j,k) = npp_pft(i,j,k,7)
-c
-c                  ph1(i,j,k) = photo_pft(i,j,k,1)
-c                  ph2(i,j,k) = photo_pft(i,j,k,2)
-c                  ph3(i,j,k) = photo_pft(i,j,k,3)
-cc                  ph4(i,j,k) = photo_pft(i,j,k,4)
-cc                  ph5(i,j,k) = photo_pft(i,j,k,5)
-cc                  ph6(i,j,k) = photo_pft(i,j,k,6)
-cc                  ph7(i,j,k) = photo_pft(i,j,k,7)
-c
-c                  ar1(i,j,k) = aresp_pft(i,j,k,1)
-c                  ar2(i,j,k) = aresp_pft(i,j,k,2)
-c                  ar3(i,j,k) = aresp_pft(i,j,k,3)
-cc                  ar4(i,j,k) = aresp_pft(i,j,k,4)
-cc                  ar5(i,j,k) = aresp_pft(i,j,k,5)
-cc                  ar6(i,j,k) = aresp_pft(i,j,k,6)
-cc                  ar7(i,j,k) = aresp_pft(i,j,k,7)
-c
-c                  lai1(i,j,k) = lai_pft(i,j,k,1)
-c                  lai2(i,j,k) = lai_pft(i,j,k,2)
-c                  lai3(i,j,k) = lai_pft(i,j,k,3)
-cc                  lai4(i,j,k) = lai_pft(i,j,k,4)
-cc                  lai5(i,j,k) = lai_pft(i,j,k,5)
-cc                  lai6(i,j,k) = lai_pft(i,j,k,6)
-cc                  lai7(i,j,k) = lai_pft(i,j,k,7)
-c
-c                  hr1(i,j,k) = hresp_pft(i,j,k,1)
-c                  hr2(i,j,k) = hresp_pft(i,j,k,2)
-c                  hr3(i,j,k) = hresp_pft(i,j,k,3)
-cc                  hr4(i,j,k) = hresp_pft(i,j,k,4)
-cc                  hr5(i,j,k) = hresp_pft(i,j,k,5)
-cc                  hr6(i,j,k) = hresp_pft(i,j,k,6)
-cc                  hr7(i,j,k) = hresp_pft(i,j,k,7)
-c
-c                  clit1(i,j,k) = clit_pft(i,j,k,1)
-c                  clit2(i,j,k) = clit_pft(i,j,k,2)
-c                  clit3(i,j,k) = clit_pft(i,j,k,3)
-cc                  clit4(i,j,k) = clit_pft(i,j,k,4)
-cc                  clit5(i,j,k) = clit_pft(i,j,k,5)
-cc                  clit6(i,j,k) = clit_pft(i,j,k,6)
-cc                  clit7(i,j,k) = clit_pft(i,j,k,7)
-c
-c                  csoil1(i,j,k) = csoil_pft(i,j,k,1)
-c                  csoil2(i,j,k) = csoil_pft(i,j,k,2)
-c                  csoil3(i,j,k) = csoil_pft(i,j,k,3)
-cc                  csoil4(i,j,k) = csoil_pft(i,j,k,4)
-cc                  csoil5(i,j,k) = csoil_pft(i,j,k,5)
-cc                  csoil6(i,j,k) = csoil_pft(i,j,k,6)
-cc                  csoil7(i,j,k) = csoil_pft(i,j,k,7)
-c
-c                  et1(i,j,k) = evapm_pft(i,j,k,1)
-c                  et2(i,j,k) = evapm_pft(i,j,k,2)
-c                  et3(i,j,k) = evapm_pft(i,j,k,3)
-cc                  et4(i,j,k) = evapm_pft(i,j,k,4)
-cc                  et5(i,j,k) = evapm_pft(i,j,k,5)
-cc                  et6(i,j,k) = evapm_pft(i,j,k,6)
-cc                  et7(i,j,k) = evapm_pft(i,j,k,7)
-c                  
-c                  rcm1(i,j,k) = rcm_pft(i,j,k,1)
-c                  rcm2(i,j,k) = rcm_pft(i,j,k,2)
-c                  rcm3(i,j,k) = rcm_pft(i,j,k,3)
-cc                  rcm4(i,j,k) = rcm_pft(i,j,k,4)
-cc                  rcm5(i,j,k) = rcm_pft(i,j,k,5)
-cc                  rcm6(i,j,k) = rcm_pft(i,j,k,6)
-cc                  rcm7(i,j,k) = rcm_pft(i,j,k,7)
-
-                  bl1(i,j,k) = betal(i,j,k,1)
-                  bl2(i,j,k) = betal(i,j,k,2)
-                  bl3(i,j,k) = betal(i,j,k,3)
-                  bl4(i,j,k) = betal(i,j,k,4)
-                  bl5(i,j,k) = betal(i,j,k,5)
-                  bl6(i,j,k) = betal(i,j,k,6)
-                  bl7(i,j,k) = betal(i,j,k,7)
-
-                  bw1(i,j,k) = betaw(i,j,k,1)
-                  bw2(i,j,k) = betaw(i,j,k,2)
-                  bw3(i,j,k) = betaw(i,j,k,3)
-                  bw4(i,j,k) = betaw(i,j,k,4)
-                  bw5(i,j,k) = betaw(i,j,k,5)
-                  bw6(i,j,k) = betaw(i,j,k,6)
-                  bw7(i,j,k) = betaw(i,j,k,7)
-                  
-                  bf1(i,j,k) = betaf(i,j,k,1)
-                  bf2(i,j,k) = betaf(i,j,k,2)
-                  bf3(i,j,k) = betaf(i,j,k,3)
-                  bf4(i,j,k) = betaf(i,j,k,4)
-                  bf5(i,j,k) = betaf(i,j,k,5)
-                  bf6(i,j,k) = betaf(i,j,k,6)
-                  bf7(i,j,k) = betaf(i,j,k,7)
-                  
-               else
-c                  npp1(i,j,k) = no_data
-c                  npp2(i,j,k) = no_data
-c                  npp3(i,j,k) = no_data
-cc                  npp4(i,j,k) = no_data
-cc                  npp5(i,j,k) = no_data
-cc                  npp6(i,j,k) = no_data
-cc                  npp7(i,j,k) = no_data
-c
-c                  ph1(i,j,k) = no_data
-c                  ph2(i,j,k) = no_data
-c                  ph3(i,j,k) = no_data
-cc                  ph4(i,j,k) = no_data
-cc                  ph5(i,j,k) = no_data
-cc                  ph6(i,j,k) = no_data
-cc                  ph7(i,j,k) = no_data
-c
-c                  ar1(i,j,k) = no_data
-c                  ar2(i,j,k) = no_data
-c                  ar3(i,j,k) = no_data
-cc                  ar4(i,j,k) = no_data
-cc                  ar5(i,j,k) = no_data
-cc                  ar6(i,j,k) = no_data
-cc                  ar7(i,j,k) = no_data
-c
-c                  hr1(i,j,k) = no_data
-c                  hr2(i,j,k) = no_data
-c                  hr3(i,j,k) = no_data
-cc                  hr4(i,j,k) = no_data
-cc                  hr5(i,j,k) = no_data
-cc                  hr6(i,j,k) = no_data
-cc                  hr7(i,j,k) = no_data
-c
-c                  clit1(i,j,k) = no_data
-c                  clit2(i,j,k) = no_data
-c                  clit3(i,j,k) = no_data
-cc                  clit4(i,j,k) = no_data
-cc                  clit5(i,j,k) = no_data
-cc                  clit6(i,j,k) = no_data
-cc                  clit7(i,j,k) = no_data
-c
-c                  csoil1(i,j,k) = no_data
-c                  csoil2(i,j,k) = no_data
-c                  csoil3(i,j,k) = no_data
-cc                  csoil4(i,j,k) = no_data
-cc                  csoil5(i,j,k) = no_data
-cc                  csoil6(i,j,k) = no_data
-cc                  csoil7(i,j,k) = no_data
-c
-c                  et1(i,j,k) = no_data
-c                  et2(i,j,k) = no_data
-c                  et3(i,j,k) = no_data
-cc                  et4(i,j,k) = no_data
-cc                  et5(i,j,k) = no_data
-cc                  et6(i,j,k) = no_data
-cc                  et7(i,j,k) = no_data
-c                  
-c                  rcm1(i,j,k) = no_data
-c                  rcm2(i,j,k) = no_data
-c                  rcm3(i,j,k) = no_data
-cc                  rcm4(i,j,k) = no_data
-cc                  rcm5(i,j,k) = no_data
-cc                  rcm6(i,j,k) = no_data
-cc                  rcm7(i,j,k) = no_data
-                  
-                  bl1(i,j,k) = no_data
-                  bl2(i,j,k) = no_data
-                  bl3(i,j,k) = no_data
-                  bl4(i,j,k) = no_data
-                  bl5(i,j,k) = no_data
-                  bl6(i,j,k) = no_data
-                  bl7(i,j,k) = no_data
-
-                  bw1(i,j,k) = no_data
-                  bw2(i,j,k) = no_data
-                  bw3(i,j,k) = no_data
-                  bw4(i,j,k) = no_data
-                  bw5(i,j,k) = no_data
-                  bw6(i,j,k) = no_data
-                  bw7(i,j,k) = no_data
-                  
-                  bf1(i,j,k) = no_data
-                  bf2(i,j,k) = no_data
-                  bf3(i,j,k) = no_data
-                  bf4(i,j,k) = no_data
-                  bf5(i,j,k) = no_data
-                  bf6(i,j,k) = no_data
-                  bf7(i,j,k) = no_data
-               endif
-            enddo
-         enddo
-      enddo
-
-      
-c!     NPP
-c      open(10,file='../outputs_pft/npp.1.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, npp1)
-c      open(10,file='../outputs_pft/npp.2.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, npp2)
-c      open(10,file='../outputs_pft/npp.3.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, npp3)
-cc      open(10,file='../outputs_pft/npp.4.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, npp4)
-cc      open(10,file='../outputs_pft/npp.5.bin',
-cc     &     status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, npp5)
-cc      open(10,file='../outputs_pft/npp.6.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, npp6)
-cc      open(10,file='../outputs_pft/npp.7.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &     access='direct',recl=4*nx*ny)
-cc      call save_file12(10, npp7)
-c
-c!     PHOTO      
-c      open(10,file='../outputs_pft/ph.1.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, ph1)
-c      open(10,file='../outputs_pft/ph.2.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, ph2)
-c      open(10,file='../outputs_pft/ph.3.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, ph3)
-cc      open(10,file='../outputs_pft/ph.4.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, ph4)
-cc      open(10,file='../outputs_pft/ph.5.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, ph5)
-cc      open(10,file='../outputs_pft/ph.6.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, ph6)
-cc      open(10,file='../outputs_pft/ph.7.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, ph7)
-c
-c      
-c!     ARESP
-c      open(10,file='../outputs_pft/ar.1.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, ar1)
-c      open(10,file='../outputs_pft/ar.2.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, ar2)
-c      open(10,file='../outputs_pft/ar.3.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, ar3)
-cc      open(10,file='../outputs_pft/ar.4.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, ar4)
-cc      open(10,file='../outputs_pft/ar.5.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, ar5)
-cc      open(10,file='../outputs_pft/ar.6.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, ar6)
-cc      open(10,file='../outputs_pft/ar.7.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, ar7)
-c
-c      
-c!     HRESP
-c      open(10,file='../outputs_pft/hr.1.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, hr1)
-c      open(10,file='../outputs_pft/hr.2.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, hr2)
-c      open(10,file='../outputs_pft/hr.3.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, hr3)
-cc      open(10,file='../outputs_pft/hr.4.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, hr4)
-cc      open(10,file='../outputs_pft/hr.5.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, hr5)
-cc      open(10,file='../outputs_pft/hr.6.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, hr6)
-cc      open(10,file='../outputs_pft/hr.7.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, hr7)
-c
-c!     CLIT
-c      open(10,file='../outputs_pft/clit.1.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, clit1)
-c      open(10,file='../outputs_pft/clit.2.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, clit2)
-c      open(10,file='../outputs_pft/clit.3.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, clit3)
-cc      open(10,file='../outputs_pft/clit.4.bin',
-cc     &     status='unknown',form='unformatted',
-cc     &     access='direct',recl=4*nx*ny)
-cc      call save_file12(10, clit4)
-cc      open(10,file='../outputs_pft/clit.5.bin',
-cc     &     status='unknown',form='unformatted',
-cc     &     access='direct',recl=4*nx*ny)
-cc      call save_file12(10, clit5)
-cc      open(10,file='../outputs_pft/clit.6.bin',
-cc     &     status='unknown',form='unformatted',
-cc     &     access='direct',recl=4*nx*ny)
-cc      call save_file12(10, clit6)
-cc      open(10,file='../outputs_pft/clit.7.bin',
-cc     &     status='unknown',form='unformatted',
-cc     &     access='direct',recl=4*nx*ny)
-cc      call save_file12(10, clit7)
-c
-c!     CSOIL
-c      open(10,file='../outputs_pft/csoil.1.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, csoil1)
-c      open(10,file='../outputs_pft/csoil.2.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, csoil2)
-c      open(10,file='../outputs_pft/csoil.3.bin',
-c     &     status='unknown',form='unformatted',
-c     &     access='direct',recl=4*nx*ny)
-c      call save_file12(10, csoil3)
-cc      open(10,file='../outputs_pft/csoil.4.bin',
-cc     &     status='unknown',form='unformatted',
-cc     &     access='direct',recl=4*nx*ny)
-cc      call save_file12(10, csoil4)
-cc      open(10,file='../outputs_pft/csoil.5.bin',
-cc     &     status='unknown',form='unformatted',
-cc     &     access='direct',recl=4*nx*ny)
-cc      call save_file12(10, csoil5)
-cc      open(10,file='../outputs_pft/csoil.6.bin',
-cc     &     status='unknown',form='unformatted',
-cc     &     access='direct',recl=4*nx*ny)
-cc      call save_file12(10, csoil6)
-cc      open(10,file='../outputs_pft/csoil.7.bin',
-cc     &     status='unknown',form='unformatted',
-cc     &     access='direct',recl=4*nx*ny)
-cc      call save_file12(10, csoil7)
-c
-c!     EVAPM
-c      open(10,file='../outputs_pft/et.1.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, et1)
-c      open(10,file='../outputs_pft/et.2.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, et2)
-c      open(10,file='../outputs_pft/et.3.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, et3)
-cc      open(10,file='../outputs_pft/et.4.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, et4)
-cc      open(10,file='../outputs_pft/et.5.bin',
-cc     &     status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, et5)
-cc      open(10,file='../outputs_pft/et.6.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &     access='direct',recl=4*nx*ny)
-cc      call save_file12(10, et6)
-cc      open(10,file='../outputs_pft/et.7.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, et7)
-c      
-c!     RCM 
-c      open(10,file='../outputs_pft/rcm.1.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, rcm1)  
-c      open(10,file='../outputs_pft/rcm.2.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, rcm2)
-c      open(10,file='../outputs_pft/rcm.3.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call save_file12(10, rcm3)
-cc      open(10,file='../outputs_pft/rcm.4.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, rcm4)
-cc      open(10,file='../outputs_pft/rcm.5.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, rcm5)
-cc      open(10,file='../outputs_pft/rcm.6.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, rcm6)
-cc      open(10,file='../outputs_pft/rcm.7.bin',
-cc     &    status='unknown',form='unformatted',
-cc     &    access='direct',recl=4*nx*ny)
-cc      call save_file12(10, rcm7)
-      
-!     BLEAF
-      open(10,file='../outputs_pft/bl.1.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bl1)
-      open(10,file='../outputs_pft/bl.2.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bl2)
-      open(10,file='../outputs_pft/bl.3.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bl3)
-      open(10,file='../outputs_pft/bl.4.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bl4)
-      open(10,file='../outputs_pft/bl.5.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bl5)
-      open(10,file='../outputs_pft/bl.6.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bl6)
-      open(10,file='../outputs_pft/bl.7.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bl7)
-
-!     BAWOOD
-      open(10,file='../outputs_pft/bw.1.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bw1)
-      open(10,file='../outputs_pft/bw.2.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bw2)
-      open(10,file='../outputs_pft/bw.3.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bw3)
-      open(10,file='../outputs_pft/bw.4.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bw4)
-      open(10,file='../outputs_pft/bw.5.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bw5)
-      open(10,file='../outputs_pft/bw.6.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bw6)
-      open(10,file='../outputs_pft/bw.7.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bw7)
-
-!     BFROOT
-      open(10,file='../outputs_pft/bf.1.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bl1)
-      open(10,file='../outputs_pft/bf.2.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bf2)
-      open(10,file='../outputs_pft/bf.3.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bf3)
-      open(10,file='../outputs_pft/bf.4.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bf4)
-      open(10,file='../outputs_pft/bf.5.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bf5)
-      open(10,file='../outputs_pft/bf.6.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bf6)
-       open(10,file='../outputs_pft/bf.7.bin',
-     &    status='unknown',form='unformatted',
-     &    access='direct',recl=4*nx*ny)
-      call save_file12(10, bf7)
-
-      
       stop
       end program env
 
 !     ==================================================
-
-      
-      subroutine pft_par(par, dt) !!!!!!!!!  mudamos os valores de dt
+      subroutine pft_par(par, dt) 
       implicit none
-!     input
-      integer, parameter :: vars = 7 
+      integer, parameter :: vars = 580 
       integer :: par            ! parameter number 
-      real, dimension(vars) :: dt,dt1,dt2,dt3,dt4,dt5,dt6
-     &    ,dt7,dt8
+      real, dimension(vars) :: dt
       
-      
-!     dt1 = g1
-!     dt2 = p21 
-!     dt3 = aleaf
-!     dt4 = aawood
-!     dt5 = afroot
-!     dt6 = tleaf
-!     dt7 = tawood
-!     dt8 = tfroot
-      
-!     PFTS
-      
-!     1 = Temperate Broad-leaf Deciduous Tree         33          4.43
-!     2 = Tropical Broad-leaf Evergreen Tree          59	      3.72
-!     3 = C3 grass	      31          4.50
+!     dt1 = aleaf
+!     dt2 = aawood
+!     dt3 = afroot
+!     dt4 = tleaf
+!     dt5 = tawood
+!     dt6 = tfroot
+!     dt7 = g1
+!     dt8 = p21
+!     DT9 = JMAX
 
-!     PFT         1       2       3       4       5       6       7      
-      data dt1/3.37,   4.8,    2.98,   4.6,    4.5,    4.64,   4.22/    !g1
-      data dt2/5.9E-5, 3.4E-5, 3.3E-5, 3.1E-5, 3.1E-5, 3.0E-5, 5.5E-5/  !p21
-      data dt3/0.35,   0.35,   0.40,   0.40,   0.45,   0.45,   0.30/    !aleaf
-      data dt4/0.30,   0.30,   0.20,   0.15,   0.0,    0.0,    0.30/    !aawood
-      data dt5/0.35,   0.35,   0.40,   0.45,   0.55,   0.55,   0.40/    !afroot
-      data dt6/6.0,    6.5,    8.3,     3.5,    3.8,    3.8,   8.33/     !tleaf
-      data dt7/70.,    68.0,   35.6,    4.0,    0.0,    0.0,    42.5/   !tawood
-      data dt8/2.8,    3.0,    3.5,     3.0,    3.5,    3.5,    3.0/    !tfroot
+      open(233,file='../inputs/pls.bin',status='old',
+     &    form='unformatted',access='direct',recl=4*580)
 
-
-
-!     PFT         1       2       3      4      5       6        7
-c      data dt1/3.37,   4.645,  7.18,   2.98,   2.35,   4.64,   4.22/ !g1
-c      data dt2/3.2E-5, 3.1E-5, 3.8E-5, 5.5E-5, 5.4E-5, 4.0E-5, 4.5E-5/ !p21
-c      data dt3/0.70,   0.65,   0.70,   0.62,   0.55,   0.82,   0.60/ !aleaf
-c      data dt4/0.10,   0.15,   0.15,   0.12,   0.0,    0.0,    0.10/ !aawood
-c      data dt5/0.20,   0.20,   0.15,   0.26,   0.45,   0.18,   0.30/ !afroot
-c      data dt6/6.8,    6.4,    2.4,     2.2,    2.8,    1.8,   4.9/ !tleaf
-c      data dt7/80.,    58.0,   38.6,    8.0,    0.0,    0.0,   42.5/ !tawood
-c      data dt8/2.8,    2.0,    2.0,     1.5,    1.4,    1.2,   3.0/ !tfroot
-      
-      if(par .eq. 1 ) then      ! g1
-         dt(:) = dt1(:)
-      else if(par .eq. 2) then  ! p21
-         dt(:) = dt2(:)
-      else if(par .eq. 3) then  ! aleaf
-         dt(:) = dt3(:)
-      else if(par .eq. 4) then  ! awood
-         dt(:) = dt4(:)
-      else if(par .eq. 5) then  ! afroot
-         dt(:) = dt5(:)
-      else if(par .eq. 6) then  ! tleaf
-         dt(:) = dt6(:)
-      else if(par .eq. 7) then  ! tawood
-         dt(:) = dt7(:)
-      else if(par .eq. 8) then  ! tfroot
-         dt(:) = dt8(:)
+      if(par .gt. 0 .and. par .lt. 10) then
+         read(233,rec=par) dt
       else
-         print*, "your search failed"
+         print*, 'search failed'
       endif
-      
+      close(233)
       return
       end subroutine pft_par
       
@@ -1177,8 +609,8 @@ c     ==================================================
 c     &     cbwoodini,cstoini,cotherini,crepini) 
       IMPLICIT NONE
 
-      integer, parameter :: nt=10000
-      integer, parameter :: npfts=7
+      integer, parameter :: nt=7000
+      integer, parameter :: npfts=580
       
 c     inputs
       integer i6, kk, k
@@ -1204,13 +636,22 @@ c     outputs
       real tawood (npfts)           !turnover time of the aboveground woody biomass compartment (yr)
       real tfroot(npfts)            !turnover time of the fine roots compartment
 
+!     dt1 = aleaf
+!     dt2 = aawood
+!     dt3 = afroot
+!     dt4 = tleaf
+!     dt5 = tawood
+!     dt6 = tfroot
+!     dt7 = g1
+!     dt8 = p21
+!     DT9 = JMAX
 
-      call pft_par(3, aleaf)
-      call pft_par(4, aawood)
-      call pft_par(5, afroot)
-      call pft_par(6, tleaf)
-      call pft_par(7, tawood)
-      call pft_par(8, tfroot)
+      call pft_par(1, aleaf)
+      call pft_par(2, aawood)
+      call pft_par(3, afroot)
+      call pft_par(4, tleaf)
+      call pft_par(5, tawood)
+      call pft_par(6, tfroot)
 
  
       sensitivity = 1.10
