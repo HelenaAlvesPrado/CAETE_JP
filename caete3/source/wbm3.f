@@ -174,13 +174,7 @@ c     ------------------------- internal variables---------------------
 !     ============
 !     
 !     For all grid points
-!     -------------------
-
-!$OMP  PARALLEL DO
-!$OMP$ SCHEDULE(STATIC)
-!$OMP$ DEFAULT(SHARED)
-!$OMP$ PRIVATE(I,J,K,P,NERRO,KK,DWWW,WSAUX1)
-      
+!     -------------------      
       do i=1,nx
          do j=1,ny
             do p = 1,q   
@@ -229,9 +223,13 @@ c     Write to track program execution
 
                enddo              
             enddo
-     
+         enddo
+      enddo
+      
 !     Only for land grid points
 !     -------------------------
+      do i = 1,nx
+         do j=1,ny 
             if (nint(lsmk(i,j)).ne.0) then
                do k=1,12
                   wg0(i,j,k) = -1.0 
@@ -405,7 +403,6 @@ c     finalize ny loop
          enddo                  ! j
 c     finalize nx loop
       enddo                     ! I
-!$OMP END PARALLEL DO 
       return
       end subroutine wbm
       
@@ -625,7 +622,11 @@ c      rh    = 0.685
          call evpot2 (p0,temp,rh,ae,emax)
              
 !     Productivity (ph, aresp, vpd, rc2 & etc.) for each PFT
-!     ================================= 
+!     =================================
+!$OMP  PARALLEL DO
+!$OMP$ SCHEDULE(STATIC)         
+!$OMP$ DEFAULT(SHARED)
+!$OMP$ PRIVATE(P) 
          do p = 1,npft
             
             call productivity1 (p,ocp_coeffs(p),OCP_WOOD(P),temp,p0,w(p)
@@ -732,6 +733,7 @@ c     Carbon allocation (carbon content on each compartment)
             ca1_pft(p) = ca2(p)     ! Adicionado ------ para fazer transforcaoes diarias
             cf1_pft(p) = cf2(p)     ! Adicionado ------ para fazer transforcaoes diarias
          enddo
+!$OMP END PARALLEL DO
       enddo                     ! end ndmonth loop
       
 !     Final calculations
