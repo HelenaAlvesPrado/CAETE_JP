@@ -89,11 +89,16 @@ C      WARNING - NEW VARIABLES ---
       
       real gridcell_ocp(nx,ny,q) !  final grid cell occupation for each pft (percentage of area)
       real betal(nx,ny,12,q)
-      real, dimension(nx,ny,12):: bl1,bl2,bl3,bl4,bl5,bl6,bl7 ! carbon allocated to growth (monthly sums) 
+      real, dimension(nx,ny,12):: bl1,bl2,bl3,bl4,bl5,bl6,bl7, ! carbon allocated to growth (monthly sums)
+     & bl8,bl9,bl10,bl11,bl12 
       real betaw(nx,ny,12,q)
-      real, dimension(nx,ny,12):: bw1,bw2,bw3,bw4,bw5,bw6,bw7
+      real, dimension(nx,ny,12):: bw1,bw2,bw3,bw4,bw5,bw6,bw7,
+     & bw8,bw9,bw10,bw11,bw12
+
       real betaf(nx,ny,12,q)
-      real, dimension(nx,ny,12):: bf1,bf2,bf3,bf4,bf5,bf6,bf7
+
+      real, dimension(nx,ny,12):: bf1,bf2,bf3,bf4,bf5,bf6,bf7,
+     & bf8,bf9,bf10,bf11,bf12
 
       
 c     variaveis do spinup
@@ -1244,7 +1249,6 @@ cc      call save_file12(10, rcm7)
 !     PFT       1       2       3       4       5       6       7
       data dt4/0.35,   0.35,   0.20,   0.25,   0.0,    0.35,   0.40, !aawood
      &
-      y
 !           8       9       10      11      12
      &    0.00,   0.20,   0.20,   0.40,   0.35/
 !     PFT       1       2       3       4       5       6       7
