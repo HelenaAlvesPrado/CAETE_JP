@@ -223,13 +223,9 @@ c     Write to track program execution
 
                enddo              
             enddo
-         enddo
-      enddo
       
 !     Only for land grid points
-!     -------------------------
-      do i = 1,nx
-         do j=1,ny 
+!     ------------------------- 
             if (nint(lsmk(i,j)).ne.0) then
                do k=1,12
                   wg0(i,j,k) = -1.0 
