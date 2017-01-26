@@ -161,7 +161,8 @@ c     ------------------------- internal variables---------------------
                do n = 1,1200    !1200 months run to attain equilibrium
                   k1 = mod(n,12)
                   if (k1.eq.0) k = 12
-                t1 = t0*exp(-1.0/tau)+(1.0-exp(-1.0/tau))*temp(i1,j1,k1) 
+                  t1 = t0*exp(-1.0/tau)+(1.0-exp(-1.0/tau))*
+     &                        temp(i1,j1,k1) 
                   tsoil(i1,j1,k1) = (t0 + t1)/2.0
                   t0 = t1
                enddo
@@ -328,8 +329,8 @@ c     Write to track program execution
                   gsoilt(i,j,k) = 0.0
 
                   do p = 1,q
-                     wsoilt(i,j,k) = wsoilt(i,j,k) + wsoil_pft(i,j,k,p)
-                     gsoilt(i,j,k) = gsoilt(i,j,k) + gsoil(i,j,k,p)
+                 wsoilt(i,j,k) = wsoilt(i,j,k) + wsoil_pft(i,j,k,p)
+                 gsoilt(i,j,k) = gsoilt(i,j,k) + gsoil(i,j,k,p)
                   enddo
 
                   wmax = 500.
@@ -344,7 +345,7 @@ c     Write to track program execution
                   if (nerro.ne.0) then
 
                      do kk=1,12
-                        wg0(i,j,kk) = wsoilt(i,j,kk) + gsoilt(i,j,kk)
+                    wg0(i,j,kk) = wsoilt(i,j,kk) + gsoilt(i,j,kk)
                      enddo
                   else
                      goto 100
@@ -369,9 +370,9 @@ c
                      if(wood(p) .le. 0.0) then
                         if(abs(bl(p)) .gt. 20.0 .or.
      $                      abs(bf(p)) .gt. 20.0) then
-                           cleaf1_pft(p) =  cleafmes(p) + ((bl(p)*1e-6))
+                      cleaf1_pft(p) =  cleafmes(p) + ((bl(p)*1e-6))
 c     &                      * 365.)
-                           cfroot1_pft(p)= cfrootmes(p) + ((bf(p)*1e-6))
+                      cfroot1_pft(p)= cfrootmes(p) + ((bf(p)*1e-6))
 c     &                      * 365.)
 c     print*, abs(bl(p)),abs(bf(p)), abs(bw(p)), p, n
                            goto 10

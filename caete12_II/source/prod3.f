@@ -860,12 +860,12 @@ c     initialization
       if(aawood(pft) .gt. 0.0) then
          sca2_128 = sca1 +(aawood(pft)*npp_aux)-(sca1/(tawood(pft)
      &       *365.0))
+         sca2 = real(sca2_128,4)
       else
          sca2 = 0.0
       endif
 
       scf2 = real(scf2_128,4)
-      sca2 = real(sca2_128,4)
       scl2 = real(scl2_128,4)
 
 
