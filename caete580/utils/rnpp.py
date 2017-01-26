@@ -93,9 +93,20 @@ for i in range(len(plsa_wood)):
 
 # CREATING TURNOVER COMBINATIONS
 colnames_t = ['tleaf','twood','troot']
-turnover_wood = [[a,b,c] for a in tleaf for b in twood for c in troot]
-turnover_grass = [[a,0.0,c] for a in tleaf for c in troot]
-turnover = turnover_grass + turnover_wood
+turnover_wood1 = [[a,b,c] for a in tleaf for b in twood for c in troot]
+turnover_wood5 = [[a,b,c] for a in tleaf for c in troot for b in twood]
+turnover_wood2 = [[a,b,c] for c in troot for b in twood for a in tleaf]
+turnover_wood6 = [[a,b,c] for c in troot for b in twood for a in tleaf]
+turnover_wood3 = [[a,b,c] for b in twood for c in troot for a in tleaf]
+turnover_wood4 = [[a,b,c] for b in twood for a in tleaf for c in troot]
+turnover_grass1 = [[a,0.0,c] for a in tleaf for c in troot]
+turnover_grass2 = [[c,0.0,a] for a in tleaf for c in troot]
+turnover_grass3 = [[a,0.0,c] for c in troot for a in tleaf]
+turnover_grass4 = [[c,0.0,a] for c in troot for a in tleaf]
+
+turnover_wood = turnover_wood1 + turnover_wood2 + turnover_wood3 + turnover_wood4 +\
+                turnover_wood5 + turnover_wood6
+turnover_grass = turnover_grass1 + turnover_grass2 +turnover_grass3 + turnover_grass4
 
 for i in range(len(turnover_grass)):
     x = turnover_grass.pop()
@@ -113,36 +124,69 @@ for i in range(len(turnover_wood)):
         
 # CREATING PHYSIOLOGICAL COMBINATIONS
 colenames_p = ['g1','vcmax','jmax']
-phys = [[a,b,c] for a in g1 for b in vcmax for c in jmax]
+phys1 = [[a,b,c] for a in g1 for b in vcmax for c in jmax]
+phys2 = [[a,b,c] for a in g1 for c in jmax for b in vcmax]
+phys3 = [[a,b,c] for b in vcmax for a in g1 for c in jmax]
+phys4 = [[a,b,c] for b in vcmax for c in jmax for a in g1]
+phys5 = [[a,b,c] for c in jmax for b in vcmax for a in g1]
+phys6 = [[a,b,c] for c in jmax for a in g1 for b in vcmax]
 
-sec_hand_wood = [a + b  for a in turnover_wood for b in phys]
-sec_hand_grass = [a + b  for a in turnover_grass for b in phys]
+phys = phys1 + phys2 + phys3 + phys4 + phys5 + phys6
 
-sec_hand_arr_grass = np.array(sec_hand_grass)
-sec_hand_arr_wood = np.array(sec_hand_wood)
+for i in range(len(phys)):
+    x = phys.pop()
+    if x in phys:
+        pass
+    else:
+        phys.insert(0,x)
+
+sec_hand_wood1 = [a + b  for a in turnover_wood for b in phys]
+sec_hand_wood2 = [a + b  for b in phys for a in turnover_wood]
+sec_hand_grass1 = [a + b  for a in turnover_grass for b in phys]
+sec_hand_grass2 = [a + b  for b in phys for a in turnover_grass]
+sec_hand_grass = sec_hand_grass1 + sec_hand_grass2
+sec_hand_wood = sec_hand_wood1 + sec_hand_wood2
+
+for i in range(len(sec_hand_grass)):
+    x = sec_hand_grass.pop()
+    if x in sec_hand_grass:
+        pass
+    else:
+        sec_hand_grass.insert(0,x)
+
+for i in range(len(sec_hand_wood)):
+    x = sec_hand_wood.pop()
+    if x in sec_hand_wood:
+        pass
+    else:
+        sec_hand_wood.insert(0,x)
+
+
+#sec_hand_arr_grass = np.array(sec_hand_grass)
+#sec_hand_arr_wood = np.array(sec_hand_wood)
 
 # juntando as combinações de turnover + g1 + vcmax etc temos
 # mais de 1300000 possíveis combinações
 
 # selecionando randomicamente (usando uma distribuição discreta uniforme) 10000
-plss_wood = sec_hand_arr_wood[np.random.random_integers(0,sec_hand_arr_wood.shape[0],10000)][:]
-plss_grass = sec_hand_arr_grass[np.random.random_integers(0,sec_hand_arr_grass.shape[0],10000)][:]
+#plss_wood = sec_hand_arr_wood[np.random.random_integers(0,sec_hand_arr_wood.shape[0],10000)][:]
+#plss_grass = sec_hand_arr_grass[np.random.random_integers(0,sec_hand_arr_grass.shape[0],10000)][:]
 
-pls_list = []
+#pls_list = []
 
-for alloc_pls in plsa_grass:
-    for x in range(10):
-        plst = alloc_pls + list(sec_hand_arr_grass[np.random.randint(0,10000)][:])
-        pls_list.append(plst)
-    
-for alloc_pls in plsa_wood:
-    for x in range(10):
-        plst = alloc_pls + list(sec_hand_arr_wood[np.random.randint(0,10000)][:])
-        pls_list.append(plst)
+#for alloc_pls in plsa_grass:
+#    for x in range(10):
+#        plst = alloc_pls + list(sec_hand_arr_grass[np.random.randint(0,10000)][:])
+#        pls_list.append(plst)
+#    
+#for alloc_pls in plsa_wood:
+#    for x in range(10):
+#        plst = alloc_pls + list(sec_hand_arr_wood[np.random.randint(0,10000)][:])
+#        pls_list.append(plst)
 
-out_arr = np.array(pls_list).T
+#out_arr = np.array(pls_list).T
 
-np.savetxt('pls_580.txt', out_arr, fmt='%.12f')
+#np.savetxt('pls_580.txt', out_arr, fmt='%.12f')
 
 
 
