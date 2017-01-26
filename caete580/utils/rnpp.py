@@ -5,7 +5,7 @@ import random as rd
 import numpy as np
 import gdal
 import matplotlib.pyplot as plt
-
+import matplotlib.mlab as mlab
 
 def random_npp():
     """CREATE A RANDOM NPP GLOBAL MAP... AS AN np.array - 0.5°resolution """
@@ -27,53 +27,27 @@ def random_npp():
     return rnpp
 
 
-# Valores que vão sair de uma distribuição lognormal
-#g1 = np.linspace(1.6, 7.1, 10)
-#vcmax = np.linspace(3.e-5,25e-5,10)
-#jmax = np.linspace(1e-4,3e-4,10)
 
-#tleaf = np.linspace(1,100,50)/12 # years
-#twood = np.linspace(0,80,90)
-#troot = np.linspace(1,100,50)/12
+g1 = np.linspace(1.6, 7.1, 10) # 10 elementos
+vcmax = np.linspace(3.e-5,25e-5,10) # 10 elementos
+jmax = np.linspace(1e-4,3e-4,10) # 10 elementos
 
-# estes valores combinados devem somar 100% 
+tleaf = np.arange(1,100,12)/12 # years 9 elementos
+twood = np.arange(1,80,5) # 16 elementos
+troot = np.arange(1,100,12)/12 #9 elementos
 
-#aleaf = np.linspace(25,90,33)
-#aroot = np.linspace(25,90,33)
-#awood = np.linspace(0,90,45)
-g1 = np.linspace(1.6, 7.1, 10)
-vcmax = np.linspace(3.e-5,25e-5,10)
-jmax = np.linspace(1e-4,3e-4,10)
+aleaf = np.arange(20,81,5) # 13
+aroot = np.arange(20,81,5) # 13
+awood = np.arange(20,81,5) # 13
 
-tleaf = np.arange(1,100,12)/12 # years
-twood = np.arange(1,80,5)
-troot = np.arange(1,100,12)/12
+estrategies_number_wood = len(g1) * len(vcmax) * len(jmax) * len(tleaf) * len(twood) * len(troot) 
+estrategies_number_grass = len(g1) * len(vcmax) * len(jmax) * len(tleaf)  * len(troot) 
 
-aleaf = np.arange(20,81,5)
-aroot = np.arange(20,81,5)
-awood = np.arange(20,81,5)
 
-pls_list = []
 colnames_a = ['aleaf','awood','aroot']
+plsa_grass = [[a/100,0.0,c/100] for a in aleaf for c in aroot if abs(a + 0.0 + c) == 100.]
+plsa_wood = [[a/100,b/100,c/100] for a in aleaf for b in awood for c in aroot if ((a + b + c) == 100.) and (b > 19)]
 
-
-pls_grass1 = [[a/100,0.0,c/100] for a in aleaf for c in aroot if abs(a + 0.0 + c) == 100.]
-pls_grass2 = [[c/100,0.0,a/100] for a in aleaf for c in aroot if abs(c + 0.0 + a) == 100.]
-pls_grass3 = [[a/100,0.0,c/100] for c in aroot for a in aleaf if abs(a + 0.0 + c) == 100.]
-pls_grass4 = [[c/100,0.0,a/100] for c in aroot for a in aleaf if abs(c + 0.0 + a) == 100.]
-
-pls_woody1 = [[a/100,b/100,c/100] for a in aleaf for b in awood for c in aroot if ((a + b + c) == 100.) and (b > 19)]
-pls_woody2 = [[a/100,b/100,c/100] for c in aroot for b in awood for a in aleaf if ((c + b + a) == 100.) and (b > 19)]
-pls_woody3 = [[a/100,b/100,c/100] for b in awood for c in aroot for a in aleaf if ((c + b + a) == 100.) and (b > 19)]
-pls_woody4 = [[a/100,b/100,c/100] for a in aleaf for c in aroot for b in awood if ((c + b + a) == 100.) and (b > 19)]
-pls_woody5 = [[a/100,b/100,c/100] for c in aroot for b in awood for a in aleaf if ((c + b + a) == 100.) and (b > 19)]
-pls_woody6 = [[a/100,b/100,c/100] for b in awood for a in aleaf for c in aroot if ((c + b + a) == 100.) and (b > 19)]
-plsa =(pls_grass1 + pls_grass2 + pls_grass3 + pls_grass4 + pls_woody1 +\
-      pls_woody2 +pls_woody3+pls_woody4+pls_woody5+pls_woody6)
-
-plsa_wood =(pls_woody1 + pls_woody2 + pls_woody3 + pls_woody4 + pls_woody5 + pls_woody6)
-
-plsa_grass =(pls_grass1 + pls_grass2 + pls_grass3 + pls_grass4)
 
 
 # CREATING ALLOCATION COMBINATIONS
@@ -93,20 +67,8 @@ for i in range(len(plsa_wood)):
 
 # CREATING TURNOVER COMBINATIONS
 colnames_t = ['tleaf','twood','troot']
-turnover_wood1 = [[a,b,c] for a in tleaf for b in twood for c in troot]
-turnover_wood5 = [[a,b,c] for a in tleaf for c in troot for b in twood]
-turnover_wood2 = [[a,b,c] for c in troot for b in twood for a in tleaf]
-turnover_wood6 = [[a,b,c] for c in troot for b in twood for a in tleaf]
-turnover_wood3 = [[a,b,c] for b in twood for c in troot for a in tleaf]
-turnover_wood4 = [[a,b,c] for b in twood for a in tleaf for c in troot]
-turnover_grass1 = [[a,0.0,c] for a in tleaf for c in troot]
-turnover_grass2 = [[c,0.0,a] for a in tleaf for c in troot]
-turnover_grass3 = [[a,0.0,c] for c in troot for a in tleaf]
-turnover_grass4 = [[c,0.0,a] for c in troot for a in tleaf]
-
-turnover_wood = turnover_wood1 + turnover_wood2 + turnover_wood3 + turnover_wood4 +\
-                turnover_wood5 + turnover_wood6
-turnover_grass = turnover_grass1 + turnover_grass2 +turnover_grass3 + turnover_grass4
+turnover_wood = [[a,b,c] for a in tleaf for b in twood for c in troot]
+turnover_grass = [[a,0.0,c] for a in tleaf for c in troot]
 
 for i in range(len(turnover_grass)):
     x = turnover_grass.pop()
@@ -123,15 +85,8 @@ for i in range(len(turnover_wood)):
         turnover_wood.insert(0,x)
         
 # CREATING PHYSIOLOGICAL COMBINATIONS
-colenames_p = ['g1','vcmax','jmax']
-phys1 = [[a,b,c] for a in g1 for b in vcmax for c in jmax]
-phys2 = [[a,b,c] for a in g1 for c in jmax for b in vcmax]
-phys3 = [[a,b,c] for b in vcmax for a in g1 for c in jmax]
-phys4 = [[a,b,c] for b in vcmax for c in jmax for a in g1]
-phys5 = [[a,b,c] for c in jmax for b in vcmax for a in g1]
-phys6 = [[a,b,c] for c in jmax for a in g1 for b in vcmax]
-
-phys = phys1 + phys2 + phys3 + phys4 + phys5 + phys6
+colnames_p = ['g1','vcmax','jmax']
+phys = [[a,b,c] for a in g1 for b in vcmax for c in jmax]
 
 for i in range(len(phys)):
     x = phys.pop()
@@ -140,53 +95,34 @@ for i in range(len(phys)):
     else:
         phys.insert(0,x)
 
-sec_hand_wood1 = [a + b  for a in turnover_wood for b in phys]
-sec_hand_wood2 = [a + b  for b in phys for a in turnover_wood]
-sec_hand_grass1 = [a + b  for a in turnover_grass for b in phys]
-sec_hand_grass2 = [a + b  for b in phys for a in turnover_grass]
-sec_hand_grass = sec_hand_grass1 + sec_hand_grass2
-sec_hand_wood = sec_hand_wood1 + sec_hand_wood2
-
-for i in range(len(sec_hand_grass)):
-    x = sec_hand_grass.pop()
-    if x in sec_hand_grass:
-        pass
-    else:
-        sec_hand_grass.insert(0,x)
-
-for i in range(len(sec_hand_wood)):
-    x = sec_hand_wood.pop()
-    if x in sec_hand_wood:
-        pass
-    else:
-        sec_hand_wood.insert(0,x)
-
-
-#sec_hand_arr_grass = np.array(sec_hand_grass)
-#sec_hand_arr_wood = np.array(sec_hand_wood)
+sec_hand_wood = [a + b  for a in turnover_wood for b in phys]
+sec_hand_grass = [a + b  for a in turnover_grass for b in phys]
+        
+sec_hand_arr_grass = np.array(sec_hand_grass)
+sec_hand_arr_wood = np.array(sec_hand_wood)
 
 # juntando as combinações de turnover + g1 + vcmax etc temos
 # mais de 1300000 possíveis combinações
 
-# selecionando randomicamente (usando uma distribuição discreta uniforme) 10000
-#plss_wood = sec_hand_arr_wood[np.random.random_integers(0,sec_hand_arr_wood.shape[0],10000)][:]
-#plss_grass = sec_hand_arr_grass[np.random.random_integers(0,sec_hand_arr_grass.shape[0],10000)][:]
+pls_list = []
 
-#pls_list = []
+for alloc_pls in plsa_grass:
+   for x in range(10):
+       plst = alloc_pls + list(sec_hand_arr_grass[np.random.randint(0,81000-1)][:])
+       pls_list.append(plst)
+   
+for alloc_pls in plsa_wood:
+   for x in range(10):
+       plst = alloc_pls + list(sec_hand_arr_wood[np.random.randint(0,1.296e6-1)][:])
+       pls_list.append(plst)
+import csv
 
-#for alloc_pls in plsa_grass:
-#    for x in range(10):
-#        plst = alloc_pls + list(sec_hand_arr_grass[np.random.randint(0,10000)][:])
-#        pls_list.append(plst)
-#    
-#for alloc_pls in plsa_wood:
-#    for x in range(10):
-#        plst = alloc_pls + list(sec_hand_arr_wood[np.random.randint(0,10000)][:])
-#        pls_list.append(plst)
-
-#out_arr = np.array(pls_list).T
-
-#np.savetxt('pls_580.txt', out_arr, fmt='%.12f')
-
+with open('pls_attrs.csv', mode='w') as fh:
+    writer = csv.writer(fh, delimiter=',')
+    writer.writerow(colnames_a + colnames_t + colnames_p)
+    writer.writerows(pls_list)
+  
+out_arr = np.array(pls_list).T
+np.savetxt('pls_580.txt', out_arr, fmt='%.12f')
 
 
