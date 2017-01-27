@@ -117,7 +117,7 @@ c     ------------------------- internal variables---------------------
       real ae                   !Available energy     
       real pr,spre,ta,td,ipar,ru
       integer I1,J1,K1,k2
-      real leaf_pool(q), froot_pool(q),awood_pool(q)
+      real leaf0(q), froot0(q),awood0(q)
       
       real, parameter :: H = 1.0 !Soil layer(m) 
       real, parameter :: diffu = 4.e-7*(30.*86400.0) !Soil thermal diffusivity (m2/month)
@@ -167,6 +167,11 @@ c     ------------------------- internal variables---------------------
                cleaf1_pft (p) =  cleaf_ini(i,j,p)
                cawood1_pft(p) = cawood_ini(i,j,p)
                cfroot1_pft(p) = cfroot_ini(i,j,p)
+
+               leaf0(p) = cleaf_ini(i,j,p)
+               froot0(p) = cfroot_ini(i,j,p)
+               awood0(p) = cawood_ini(i,j,p)
+
                cleaf_pft(i,j,p)  = no_data ! leaf biomass (KgC/m2)
                cawood_pft(i,j,p) = no_data ! aboveground biomass (KgC/m2)
                cfroot_pft(i,j,p) = no_data ! fine root biomass (KgC/m2)
@@ -324,7 +329,7 @@ c     Write to track program execution
                   do kk=1,12
                      wsaux1 = wsoilt(i,j,kk) + gsoilt(i,j,kk)   
                      dwww = (wsaux1 - wg0(i,j,kk)) / wmax
-                     if (abs(dwww).gt.0.01) nerro = nerro + 1
+                     if (abs(dwww).gt.0.008) nerro = nerro + 1
                   enddo
                   
                   if (nerro.ne.0) then
@@ -349,9 +354,9 @@ c     Write to track program execution
      &                   cfroot_pft(i,j,p).gt. 0.0) then
                         if(wood(p) .le. 0.0) then
                            print*,'GRASS' 
-                           print*, cleaf_ini(i,j,p) - cleaf1_pft(p), 'l'
+                           print*, leaf0(p) - cleaf1_pft(p), 'l'
      &                         , p, n
-                           print*, cfroot_ini(i,j,p) - cfroot1_pft(p),
+                           print*, froot0(p) - cfroot1_pft(p),
      &                         'r', p, n
                            print*,' ' 
                            print*,' '
@@ -359,11 +364,11 @@ c     Write to track program execution
 
                         else
                            print*, 'woody'
-                           print*, cleaf_ini(i,j,p) - cleaf1_pft(p), 'l'
+                           print*, leaf0(p) - cleaf1_pft(p), 'l'
      &                         , p, n
-                           print*, cfroot_ini(i,j,p) - cfroot1_pft(p),
+                           print*, froot0(p) - cfroot1_pft(p),
      &                         'r', p, n
-                           print*, cawood_ini(i,j,p) - cawood1_pft(p),
+                           print*, awood0(p) - cawood1_pft(p),
      &                         'w', p, n
                            print*,' ' 
                            print*,' '
