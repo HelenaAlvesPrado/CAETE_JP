@@ -339,34 +339,48 @@ c     Write to track program execution
                goto 10               
  100           continue
 !     PFTs equilibrium check
-c              nerro = 0
-               DO K = 1,12
-                  DO P = 1,Q
-                     BL(P) = BL(P) + BETAL(I,J,K,P)/12.
-                     BW(P) = BW(P) + BETAW(I,J,K,P)/12.
-                     BF(P) = BF(P) + BETAF(I,J,K,P)/12.
-                  ENDDO
-               ENDDO
+!     ==================================================
+!     tentativa 1 - usando variacao no pool de C
+!     --------------------------------------------------
+               if (k.eq.12) then
+                  do p = 1,q
+                     print* cleaf1_pft(p), cleaf_ini(i,j,p)
+                  enddo
+               endif
                
-               call pft_par(4,wood)
-               do p = 1,q
-                  if(cleaf_pft(i,j,p) .gt. 0.0 .and.
-     &                cfroot_pft(i,j,p).gt. 0.0) then
-                     if(wood(p) .le. 0.0) then
-                        if(abs(bl(p)) .gt. 250.0 .or.
-     $                     abs(bf(p)) .gt. 250.0) then  
-                            nerro = nerro + 1
-                        ENDIF
-                     else
-                        if(abs(bl(p)) .gt. 250.0 .or.
-     $                      abs(bf(p)) .gt. 250.0 .or.
-     $                      abs(bw(p)) .gt. 700.0) then
-                            nerro = nerro + 1 
-                        ENDIF   
-                     endif
-                  endif
-               enddo
-               if(nerro .gt. 0) goto 10
+cc              nerro = 0
+c               DO K = 1,12
+c                  DO P = 1,Q
+c                     BL(P) = BL(P) + BETAL(I,J,K,P)/12.
+c                     BW(P) = BW(P) + BETAW(I,J,K,P)/12.
+c                     BF(P) = BF(P) + BETAF(I,J,K,P)/12.
+c                  ENDDO
+c               ENDDO
+c               
+c               call pft_par(4,wood)
+c               do p = 1,q
+c                  if(cleaf_pft(i,j,p) .gt. 0.0 .and.
+c     &                cfroot_pft(i,j,p).gt. 0.0) then
+c                     if(wood(p) .le. 0.0) then
+c                        if(abs(bl(p)) .gt. 250.0 .or.
+c     $                     abs(bf(p)) .gt. 250.0) then  
+c                            nerro = nerro + 1
+c                        ENDIF
+c                     else
+c                        if(abs(bl(p)) .gt. 250.0 .or.
+c     $                      abs(bf(p)) .gt. 250.0 .or.
+c     $                      abs(bw(p)) .gt. 700.0) then
+c                            nerro = nerro + 1 
+c                        ENDIF   
+c                     endif
+c                  endif
+c               enddo
+c               if(nerro .gt. 0) goto 10
+c     ========================================================
+
+
+               
+               
             endif               ! endif lsmk
 c     finalize ny loop
          enddo                  ! j

@@ -333,9 +333,9 @@ c     Autothrophic respiration
 !     eu esqueço as vezes =P. Mas eu desconfio que essa eh a origem do bug que
 !     nao deixa a bia editar o codigo no notepad++ 
       
-      ncl = 0.021               !(gN/gC) 
-      ncf = 0.004               !(gN/gC)
-      ncs = 0.003               !(gN/gC)
+      ncl = 0.030               !(gN/gC) 
+      ncf = 0.030               !(gN/gC)
+      ncs = 0.006               !(gN/gC)
  
       rml64 = (ncl * cl1) * 27. * exp(0.03*temp)
       rml =  real(rml64,4)
@@ -623,7 +623,7 @@ c23456
       
 
       DO P = 1,NPFT
-         TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P) * 5e-3 ! only sapwood
+         TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P) ! only sapwood
          TOTAL_BIOMASS = TOTAL_BIOMASS + TOTAL_BIOMASS_PFT(P)
          TOTAL_WOOD = TOTAL_WOOD + CAWOOD(P)
          TOTAL_W_PFT(P) = CAWOOD(P)
