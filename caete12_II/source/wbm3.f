@@ -103,8 +103,8 @@ c     ------------------------- internal variables---------------------
       real cawood1_pft(q)
       real cfroot1_pft(q)
       real wood(q)
-!     outputs for budget
-      real epmes ! equal for all pfts - Maximum evapotranspiration (mm day-1)
+!     outputs for budget (these variables store monthly values from budget)
+      real epmes ! equal for all pfts - potential evapotranspiration(PET)(mm day-1)
       real rmes(q),phmes(q),smes(q),rcmes(q),hrmes(q)
       real nppmes(q),laimes(q), armes(q),clmes(q),csmes(q)
       real emes(q),rmlmes(q),rmfmes(q),rmsmes(q)
@@ -314,23 +314,23 @@ c     Write to track program execution
                   gsoilt(i,j,k) = 0.0
 
                   do p = 1,q
-                 wsoilt(i,j,k) = wsoilt(i,j,k) + wsoil_pft(i,j,k,p)
-                 gsoilt(i,j,k) = gsoilt(i,j,k) + gsoil(i,j,k,p)
+                     wsoilt(i,j,k) = wsoilt(i,j,k) + wsoil_pft(i,j,k,p)
+                     gsoilt(i,j,k) = gsoilt(i,j,k) + gsoil(i,j,k,p)
                   enddo
-
+                  
                   wmax = 500.
                   nerro = 0
-
+                  
                   do kk=1,12
-                     wsaux1 = wsoilt(i,j,kk) + gsoilt(i,j,kk)                     
+                     wsaux1 = wsoilt(i,j,kk) + gsoilt(i,j,kk)   
                      dwww = (wsaux1 - wg0(i,j,kk)) / wmax
                      if (abs(dwww).gt.0.01) nerro = nerro + 1
                   enddo
-
+                  
                   if (nerro.ne.0) then
-
+                     
                      do kk=1,12
-                    wg0(i,j,kk) = wsoilt(i,j,kk) + gsoilt(i,j,kk)
+                        wg0(i,j,kk) = wsoilt(i,j,kk) + gsoilt(i,j,kk)
                      enddo
                   else
                      goto 100
@@ -343,10 +343,33 @@ c     Write to track program execution
 !     tentativa 1 - usando variacao no pool de C
 !     --------------------------------------------------
                if (k.eq.12) then
+                  call pft_par(4,wood)
                   do p = 1,q
-               print*, cleaf1_pft(p) - cleaf_ini(i,j,p),'l',p,n
-               print*, cfroot1_pft(p) - cfroot_ini(i,j,p),'r',p,n
-               print*, cawood1_pft(p) - cawood_ini(i,j,p),'w',p,n
+                     if(cleaf_pft(i,j,p) .gt. 0.0 .and.
+     &                   cfroot_pft(i,j,p).gt. 0.0) then
+                        if(wood(p) .le. 0.0) then
+                           print*,'GRASS' 
+                           print*, cleaf_ini(i,j,p) - cleaf1_pft(p), 'l'
+     &                         , p, n
+                           print*, cfroot_ini(i,j,p) - cfroot1_pft(p),
+     &                         'r', p, n
+                           print*,' ' 
+                           print*,' '
+                           print*,' '
+
+                        else
+                           print*, 'woody'
+                           print*, cleaf_ini(i,j,p) - cleaf1_pft(p), 'l'
+     &                         , p, n
+                           print*, cfroot_ini(i,j,p) - cfroot1_pft(p),
+     &                         'r', p, n
+                           print*, cawood_ini(i,j,p) - cawood1_pft(p),
+     &                         'w', p, n
+                           print*,' ' 
+                           print*,' '
+                           print*,' '
+                        endif
+                     endif
                   enddo
                endif
                
