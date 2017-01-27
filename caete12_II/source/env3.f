@@ -324,25 +324,25 @@ c     if (prec(i,j,k).lt.0.0) prec (i,j,k) = 0.0
       
       
 !     SAVE RESULTS TO FILES
-      call nan2ndt(gridcell_ocp, q)
+c      call nan2ndt(gridcell_ocp, q)
       open(10,file='../outputs/gridcell_ocp.bin',
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)
       call savex(10, gridcell_ocp, q)
       
-      call nan2ndt(cleaf_pft, q)
+c      call nan2ndt(cleaf_pft, q)
       open(10,file='../outputs/cleaf.bin',
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)
       call savex(10, cleaf_pft, q)
       
-      call nan2ndt(cawood_pft, q)
+c      call nan2ndt(cawood_pft, q)
       open(10,file='../outputs/cawood.bin',
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)
       call savex(10,cawood_pft,q)
       
-      call nan2ndt(cfroot_pft, q)
+c      call nan2ndt(cfroot_pft, q)
       open(10,file='../outputs/cfroot.bin',
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)

@@ -117,9 +117,11 @@ c     ------------------------- internal variables---------------------
       real ae                   !Available energy     
       real pr,spre,ta,td,ipar,ru
       integer I1,J1,K1,k2
+
       real leaf0(q), froot0(q),awood0(q)
       real biomass, biomass0
       real sensi
+      logical check
       real, parameter :: H = 1.0 !Soil layer(m) 
       real, parameter :: diffu = 4.e-7*(30.*86400.0) !Soil thermal diffusivity (m2/month)
       real, parameter :: tau = (H**2)/(2.0*diffu) !E-folding time (months)
@@ -330,7 +332,7 @@ c     Write to track program execution
                   do kk=1,12
                      wsaux1 = wsoilt(i,j,kk) + gsoilt(i,j,kk)   
                      dwww = (wsaux1 - wg0(i,j,kk)) / wmax
-                     if (abs(dwww).gt.0.008) nerro = nerro + 1
+                     if (abs(dwww).gt.0.015) nerro = nerro + 1
                   enddo
                   
                   if (nerro.ne.0) then
@@ -346,15 +348,14 @@ c     Write to track program execution
  100           continue
 !     PFTs equilibrium check
 !     ==================================================
-!     tentativa 1 - usando variacao no pool de C
+!     tentativa 1 - usando variacao no pool de C vegetal
 !     --------------------------------------------------
                if (k.eq.12) then
-                  
                   nerro = 0
                   biomass = 0.0
                   biomass0 = 0.0
                   check = .false.
-                  sensi = 1.001 ! if (biomass1-biomass0)/0.1 (kg/m2/y) .lt. sensi: equilibrium
+                  sensi = 1.1 ! (kg/m2/y) if biomas change .le. sensi: equilibrium
                   call pft_par(4,wood)
 
                   do p = 1,q
@@ -366,33 +367,17 @@ c     Write to track program execution
      &                         cfroot1_pft(p)  
                            biomass0 = biomass0 + leaf0(p) +
      &                         froot0(p)
-c     print*,' '
-c     print*, 'pft not in eq', p, n
-c     print*, abs(biomass -biomass0)
-c     print*,' '
-c     print*,' '
-c     print*, 'pft in eq', p, n
-c     print*, abs(biomass -biomass0)
-c     print*,' '
                         else
                            check = .true.
                            biomass = biomass + cleaf1_pft(p) +
-     &                         cfroot1_pft(p) + cawood1_pft
+     &                         cfroot1_pft(p) + cawood1_pft(p)
                            biomass0 = biomass0 + leaf0(p) +
      &                         froot0(p) + awood0(p)
-c     print*,' '
-c     print*, 'pft not in eq', p, n
-c     print*, abs(biomass -biomass0)
-c     print*,' '
-c     print*,' '
-c     print*, 'pft in eq', p, n
-c     print*, abs(biomass -biomass0)
-c     print*,' '
                         endif
                      endif
                   enddo
                   if(check) then
-                     if ((abs(biomass-biomass0)/0.1) .gt. sensi) then
+                     if (abs(biomass-biomass0) .gt. sensi) then
                         do p=1,q
                            leaf0(p) = cleaf1_pft(p)
                            froot0(p) = cfroot1_pft(p)
@@ -401,7 +386,13 @@ c     print*,' '
                         enddo
                      endif
                   endif
-                  if(nerro .gt. 0) goto 10
+                  if(nerro .gt. 0) then
+                     !print*, abs(biomass-biomass0), n
+                     goto 10
+                  else
+                     !print*, 'eq attained',n
+                     continue
+                  endif
                endif
             endif               ! endif lsmk
 c     finalize ny loop
