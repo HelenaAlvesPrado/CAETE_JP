@@ -2,9 +2,8 @@ C23456
       subroutine wbm (prec,temp,lsmk,p0,ca,par,rhs,cleaf_ini,cawood_ini
      &    ,cfroot_ini,emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft
      &    ,clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,evapm_pft
-     &    ,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft,rgf_pft
-     &    ,rgs_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft,grid_area
-     &    ,betal,betaw,betaf)
+     &    ,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rg_pft
+     &    ,cleaf_pft,cawood_pft,cfroot_pft,grid_area)
       
 
       implicit none
@@ -493,7 +492,7 @@ c     Carbon Cycle
       real cs  (npft)           !Soil carbon (kgC/m2) 
       real hr  (npft)           !Heterotrophic (microbial) respiration (kgC/m2/yr)
       real rc2 (npft)           !Canopy resistence (s/m)
-      real f5(npft)
+      real f5(npft),f1(npft)
       real rm(npft) ! maintenance & growth a.resp
       real rg(npft)
       real cl1(npft),cf1(npft),ca1(npft) ! carbon pre-allocation 
@@ -504,7 +503,8 @@ c     Carbon Cycle
 !     ---------------------------------------
       do p = 1,npft
          rc2(p) = 0.0
-         f5(p)
+         f5(p) = 0.0
+         f1(p) = 0.0
       enddo
       
 !     Parameters

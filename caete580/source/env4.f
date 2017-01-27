@@ -63,38 +63,29 @@ c     primeiro algumas variaveis que nao sao dependentes de pfts
       real tsoil(nx,ny,12)
       
       
-c     agora as variaveis para pfts
-      real photo_pft(nx,ny,12,q) !Monthly photosynthesis   (kgC/m2)
-      real aresp_pft(nx,ny,12,q) !Monthly autotrophic res  (kgC/m2)
-      real npp_pft(nx,ny,12,q)  !Monthly net primary produ (kgC/m2)
-      
-      real lai_pft(nx,ny,12,q)  !Monthly leaf area index
-      real clit_pft(nx,ny,12,q) !Monthly litter carbon
-      real csoil_pft(nx,ny,12,q) !Monthly soil carbon
-      real hresp_pft(nx,ny,12,q) !Monthly het resp          (kgC/m2)
-      real rcm_pft(nx,ny,12,q) 
-      
-c     VARIAVEIS HIDROLOGICAS IMPORTANTES   
-      real runom_pft(nx,ny,12,q) !Runoff
-      real evapm_pft(nx,ny,12,q) !Actual evapotranspiration        
-      real wsoil_pft(nx,ny,12,q) !Soil moisture (mm)
-      
+
+c      real photo_pft(nx,ny,12) !Monthly photosynthesis   (kgC/m2)
+c      real aresp_pft(nx,ny,12) !Monthly autotrophic res  (kgC/m2)
+c      real npp_pft(nx,ny,12)  !Monthly net primary produ (kgC/m2)
+c      
+c      real lai_pft(nx,ny,12)  !Monthly leaf area index
+c      real clit_pft(nx,ny,12) !Monthly litter carbon
+c      real csoil_pft(nx,ny,12) !Monthly soil carbon
+c      real hresp_pft(nx,ny,12) !Monthly het resp          (kgC/m2)
+c      real rcm_pft(nx,ny,12) 
+c      
+cc     VARIAVEIS HIDROLOGICAS IMPORTANTES   
+c      real runom_pft(nx,ny,12) !Runoff
+c      real evapm_pft(nx,ny,12) !Actual evapotranspiration        
+c      real wsoil_pft(nx,ny,12) !Soil moisture (mm)
+c      
 c     variables related to carbon allocation and autothrophic respiration (bianca)
-      real, dimension(nx,ny,12,q) :: rml_pft,rmf_pft,rms_pft,rm_pft,
-     $rgl_pft,rgf_pft,rgs_pft,rg_pft
-      real, dimension(nx,ny,q) :: cleaf_pft,cawood_pft,cfroot_pft
+      real, dimension(nx,ny) :: cleaf_pft,cawood_pft,cfroot_pft
 
 
 C      WARNING - NEW VARIABLES ---
       
       real gridcell_ocp(nx,ny,q) !  final grid cell occupation for each pft (percentage of area)
-      real betal(nx,ny,12,q)
-c      real, dimension(nx,ny,12):: bl1,bl2,bl3,bl4,bl5,bl6,bl7 ! carbon allocated to growth (monthly sums) 
-      real betaw(nx,ny,12,q)
-c      real, dimension(nx,ny,12):: bw1,bw2,bw3,bw4,bw5,bw6,bw7
-      real betaf(nx,ny,12,q)
-c      real, dimension(nx,ny,12):: bf1,bf2,bf3,bf4,bf5,bf6,bf7
-
       
 c     variaveis do spinup
       real, dimension(q) :: aux1, aux2, aux3
@@ -118,36 +109,23 @@ c     variaveis anuais -
       real, dimension(nx,ny) :: ave_wsoil = 0.0    
       
 C     THESE WILL RECEIVE MEANS BETWEEN q PFTs and for each pft (ex. ph to mean; ph1 to pft 1)
-      real, dimension(nx,ny,12) :: ph!, ph1, ph2, ph3  
-c, ph4, ph5, ph6, ph7
-      real, dimension(nx,ny,12) :: ar!, ar1, ar2, ar3, ar4, ar5, ar6, ar7
-      real, dimension(nx,ny,12) :: npp!,npp1,npp2,npp3
-c,npp4,npp5,npp6,npp7
-      real, dimension(nx,ny,12) :: lai!, lai1, lai2, lai3
-c lai4, lai5,lai6, lai7
-      real, dimension(nx,ny,12) :: clit!, clit1, clit2, clit3
-c clit4,   &    clit5, clit6, clit7
-      real, dimension(nx,ny,12) :: csoil!, csoil1, csoil2, csoil3
-c, csoil4    &    , csoil5, csoil6, csoil7
-      real, dimension(nx,ny,12) :: hr!, hr1, hr2, hr3
-c, hr4, hr5, hr6, hr7
-      real, dimension(nx,ny,12) :: rcm!, rcm1, rcm2, rcm3
-c, rcm4, rcm5,    &    rcm6, rcm7
-      real, dimension(nx,ny,12) :: evaptr!, et1, et2, et3
-c, et4, et5, et6,    &    et7
+      real, dimension(nx,ny,12) :: ph
+      real, dimension(nx,ny,12) :: ar
+      real, dimension(nx,ny,12) :: npp
+      real, dimension(nx,ny,12) :: lai
+      real, dimension(nx,ny,12) :: clit
+      real, dimension(nx,ny,12) :: csoil
+      real, dimension(nx,ny,12) :: hr
+      real, dimension(nx,ny,12) :: rcm
+      real, dimension(nx,ny,12) :: evaptr
       real, dimension(nx,ny,12) :: wsoil
-      real, dimension(nx,ny,12) :: runom!
+      real, dimension(nx,ny,12) :: runom
       
 C     NEW OUTPUTS (AUTOTRF RESPIRATION, ALLOCATION)
       
-      real, dimension(nx,ny,12) :: rml!, rml1, rml2, rml3
-      real, dimension(nx,ny,12) :: rmf!, rmf1, rmf2, rmf3 
-      real, dimension(nx,ny,12) :: rms!, rms1, rms2, rms3
-      real, dimension(nx,ny,12) :: rm!,  rm1,  rm2,  rm3
-      real, dimension(nx,ny,12) :: rgl!, rgl1, rgl2, rgl3
-      real, dimension(nx,ny,12) :: rgf!, rgf1, rgf2, rgf3
-      real, dimension(nx,ny,12) :: rgs!, rgs1, rgs2, rgs3
-      real, dimension(nx,ny,12) :: rg!,  rg1,  rg2,  rg3 
+
+      real, dimension(nx,ny,12) :: rm
+      real, dimension(nx,ny,12) :: rg 
       
 C     -------END DECLARATION----------------------------------------
       
@@ -283,14 +261,13 @@ c!     ===========
       
       
       do i=1,nx
-         do j=1,ny
-            
+         do j=1,ny            
 !     this block set ocean grid cells to no_data 
             if(nint(lsmk(i,j)) .eq. 0) then
+               cleaf_pft(i,j)  = no_data
+               cfroot_pft(i,j) = no_data
+               cawood_pft(i,j) = no_data
                do p = 1,q
-                  cleaf_pft(i,j,p)  = no_data
-                  cfroot_pft(i,j,p) = no_data
-                  cawood_pft(i,j,p) = no_data
                   gridcell_ocp(i,j,p) = no_data
                enddo
             endif
@@ -315,123 +292,38 @@ c     if (prec(i,j,k).lt.0.0) prec (i,j,k) = 0.0
 !     Calculate environmental variables (wbm)
 !     =======================================
       
-      call wbm (prec,temp,lsmk,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,
-     &    emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,
-     &    clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,
-     &    evapm_pft,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft
-     &    ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft, cfroot_pft
-     &    ,gridcell_ocp,betal,betaw,betaf)   
-      
-      
+      call wbm (prec,temp,lsmk,p0,ca,par,rhs,cleafin,cawoodin,
+     &    cfrootin, emaxm, tsoil, ph,ar,npp,lai,clit,csoil,hr,
+     &    rcm,runom,evaptr,wsoil,rm,rg,cleaf_pft,cawood_pft,
+     &    cfroot_pft,gridcell_ocp)   
       
       
 !     SAVE RESULTS TO FILES ! arquivos gigantes > 700Mbytes
-      call nan2ndt(gridcell_ocp, q)
       open(10,file='../outputs/gridcell_ocp.bin',
      &    status='unknown',form='unformatted',
      &    access='direct',recl=4*nx*ny)
       call savex(10, gridcell_ocp, q)
-c      
-c      call nan2ndt(cleaf_pft, q)
-c      open(10,file='../outputs/cleaf.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call savex(10, cleaf_pft, q)
-c      
-c      call nan2ndt(cawood_pft, q)
-c      open(10,file='../outputs/cawood.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call savex(10,cawood_pft,q)
-c      
-c      call nan2ndt(cfroot_pft, q)
-c      open(10,file='../outputs/cfroot.bin',
-c     &    status='unknown',form='unformatted',
-c     &    access='direct',recl=4*nx*ny)
-c      call savex(10, cfroot_pft,q)
-      
-      do i = 1,nx
-         do j = 1,ny
-            do k = 1,12
-               if(nint(lsmk(i,j)) .ne. 0) then
-                  ph(i,j,k) = 0.0
-                  ar(i,j,k) = 0.0
-                  npp(i,j,k) = 0.0
-                  lai(i,j,k) = 0.0
-                  clit(i,j,k) = 0.0
-                  csoil(i,j,k) = 0.0
-                  hr(i,j,k) = 0.0
-                  rcm(i,j,k) = 0.0
-                  runom(i,j,k) = 0.0
-                  evaptr(i,j,k) = 0.0
-                  wsoil(i,j,k) = 0.0
-                  rml(i,j,k)  = 0.0
-                  rmf(i,j,k)  = 0.0
-                  rms(i,j,k)  = 0.0
-                  rm(i,j,k)  = 0.0
-                  rgl(i,j,k)  = 0.0
-                  rgf(i,j,k)  = 0.0
-                  rgs(i,j,k)  = 0.0
-                  rg(i,j,k)  = 0.0
-               else
-                  ph(i,j,k) = no_data
-                  ar(i,j,k) = no_data
-                  npp(i,j,k) = no_data
-                  lai(i,j,k) = no_data
-                  clit(i,j,k) = no_data
-                  csoil(i,j,k) = no_data
-                  hr(i,j,k) = no_data
-                  rcm(i,j,k) = no_data
-                  runom(i,j,k) = no_data
-                  evaptr(i,j,k) = no_data
-                  wsoil(i,j,k) = no_data
-                  rml(i,j,k)  = no_data
-                  rmf(i,j,k)  = no_data
-                  rms(i,j,k)  = no_data
-                  rm(i,j,k)  = no_data
-                  rgl(i,j,k)  = no_data
-                  rgf(i,j,k)  = no_data
-                  rgs(i,j,k)  = no_data
-                  rg(i,j,k)  = no_data
-               endif                     
-            enddo
-         enddo
-      enddo
-      
-           
-C     preparando o terreno pra salvar as variaveis
-      
-      do i = 1,nx
-         do j = 1,ny
-            if(nint(lsmk(i,j)) .ne. 0) then
-               do k = 1,12
-                  do p = 1,q
-                     
-                     ph(i,j,k) = ph(i,j,k) + photo_pft(i,j,k,p)
-                     ar(i,j,k) = ar(i,j,k) + aresp_pft(i,j,k,p)
-                     npp(i,j,k) = npp(i,j,k) + npp_pft(i,j,k,p)
-                     lai(i,j,k) = lai(i,j,k) + lai_pft(i,j,k,p)
-                     clit(i,j,k) = clit(i,j,k) + clit_pft(i,j,k,p)
-                     csoil(i,j,k) = csoil(i,j,k) + csoil_pft(i,j,k,p)
-                     hr(i,j,k) = hr(i,j,k) + hresp_pft(i,j,k,p)
-                     rcm(i,j,k) = rcm(i,j,k) + rcm_pft(i,j,k,p)
-                     runom(i,j,k) = runom(i,j,k) + runom_pft(i,j,k,p)
-                     evaptr(i,j,k) = evaptr(i,j,k) + evapm_pft(i,j,k,p)
-                     wsoil(i,j,k) = wsoil(i,j,k) + wsoil_pft(i,j,k,p)
-                     rml(i,j,k)  = rml(i,j,k) + rml_pft(i,j,k,p)
-                     rmf(i,j,k)  = rmf(i,j,k) + rmf_pft(i,j,k,p)
-                     rms(i,j,k)  = rms(i,j,k) + rms_pft(i,j,k,p)
-                     rm(i,j,k)  = rm(i,j,k) + rm_pft(i,j,k,p)
-                     rgl(i,j,k)  = rgl(i,j,k) + rgl_pft(i,j,k,p)
-                     rgf(i,j,k)  = rgf(i,j,k) + rgf_pft(i,j,k,p)
-                     rgs(i,j,k)  = rgs(i,j,k) + rgs_pft(i,j,k,p)
-                     rg(i,j,k)  = rg(i,j,k) + rg_pft(i,j,k,p)
-                  enddo
-               enddo
-            endif
-         enddo
-      enddo  
 
+
+      open(10,file='../outputs/cleaf.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      write(10,rec=1) cleaf_pft
+      close(10)
+
+      open(10,file='../outputs/cawood.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      write(10, rec=1) cawood_pft
+      close(10)
+
+      open(10,file='../outputs/cfroot.bin',
+     &    status='unknown',form='unformatted',
+     &    access='direct',recl=4*nx*ny)
+      write(10, rec=1) cfroot_pft
+      close(10)
+
+      
       open(10,file='../outputs/ph.bin',
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
@@ -482,40 +374,10 @@ C     preparando o terreno pra salvar as variaveis
      &     access='direct',recl=4*nx*ny)
       call save_file12(10, wsoil)
 
-      open(10,file='../outputs/rml.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rml)
-
-      open(10,file='../outputs/rms.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rms)
-
-      open(10,file='../outputs/rmf.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rmf)
-
       open(10,file='../outputs/rm.bin',
      &     status='unknown',form='unformatted',
      &     access='direct',recl=4*nx*ny)
       call save_file12(10, rm)
-
-      open(10,file='../outputs/rgl.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rgl)
-
-      open(10,file='../outputs/rgf.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rgf)
-
-      open(10,file='../outputs/rgs.bin',
-     &     status='unknown',form='unformatted',
-     &     access='direct',recl=4*nx*ny)
-      call save_file12(10, rgs)
 
       open(10,file='../outputs/rg.bin',
      &     status='unknown',form='unformatted',
