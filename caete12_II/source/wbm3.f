@@ -118,7 +118,8 @@ c     ------------------------- internal variables---------------------
       real pr,spre,ta,td,ipar,ru
       integer I1,J1,K1,k2
       real leaf0(q), froot0(q),awood0(q)
-      
+      real biomass, biomass0
+      real sensi
       real, parameter :: H = 1.0 !Soil layer(m) 
       real, parameter :: diffu = 4.e-7*(30.*86400.0) !Soil thermal diffusivity (m2/month)
       real, parameter :: tau = (H**2)/(2.0*diffu) !E-folding time (months)
@@ -361,7 +362,7 @@ c     Write to track program execution
                         if(wood(p) .le. 0.0) then
                            biomass = biomass + cleaf1_pft(p) +
      &                         cfroot1_pft(p)  
-                           biomass0 = biomass + leaf0(p) +
+                           biomass0 = biomass0 + leaf0(p) +
      &                         froot0(p)
                            if ((abs(biomass-biomass0)/0.1) .gt. sensi)
      &                         then
