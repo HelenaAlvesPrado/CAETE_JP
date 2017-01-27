@@ -344,7 +344,9 @@ c     Write to track program execution
 !     --------------------------------------------------
                if (k.eq.12) then
                   do p = 1,q
-                     print* cleaf1_pft(p), cleaf_ini(i,j,p)
+               print*, cleaf1_pft(p) - cleaf_ini(i,j,p),'l',p,n
+               print*, cfroot1_pft(p) - cfroot_ini(i,j,p),'r',p,n
+               print*, cawood1_pft(p) - cawood_ini(i,j,p),'w',p,n
                   enddo
                endif
                
