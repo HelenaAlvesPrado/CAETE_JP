@@ -348,34 +348,61 @@ c     Write to track program execution
 !     tentativa 1 - usando variacao no pool de C
 !     --------------------------------------------------
                if (k.eq.12) then
+                  
+                  nerro = 0
+                  biomass = 0.0
+                  biomass0 = 0.0
+                  sensi = 1.001 ! if (biomass1-biomass0)/0.1 (kg/m2/y) .lt. sensi: equilibrium
                   call pft_par(4,wood)
+
                   do p = 1,q
                      if(cleaf_pft(i,j,p) .gt. 0.0 .and.
      &                   cfroot_pft(i,j,p).gt. 0.0) then
                         if(wood(p) .le. 0.0) then
-                           print*,'GRASS' 
-                           print*, leaf0(p) - cleaf1_pft(p), 'l'
-     &                         , p, n
-                           print*, froot0(p) - cfroot1_pft(p),
-     &                         'r', p, n
-                           print*,' ' 
-                           print*,' '
-                           print*,' '
-
+                           biomass = biomass + cleaf1_pft(p) +
+     &                         cfroot1_pft(p)  
+                           biomass0 = biomass + leaf0(p) +
+     &                         froot0(p)
+                           if ((abs(biomass-biomass0)/0.1) .gt. sensi)
+     &                         then
+                              leaf0(p) = cleaf1_pft(p) ! salvando os valores atuais para o proximo ano novo
+                              froot0(p) = cfroot1_pft(p)
+                              nerro = nerro + 1
+                              print*,' '
+                              print*, 'pft not in eq', p, n
+                              print*, abs(biomass -biomass0)
+                              print*,' '
+                           else
+                              print*,' '
+                              print*, 'pft in eq', p, n
+                              print*, abs(biomass -biomass0)
+                              print*,' '
+                           endif
                         else
-                           print*, 'woody'
-                           print*, leaf0(p) - cleaf1_pft(p), 'l'
-     &                         , p, n
-                           print*, froot0(p) - cfroot1_pft(p),
-     &                         'r', p, n
-                           print*, awood0(p) - cawood1_pft(p),
-     &                         'w', p, n
-                           print*,' ' 
-                           print*,' '
-                           print*,' '
+                           biomass = biomass + cleaf1_pft(p) +
+     &                         cfroot1_pft(p) + cawood1_pft
+                           biomass0 = biomass + leaf0(p) +
+     &                         froot0(p)
+                           if ((abs(biomass-biomass0)/0.1) .gt. sensi)
+     &                         then
+                              leaf0(p) = cleaf1_pft(p)
+                              froot0(p) = cfroot1_pft(p)
+                              awood0(p) = cawood1_pft(p)
+                              nerro = nerro + 1
+                              print*,' '
+                              print*, 'pft not in eq', p, n
+                              print*, abs(biomass -biomass0)
+                              print*,' '
+                           else
+                              print*,' '
+                              print*, 'pft in eq', p, n
+                              print*, abs(biomass -biomass0)
+                              print*,' '
+                           endif
                         endif
                      endif
                   enddo
+                  if(nerro .gt. 0) goto 10
                endif
                
 cc              nerro = 0
