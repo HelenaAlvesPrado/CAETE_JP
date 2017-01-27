@@ -353,6 +353,7 @@ c     Write to track program execution
                   nerro = 0
                   biomass = 0.0
                   biomass0 = 0.0
+                  check = .false.
                   sensi = 1.001 ! if (biomass1-biomass0)/0.1 (kg/m2/y) .lt. sensi: equilibrium
                   call pft_par(4,wood)
 
@@ -360,85 +361,48 @@ c     Write to track program execution
                      if(cleaf_pft(i,j,p) .gt. 0.0 .and.
      &                   cfroot_pft(i,j,p).gt. 0.0) then
                         if(wood(p) .le. 0.0) then
+                           check = .true.
                            biomass = biomass + cleaf1_pft(p) +
      &                         cfroot1_pft(p)  
                            biomass0 = biomass0 + leaf0(p) +
      &                         froot0(p)
-                           if ((abs(biomass-biomass0)/0.1) .gt. sensi)
-     &                         then
-                              leaf0(p) = cleaf1_pft(p) ! salvando os valores atuais para o proximo ano novo
-                              froot0(p) = cfroot1_pft(p)
-                              nerro = nerro + 1
-                              print*,' '
-                              print*, 'pft not in eq', p, n
-                              print*, abs(biomass -biomass0)
-                              print*,' '
-                           else
-                              print*,' '
-                              print*, 'pft in eq', p, n
-                              print*, abs(biomass -biomass0)
-                              print*,' '
-                           endif
+c     print*,' '
+c     print*, 'pft not in eq', p, n
+c     print*, abs(biomass -biomass0)
+c     print*,' '
+c     print*,' '
+c     print*, 'pft in eq', p, n
+c     print*, abs(biomass -biomass0)
+c     print*,' '
                         else
+                           check = .true.
                            biomass = biomass + cleaf1_pft(p) +
      &                         cfroot1_pft(p) + cawood1_pft
-                           biomass0 = biomass + leaf0(p) +
-     &                         froot0(p)
-                           if ((abs(biomass-biomass0)/0.1) .gt. sensi)
-     &                         then
-                              leaf0(p) = cleaf1_pft(p)
-                              froot0(p) = cfroot1_pft(p)
-                              awood0(p) = cawood1_pft(p)
-                              nerro = nerro + 1
-                              print*,' '
-                              print*, 'pft not in eq', p, n
-                              print*, abs(biomass -biomass0)
-                              print*,' '
-                           else
-                              print*,' '
-                              print*, 'pft in eq', p, n
-                              print*, abs(biomass -biomass0)
-                              print*,' '
-                           endif
+                           biomass0 = biomass0 + leaf0(p) +
+     &                         froot0(p) + awood0(p)
+c     print*,' '
+c     print*, 'pft not in eq', p, n
+c     print*, abs(biomass -biomass0)
+c     print*,' '
+c     print*,' '
+c     print*, 'pft in eq', p, n
+c     print*, abs(biomass -biomass0)
+c     print*,' '
                         endif
                      endif
                   enddo
+                  if(check) then
+                     if ((abs(biomass-biomass0)/0.1) .gt. sensi) then
+                        do p=1,q
+                           leaf0(p) = cleaf1_pft(p)
+                           froot0(p) = cfroot1_pft(p)
+                           awood0(p) = cawood1_pft(p)
+                           nerro = nerro + 1
+                        enddo
+                     endif
+                  endif
                   if(nerro .gt. 0) goto 10
                endif
-               
-cc              nerro = 0
-c               DO K = 1,12
-c                  DO P = 1,Q
-c                     BL(P) = BL(P) + BETAL(I,J,K,P)/12.
-c                     BW(P) = BW(P) + BETAW(I,J,K,P)/12.
-c                     BF(P) = BF(P) + BETAF(I,J,K,P)/12.
-c                  ENDDO
-c               ENDDO
-c               
-c               call pft_par(4,wood)
-c               do p = 1,q
-c                  if(cleaf_pft(i,j,p) .gt. 0.0 .and.
-c     &                cfroot_pft(i,j,p).gt. 0.0) then
-c                     if(wood(p) .le. 0.0) then
-c                        if(abs(bl(p)) .gt. 250.0 .or.
-c     $                     abs(bf(p)) .gt. 250.0) then  
-c                            nerro = nerro + 1
-c                        ENDIF
-c                     else
-c                        if(abs(bl(p)) .gt. 250.0 .or.
-c     $                      abs(bf(p)) .gt. 250.0 .or.
-c     $                      abs(bw(p)) .gt. 700.0) then
-c                            nerro = nerro + 1 
-c                        ENDIF   
-c                     endif
-c                  endif
-c               enddo
-c               if(nerro .gt. 0) goto 10
-c     ========================================================
-
-
-               
-               
             endif               ! endif lsmk
 c     finalize ny loop
          enddo                  ! j
