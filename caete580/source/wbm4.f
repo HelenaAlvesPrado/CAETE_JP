@@ -45,42 +45,44 @@ C     -----------------------------E N D-------------------------------
 c     -------------------------O U T P U T S---------------------------
        
       real tsoil (nx,ny,12)     !soil temperature
+c
+c      ======================================================================================
+      ! mudando dimensoes!
+      real photo_pft(nx,ny,12) !Monthly photosynthesis   (kgC m-2)
+      real aresp_pft(nx,ny,12) !Monthly autotrophic res  (kgC m-2)
+      real npp_pft  (nx,ny,12) !Monthly net primary produ (kgC m-2)
       
-      real photo_pft(nx,ny,12,q) !Monthly photosynthesis   (kgC m-2)
-      real aresp_pft(nx,ny,12,q) !Monthly autotrophic res  (kgC m-2)
-      real npp_pft  (nx,ny,12,q) !Monthly net primary produ (kgC m-2)
-      
-      real lai_pft  (nx,ny,12,q) !Monthly leaf area index
-      real clit_pft (nx,ny,12,q) !Monthly litter carbon
-      real csoil_pft(nx,ny,12,q) !Monthly soil carbon
-      real hresp_pft(nx,ny,12,q) !Monthly het resp  (kgC/m2)
-      real rcm_pft  (nx,ny,12,q) 
+      real lai_pft  (nx,ny,12) !Monthly leaf area index
+      real clit_pft (nx,ny,12) !Monthly litter carbon
+      real csoil_pft(nx,ny,12) !Monthly soil carbon
+      real hresp_pft(nx,ny,12) !Monthly het resp  (kgC/m2)
+      real rcm_pft  (nx,ny,12) 
 
       real emaxm    (nx,ny,12) !Max.evapotranspiration (kg m-2 day-1)
-      real runom_pft(nx,ny,12,q) !Runoff 
-      real evapm_pft(nx,ny,12,q) !Actual evapotranspiration        
-      real wsoil_pft(nx,ny,12,q) !Soil moisture (mm)
+      real runom_pft(nx,ny,12) !Runoff 
+      real evapm_pft(nx,ny,12) !Actual evapotranspiration        
+      real wsoil_pft(nx,ny,12)  !Soil moisture (mm)
       
-c     NOVOS OUTPUTS DA BIANCA
-      real rml_pft  (nx,ny,12,q) ! Maintenance respiration 
-      real rmf_pft  (nx,ny,12,q)
-      real rms_pft  (nx,ny,12,q)
-      real rm_pft   (nx,ny,12,q)
+c      real rml_pft  (nx,ny,12) ! Maintenance respiration 
+c      real rmf_pft  (nx,ny,12)
+c      real rms_pft  (nx,ny,12)
+      real rm_pft   (nx,ny,12)
       
-      real rgl_pft  (nx,ny,12,q) ! Growth respiration
-      real rgf_pft  (nx,ny,12,q)
-      real rgs_pft  (nx,ny,12,q)
-      real rg_pft   (nx,ny,12,q)
+c      real rgl_pft  (nx,ny,12) ! Growth respiration
+c      real rgf_pft  (nx,ny,12)
+c      real rgs_pft  (nx,ny,12)
+      real rg_pft   (nx,ny,12)
+c     ===========================================================================================
       
-      real cleaf_pft (nx,ny,q) ! leaf biomass (KgC/m2)
-      real cawood_pft(nx,ny,q) ! aboveground wood biomass (KgC/m2)
-      real cfroot_pft(nx,ny,q)  ! fine root biomass
+      real cleaf_pft (nx,ny) ! leaf biomass (KgC/m2)
+      real cawood_pft(nx,ny) ! aboveground wood biomass (KgC/m2)
+      real cfroot_pft(nx,ny)  ! fine root biomass
       
       real grid_area(nx,ny,q)   ! gridcell area fraction of pfts!
-      real betal(nx,ny,12,q)
-      real betaw(nx,ny,12,q)
-      real betaf(nx,ny,12,q)
-      real,dimension(q) :: bl = no_data, bw = no_data, bf = no_data
+c      real betal(nx,ny,12,q)
+c      real betaw(nx,ny,12,q)
+c      real betaf(nx,ny,12,q)
+c      real,dimension(q) :: bl = no_data, bw = no_data, bf = no_data
 
 c     --------------------------------E N D----------------------------
 
@@ -88,12 +90,12 @@ c     ------------------------- internal variables---------------------
 
       integer i, j, k, kk, n, mes, nerro, p
       
-      real wg0  (nx,ny,12)      !Previous year soil moisture
-      real wsoilt(nx,ny,12)     !soil water (check wbm equilibrium)
-      real gsoilt(nx,ny,12)     !soil ice   (check wbm equilibrium)
-      real gsoil(nx,ny,12,q)    !Soil ice 
-      real ssoil(nx,ny,12,q)    !Soil snow
-      real snowm(nx,ny,12,q)    !Snowmelt
+      real wg0  (12)      !Previous year soil moisture
+      real wsoilt(12)     !soil water (check wbm equilibrium)
+      real gsoilt(12)     !soil ice   (check wbm equilibrium)
+      real gsoil(nx,ny,12)    !Soil ice 
+      real ssoil(nx,ny,12)    !Soil snow
+      real snowm(nx,ny,12)    !Snowmelt
 
       real sini(q), sfim(q)
       real wini(q), wfim(q)
@@ -117,27 +119,17 @@ c     ------------------------- internal variables---------------------
       real ae                   !Available energy     
       real pr,spre,ta,td,ipar,ru
       integer I1,J1,K1,k2
+
+!     inserir variaveis do novo equilibrio!
+      real leaf0(q), froot0(q),awood0(q)
+      real biomass, biomass0
+      real sensi
+      logical check
       
       real, parameter :: H = 1.0 !Soil layer(m) 
       real, parameter :: diffu = 4.e-7*(30.*86400.0) !Soil thermal diffusivity (m2/month)
       real, parameter :: tau = (H**2)/(2.0*diffu) !E-folding time (months)
       real, parameter :: auxs = -100.0 !Auxiliar for calculation of Snpp
-
-!     SHARED(nx,ny,q,no_data,CLEAF_PFT
-!    $ ,CAWOOD_PFT,CFROOT_PFT
-!    $ ,CAWOOD_INI,CFROOT_INI,WG0,EMAXM,tsoil,photo_pft,aresp_pft
-!    $ ,lai_pft,clit_pft,csoil_pft,hresp_pft,rcm_pft,runom_pft
-!    & ,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft,rgf_pft
-!    & ,rgs_pft,rg_pft,grid_area
-!    & ,betal,betaw,betaf,GSOIL,SSOIL,WINI,GINI,SINI,BL,BW,BF
-!    & ,P0,TEMP,PREC,PAR,RHS,wfim,gfim,sfim,smes,rmes,emes
-!    & ,nppmes,laimes,clmes,csmes,hrmes,rcmes,rmlmes,rmfmes
-!    & ,rmsmes,rmmes,rglmes,rgfmes,rgsmes,rgmes,cleafmes
-!    & ,cawoodmes,cfrootmes, gridocpmes,betalmes, betawmes
-!    & ,betafmes,epmes,phmes,armes,npp_pft,CA,evapm_pft
-!    & ,WSOIT,GSOILT,WMAX,CLEAF_INI
-
-      
       
 !     ================      
 !     Soil temperature
@@ -193,33 +185,33 @@ c     Write to track program execution
           
 !     Initialize variables
             do k=1,12
-               wg0  (i,j,k) = no_data !Soil water content in preceeding year integration
+               wg0  (k) = no_data !Soil water content in preceeding year integration
                emaxm(i,j,k) = no_data !Maximum evapotranspiration
                do p=1,q
-                  photo_pft(i,j,k,p)  = no_data !Monthly photosynthesis (kgC/m2)
-                  aresp_pft(i,j,k,p)  = no_data !Monthly autotrophic respiration (kgC/m2)
-                  npp_pft(i,j,k,p)    = no_data !Monthly net primary productivity (average between PFTs) (kgC/m2)
-                  lai_pft(i,j,k,p)    = no_data !Monthly leaf area index
-                  clit_pft(i,j,k,p)   = no_data !Monthly litter carbon
-                  csoil_pft(i,j,k,p)  = no_data !Monthly soil carbon
-                  hresp_pft(i,j,k,p)  = no_data !Monthly heterotrophic respiration (kgC/m2)
-                  rcm_pft(i,j,k,p)    = no_data
-                  gsoil(i,j,k,p)      = no_data !Soil ice
-                  ssoil(i,j,k,p)      = no_data !Soil snow
-                  runom_pft(i,j,k,p)  = no_data !Runoff
-                  evapm_pft(i,j,k,p)  = no_data !Actual evapotranspiration        
-                  wsoil_pft(i,j,k,p)  = no_data !Soil moisture (mm)
-                  rml_pft(i,j,k,p)    = no_data !MAINTENANCE ARESP
-                  rmf_pft(i,j,k,p)    = no_data
-                  rms_pft(i,j,k,p)    = no_data
-                  rm_pft(i,j,k,p)     = no_data
-                  rgl_pft(i,j,k,p)    = no_data !GROWTH RESPIRATION 
-                  rgf_pft(i,j,k,p)    = no_data
-                  rgs_pft(i,j,k,p)    = no_data
-                  rg_pft(i,j,k,p)     = no_data
-                  betal(i,j,k,p) = no_data ! to store accumulated beta_leaf(kgC/m2)
-                  betaw(i,j,k,p) = no_data ! 
-                  betaf(i,j,k,p) = no_data
+                  photo_pft(i,j,k)  = no_data !Monthly photosynthesis (kgC/m2)
+                  aresp_pft(i,j,k)  = no_data !Monthly autotrophic respiration (kgC/m2)
+                  npp_pft(i,j,k)    = no_data !Monthly net primary productivity (average between PFTs) (kgC/m2)
+                  lai_pft(i,j,k)    = no_data !Monthly leaf area index
+                  clit_pft(i,j,k)   = no_data !Monthly litter carbon
+                  csoil_pft(i,j,k)  = no_data !Monthly soil carbon
+                  hresp_pft(i,j,k)  = no_data !Monthly heterotrophic respiration (kgC/m2)
+                  rcm_pft(i,j,k)    = no_data
+                  gsoil(i,j,k)      = no_data !Soil ice
+                  ssoil(i,j,k)      = no_data !Soil snow
+                  runom_pft(i,j,k)  = no_data !Runoff
+                  evapm_pft(i,j,k)  = no_data !Actual evapotranspiration        
+                  wsoil_pft(i,j,k)  = no_data !Soil moisture (mm)
+c                  rml_pft(i,j,k)    = no_data !MAINTENANCE ARESP
+c                  rmf_pft(i,j,k)    = no_data
+c                  rms_pft(i,j,k)    = no_data
+                  rm_pft(i,j,k)     = no_data
+c                  rgl_pft(i,j,k)    = no_data !GROWTH RESPIRATION 
+c                  rgf_pft(i,j,k)    = no_data
+c                  rgs_pft(i,j,k)    = no_data
+                  rg_pft(i,j,k)     = no_data
+c                  betal(i,j,k,p) = no_data ! to store accumulated beta_leaf(kgC/m2)
+c                  betaw(i,j,k,p) = no_data ! 
+c                  betaf(i,j,k,p) = no_data
 
                enddo              
             enddo
@@ -228,7 +220,7 @@ c     Write to track program execution
 !     ------------------------- 
             if (nint(lsmk(i,j)).ne.0) then
                do k=1,12
-                  wg0(i,j,k) = -1.0 
+                  wg0(k) = -1.0 
                enddo
 
 !     Set some variables
@@ -246,11 +238,11 @@ c     Write to track program execution
 
  10            continue
 
-               do p=1,q
-                  bl(p)= 0.0
-                  bf(p)= 0.0 
-                  bw(p)= 0.0
-               enddo
+c               do p=1,q
+c                  bl(p)= 0.0
+c                  bf(p)= 0.0 
+c                  bw(p)= 0.0
+c               enddo
                
 
                n = n + 1
@@ -272,35 +264,33 @@ c     Write to track program execution
                call budget (mes,wini,gini,sini,td,ta,pr,spre,ae
      &             ,ca,ipar,ru,cleaf1_pft,cawood1_pft,cfroot1_pft
      &             ,wfim,gfim, sfim,smes,rmes,emes,epmes,phmes,armes
-     &             ,nppmes,laimes,clmes,csmes,hrmes,rcmes,rmlmes,rmfmes
-     &             ,rmsmes,rmmes,rglmes,rgfmes,rgsmes,rgmes,cleafmes
-     &             ,cawoodmes,cfrootmes, gridocpmes,betalmes, betawmes
-     &             ,betafmes)
+     &             ,nppmes,laimes,clmes,csmes,hrmes,rcmes,rmmes,rgmes
+     &             ,cleafmes,cawoodmes,cfrootmes,gridocpmes)
 
                do p=1,q
                   if(p .eq. 1) emaxm(i,j,k) = epmes
-                  gsoil    (i,j,k,p) = gfim(p)
-                  ssoil    (i,j,k,p) = sfim(p)
-                  wsoil_pft(i,j,k,p) = wfim(p)
-                  snowm    (i,j,k,p) = smes(p)
-                  runom_pft(i,j,k,p) = rmes(p)
-                  evapm_pft(i,j,k,p) = emes(p)
-                  rcm_pft  (i,j,k,p) = rcmes(p)
-                  lai_pft  (i,j,k,p) = laimes(p)
-                  photo_pft(i,j,k,p) = phmes(p)
-                  aresp_pft(i,j,k,p) = armes(p)
-                  npp_pft  (i,j,k,p) = nppmes(p)
-                  clit_pft (i,j,k,p) = clmes(p)
-                  csoil_pft(i,j,k,p) = csmes(p)
-                  hresp_pft(i,j,k,p) = hrmes(p)
-                  rml_pft  (i,j,k,p) = rmlmes(p)
-                  rmf_pft  (i,j,k,p) = rmfmes(p)
-                  rms_pft  (i,j,k,p) = rmsmes(p)
-                  rm_pft   (i,j,k,p) = rmmes(p)
-                  rgl_pft   (i,j,k,p) = rglmes(p)
-                  rgf_pft   (i,j,k,p) = rgfmes(p)
-                  rgs_pft   (i,j,k,p) = rgsmes(p)
-                  rg_pft    (i,j,k,p) = rgmes(p)
+                  gsoil    (i,j,k) = gsoil(i,j,k) +  gfim(p)
+                  ssoil    (i,j,k) = ssoil(i,j,k) + sfim(p)
+                  wsoil_pft(i,j,k) = wsoil_pft(i,j,k) + wfim(p)
+                  snowm    (i,j,k) = snowm(i,j,k) + smes(p)
+                  runom_pft(i,j,k) = runom_pft(i,j,k) + rmes(p)
+                  evapm_pft(i,j,k) = evapm_pft(i,j,k) + emes(p)
+                  rcm_pft  (i,j,k) = rcm_pft(i,j,k) + rcmes(p)
+                  lai_pft  (i,j,k) = lai_pft(i,j,k) + laimes(p)
+                  photo_pft(i,j,k) = photo_pft(i,j,k) + phmes(p)
+                  aresp_pft(i,j,k) = aresp_pft(i,j,k) + armes(p)
+                  npp_pft  (i,j,k) = npp_pft(i,j,k) + nppmes(p)
+                  clit_pft (i,j,k) = clit_pft(i,j,k) + clmes(p)
+                  csoil_pft(i,j,k) = csoil_pft(i,j,k) + csmes(p)
+                  hresp_pft(i,j,k) = hresp_pft(i,j,k) + hrmes(p)
+c                  rml_pft  (i,j,k) = rmlmes(p)
+c                  rmf_pft  (i,j,k) = rmfmes(p)
+c                  rms_pft  (i,j,k) = rmsmes(p)
+                  rm_pft   (i,j,k) =  rm_pft(i,j,k) +  rmmes(p)
+c                  rgl_pft   (i,j,k) = rglmes(p)
+c                  rgf_pft   (i,j,k) = rgfmes(p)
+c                  rgs_pft   (i,j,k) = rgsmes(p)
+                  rg_pft    (i,j,k) = rg_pft(i,j,k) + rgmes(p)
                   
                   wini(p) = wfim(p)
                   gini(p) = gfim(p)
@@ -310,14 +300,14 @@ c     Write to track program execution
                   cawood1_pft(p) = cawoodmes(p)
                   cfroot1_pft(p) = cfrootmes(p)
 
-                  betal(i,j,k,p) = betalmes(p)
-                  betaw(i,j,k,p) = betawmes(p)
-                  betaf(i,j,k,p) = betafmes(p)
+c                  betal(i,j,k,p) = betalmes(p)
+c                  betaw(i,j,k,p) = betawmes(p)
+c                  betaf(i,j,k,p) = betafmes(p)
                   
                   if(k .eq. 12) then
-                      cleaf_pft (i,j,p) = cleafmes(p)
-                      cawood_pft(i,j,p) = cawoodmes(p)
-                      cfroot_pft(i,j,p) = cfrootmes(p)
+                      cleaf_pft (i,j) = cleaf_pft (i,j) +  cleafmes(p)
+                      cawood_pft(i,j) = cawood_pft(i,j) + cawoodmes(p)
+                      cfroot_pft(i,j) = cfroot_pft(i,j) + cfrootmes(p)
                       grid_area(i,j,p) = gridocpmes(p)
                   endif
                enddo
@@ -325,27 +315,23 @@ c     Write to track program execution
 !     Check if equilibrium is attained
 !     --------------------------------
                if (k.eq.12) then
-                  wsoilt(i,j,k) = 0.0
-                  gsoilt(i,j,k) = 0.0
-
-                  do p = 1,q
-                     wsoilt(i,j,k) = wsoilt(i,j,k) + wsoil_pft(i,j,k,p)
-                     gsoilt(i,j,k) = gsoilt(i,j,k) + gsoil(i,j,k,p)
-                  enddo
-
+                  wsoilt(k) = 0.0
+                  gsoilt(k) = 0.0
+                  wsoilt(k) = wsoilt(k) + wsoil_pft(i,j,k)
+                  gsoilt(k) = gsoilt(k) + gsoil(i,j,k)
                   wmax = 500.
                   nerro = 0
 
                   do kk=1,12
-                     wsaux1 = wsoilt(i,j,kk) + gsoilt(i,j,kk)                     
-                     dwww = (wsaux1 - wg0(i,j,kk)) / wmax
+                     wsaux1 = wsoilt(kk) + gsoilt(kk)                     
+                     dwww = (wsaux1 - wg0(kk)) / wmax
                      if (abs(dwww).gt.0.01) nerro = nerro + 1
                   enddo
 
                   if (nerro.ne.0) then
 
                      do kk=1,12
-                        wg0(i,j,kk) = wsoilt(i,j,kk) + gsoilt(i,j,kk)
+                        wg0(kk) = wsoilt(kk) + gsoilt(kk)
                      enddo
                   else
                      goto 100
@@ -353,50 +339,56 @@ c     Write to track program execution
                endif
                goto 10               
  100           continue
-!     PFTs equilibrium check
-c     
-               DO K = 1,12
-                  DO P = 1,Q
-                     BL(P) = BL(P) + BETAL(I,J,K,P)/12.
-                     BW(P) = BW(P) + BETAW(I,J,K,P)/12.
-                     BF(P) = BF(P) + BETAF(I,J,K,P)/12.
-                  ENDDO
-               ENDDO
 
 
-!     dt2 = aawood
-
-               call pft_par(2,wood) ! diferenciar gramineas de arboreas/arbustivas
-               do p = 1,q
-                  if(wood(p) .le. 0.0) then
-                     if(abs(bl(p)) .gt. 20.0 .or.
-     $                  abs(bf(p)) .gt. 20.0) then
-                        cleaf1_pft(p) =  cleafmes(p) + ((bl(p)*1e-6))
-c     &                      * 365.)
-                        cfroot1_pft(p)= cfrootmes(p) + ((bf(p)*1e-6))
-c     &                      * 365.)
-c     print*, abs(bl(p)),abs(bf(p)), abs(bw(p)), p, n
-                        goto 10
-                     ENDIF
-                  else
-                     if(abs(bl(p)) .gt. 20.0 .or.
-     $                   abs(bf(p)) .gt. 20.0 .or.
-     $                   abs(bw(p)) .gt. 100.0) then
-                        cleaf1_pft(p) =  cleafmes(p) + ((bl(p)*1e-6))
-c     &                      * 365.)
-                        cawood1_pft(p)= cawoodmes(p) + ((bw(p)*1e-6))
-c     &                      * 365.)
-                        cfroot1_pft(p)= cfrootmes(p) + ((bf(p)*1e-6))
-c     &                      * 365. )
-c                         print*, abs(bl(p)),abs(bf(p)), abs(bw(p)), p, n
-                        goto 10 
-                     ENDIF   
+               !     PFTs equilibrium check
+!     ==================================================
+!     tentativa 1 - usando variacao no pool de C vegetal
+!     --------------------------------------------------
+               if (k.eq.12) then
+                  nerro = 0
+                  biomass = 0.0
+                  biomass0 = 0.0
+                  check = .false.
+                  sensi = 1.1   ! (kg/m2/y) if biomas change .le. sensi: equilibrium
+                  call pft_par(4,wood)
+                  
+                  do p = 1,q
+                     if(cleaf_pft(i,j,p) .gt. 0.0 .and.
+     &                   cfroot_pft(i,j,p).gt. 0.0) then
+                        if(wood(p) .le. 0.0) then
+                           check = .true.
+                           biomass = biomass + cleaf1_pft(p) +
+     &                         cfroot1_pft(p)
+                           biomass0 = biomass0 + leaf0(p) +
+     &                         froot0(p)
+                        else
+                           check = .true.
+                           biomass = biomass + cleaf1_pft(p) +
+     &                         cfroot1_pft(p) + cawood1_pft(p)
+                           biomass0 = biomass0 + leaf0(p) +
+     &                         froot0(p) + awood0(p)
+                        endif
+                     endif
+                  enddo
+                  if(check) then
+                     if (abs(biomass-biomass0) .gt. sensi) then
+                        do p=1,q
+                           leaf0(p) = cleaf1_pft(p)
+                           froot0(p) = cfroot1_pft(p)
+                           awood0(p) = cawood1_pft(p)
+                           nerro = nerro + 1
+                        enddo
+                     endif
                   endif
-c                  print*, 'pft equilibrium attained', p
-c                  print*, abs(bl(p)),abs(bf(p)), abs(bw(p)), p, n
-c                  print*, cleaf1_pft(p), cawood1_pft(p), cfroot1_pft(p),
-c     &                'pft'
-               enddo
+                  if(nerro .gt. 0) then
+!     print*, abs(biomass-biomass0), n
+                     goto 10
+                  else
+!     print*, 'eq attained',n
+                     continue
+                  endif
+               endif                  
             endif               ! endif lsmk
 c     finalize ny loop
          enddo                  ! j
@@ -410,9 +402,7 @@ c     finalize nx loop
       subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca
      $    ,ipar,rh,cl1_pft,ca1_pft,cf1_pft,w2,g2,s2,smavg,ruavg,evavg
      &    ,epavg,phavg,aravg,nppavg,laiavg,clavg,csavg,hravg,rcavg
-     &    ,rmlavg,rmfavg,rmsavg,rmavg,rglavg,rgfavg,rgsavg,rgavg
-     &    ,cleafavg_pft,cawoodavg_pft,cfrootavg_pft,ocpavg,betalavg
-     &    ,betawavg,betafavg)
+     &    ,rmavg,rgavg,cleafavg_pft,cawoodavg_pft,cfrootavg_pft,ocpavg)
       implicit none
 
       integer, parameter :: npft = 580
@@ -451,14 +441,16 @@ c     finalize nx loop
       real csavg(npft)          !Monthly carbon soil
       real hravg(npft)          !Monthly heterotrophic respiration
       real rcavg(npft)          !Monthly canopy resistence
-      real rmlavg(npft),rmfavg(npft) ! maintenance/growth respiration
-      real rmsavg(npft),rmavg(npft)  
-      real rglavg(npft),rgfavg(npft)
-      real rgsavg(npft),rgavg(npft)
+c      real rmlavg(npft),rmfavg(npft) ! maintenance/growth respiration
+c      real rmsavg(npft),
+      real rmavg(npft)  
+c      real rglavg(npft),rgfavg(npft)
+c     real rgsavg(npft),
+      real rgavg(npft)
       real cleafavg_pft(npft) ! Carbon in plant tissues
       real cawoodavg_pft(npft) 
       real cfrootavg_pft(npft)
-      real ocpavg(npft), betalavg(npft), betawavg(npft), betafavg(npft)
+      real ocpavg(npft)
       
 !     -----------------------Internal Variables------------------------
       integer p,i
@@ -501,12 +493,9 @@ c     Carbon Cycle
       real cs  (npft)           !Soil carbon (kgC/m2) 
       real hr  (npft)           !Heterotrophic (microbial) respiration (kgC/m2/yr)
       real rc2 (npft)           !Canopy resistence (s/m)
-      real f1  (npft)           !
-      real f5  (npft)           !Photosynthesis (mol/m2/s)
-c      real f1b (npft)           !Photosynthesis (micromol/m2/s)
-      real vpd (npft)           !Vapor Pressure deficit
-      real rm(npft),rml(npft),rmf(npft),rms(npft) ! maintenance & growth a.resp
-      real rg(npft),rgl(npft),rgf(npft),rgs(npft)
+      real f5(npft)
+      real rm(npft) ! maintenance & growth a.resp
+      real rg(npft)
       real cl1(npft),cf1(npft),ca1(npft) ! carbon pre-allocation 
       real cl2(npft),cf2(npft),ca2(npft) ! carbon pos-allocation
       
@@ -515,14 +504,11 @@ c      real f1b (npft)           !Photosynthesis (micromol/m2/s)
 !     ---------------------------------------
       do p = 1,npft
          rc2(p) = 0.0
-         f1(p)  = 0.0
-c         f1b(p) = 0.0
-         f5(p) = 0.0
+         f5(p)
       enddo
       
 !     Parameters
 !     ----------
-c      rh    = 0.685
       wmax  = 500.0
       tsnow = -1.0
       tice  = -2.5
@@ -555,19 +541,10 @@ c      rh    = 0.685
          clavg(p)   = 0.0
          csavg(p)   = 0.0
          hravg(p)   = 0.0
-         rmlavg(p)  = 0.0
-         rmfavg(p)  = 0.0
-         rmsavg(p)  = 0.0
          rmavg(p)   = 0.0
-         rglavg(p)  = 0.0
-         rgfavg(p)  = 0.0
-         rgsavg(p)  = 0.0
          rgavg(p)   = 0.0
          ocpavg(p)  = 0.0
          ocp_mm(p)  = 0.0
-         betalavg(p) = 0.0
-         betawavg(p) = 0.0
-         betafavg(p) = 0.0
          alfa_leaf(p) = 0.0
          alfa_awood(p) = 0.0
          alfa_froot(p) = 0.0
@@ -593,17 +570,9 @@ c      rh    = 0.685
             ar(p)    = 0.0
             laia(p)  = 0.0
             f5(p)    = 0.0
-            f1(p)    = 0.0
-            vpd(p)   = 0.0
             rc2(p)   = 0.0
             rm(p)    = 0.0
-            rml(p)   = 0.0
-            rmf(p)   = 0.0
-            rms(p)   = 0.0
             rg(p)    = 0.0
-            rgl(p)   = 0.0
-            rgf(p)   = 0.0
-            rgs(p)   = 0.0
 
             if ((i.eq.1).and.(month.eq.1)) then    
                beta_leaf(p) = 0.00000001
@@ -630,8 +599,7 @@ c      rh    = 0.685
             call productivity1 (p,ocp_coeffs(p),OCP_WOOD(P),temp,p0,w(p)
      &          ,wmax,ca,ipar,rh,cl1(p),ca1(p),cf1(p),beta_leaf(p)
      &          ,beta_awood(p),beta_froot(p),emax,ph(p),ar(p)
-     &          ,nppa(p),laia(p),f5(p),f1(p),vpd(p),rm(p),rml(p)
-     &          ,rmf(p),rms(p),rg(p),rgl(p),rgf(p),rgs(p),rc2(p))
+     &          ,nppa(p),laia(p),f5(p),f1(p),vpd(p),rm(p),rg(p),rc2(p))
 
             
 c     Carbon allocation (carbon content on each compartment)
@@ -713,20 +681,11 @@ c     Carbon allocation (carbon content on each compartment)
             clavg(p) = clavg(p) + cl(p) * ocp_coeffs(p) !kgC/m2/day
             csavg(p) = csavg(p) + cs(p) * ocp_coeffs(p) !kgC/m2/day
             hravg(p) = hravg(p) + hr(p) * ocp_coeffs(p) !kgC/m2/day
-            rmlavg(p) = rmlavg(p) + rml(p) * ocp_coeffs(p)
-            rmfavg(p) = rmfavg(p) + rmf(p) * ocp_coeffs(p)
-            rmsavg(p) = rmsavg(p) + rms(p) * ocp_coeffs(p)
             rmavg(p) = rmavg(p) + rm(p) * ocp_coeffs(p)
-            rglavg(p) = rglavg(p) + rgl(p) * ocp_coeffs(p)
-            rgfavg(p) = rgfavg(p) + rgf(p) * ocp_coeffs(p)
-            rgsavg(p) = rgsavg(p) + rgs(p) * ocp_coeffs(p)
             rgavg(p) = rgavg(p) + rg(p) * ocp_coeffs(p)
             cleafavg_pft(p)  =  cl2(p)
             cawoodavg_pft(p) =  ca2(p)
             cfrootavg_pft(p) =  cf2(p)
-            betalavg(p) = betalavg(p) + (alfa_leaf(p) * 1e6)  !kg m-2 to kg km-2  
-            betawavg(p) = betawavg(p) + (alfa_awood(p) * 1e6)
-            betafavg(p) = betafavg(p) + (alfa_froot(p) * 1e6)
             cl1_pft(p) = cl2(p)     ! Adicionado ------ para fazer transforcaoes diarias
             ca1_pft(p) = ca2(p)     ! Adicionado ------ para fazer transforcaoes diarias
             cf1_pft(p) = cf2(p)     ! Adicionado ------ para fazer transforcaoes diarias
@@ -753,17 +712,8 @@ c     Carbon allocation (carbon content on each compartment)
          clavg(p) = (clavg(p)/365.0) * 12.0 !kgC/m2
          csavg(p) = (csavg(p)/365.0) * 12.0 !kgC/m2
          hravg(p) = (hravg(p)/365.0) * 12.0 !kgC/m2/yr
-         rmlavg(p) = (rmlavg(p)/365.0) * 12.0 
-         rmfavg(p) = (rmfavg(p)/365.0) * 12.0
-         rmsavg(p) = (rmsavg(p)/365.0) * 12.0
          rmavg(p) = (rmavg(p)/365.0) * 12.0 
-         rglavg(p) = (rglavg(p)/365.0) * 12.0 
-         rgfavg(p) = (rgfavg(p)/365.0) * 12.0 
-         rgsavg(p) = (rgsavg(p)/365.0) * 12.0 
          rgavg(p) = (rgavg(p)/365.0) * 12.0
-         betalavg(p) = (betalavg(p)/365.0) * 12.0   
-         betawavg(p) = (betawavg(p)/365.0) * 12.0 
-         betafavg(p) = (betafavg(p)/365.0) * 12.0 
          ocpavg(p) = ocp_coeffs(p) * 100.
       enddo
       return

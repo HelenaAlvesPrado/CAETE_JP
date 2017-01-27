@@ -11,8 +11,7 @@ c234567
 
       subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,
      &    wmax,ca,ipar,rh,cl1,ca1,cf1,beta_leaf,beta_awood,      
-     &    beta_froot,emax, ph,ar,nppa,laia,f5,f1,vpd,rm,rml, 
-     &    rmf,rms,rg,rgl,rgf,rgs,rc)
+     &    beta_froot,emax, ph,ar,nppa,laia,f5,f1,vpd,rm,rg,rc)
 
       implicit none
 
