@@ -117,27 +117,12 @@ c     ------------------------- internal variables---------------------
       real ae                   !Available energy     
       real pr,spre,ta,td,ipar,ru
       integer I1,J1,K1,k2
+      real leaf_pool(q), froot_pool(q),awood_pool(q)
       
       real, parameter :: H = 1.0 !Soil layer(m) 
       real, parameter :: diffu = 4.e-7*(30.*86400.0) !Soil thermal diffusivity (m2/month)
       real, parameter :: tau = (H**2)/(2.0*diffu) !E-folding time (months)
-      real, parameter :: auxs = -100.0 !Auxiliar for calculation of Snpp
-
-!     SHARED(nx,ny,q,no_data,CLEAF_PFT
-!    $ ,CAWOOD_PFT,CFROOT_PFT
-!    $ ,CAWOOD_INI,CFROOT_INI,WG0,EMAXM,tsoil,photo_pft,aresp_pft
-!    $ ,lai_pft,clit_pft,csoil_pft,hresp_pft,rcm_pft,runom_pft
-!    & ,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft,rgf_pft
-!    & ,rgs_pft,rg_pft,grid_area
-!    & ,betal,betaw,betaf,GSOIL,SSOIL,WINI,GINI,SINI,BL,BW,BF
-!    & ,P0,TEMP,PREC,PAR,RHS,wfim,gfim,sfim,smes,rmes,emes
-!    & ,nppmes,laimes,clmes,csmes,hrmes,rcmes,rmlmes,rmfmes
-!    & ,rmsmes,rmmes,rglmes,rgfmes,rgsmes,rgmes,cleafmes
-!    & ,cawoodmes,cfrootmes, gridocpmes,betalmes, betawmes
-!    & ,betafmes,epmes,phmes,armes,npp_pft,CA,evapm_pft
-!    & ,WSOIT,GSOILT,WMAX,CLEAF_INI
-
-      
+      real, parameter :: auxs = -100.0 !Auxiliar for calculation of Snpp     
       
 !     ================      
 !     Soil temperature
@@ -354,7 +339,7 @@ c     Write to track program execution
                goto 10               
  100           continue
 !     PFTs equilibrium check
-c     
+c              nerro = 0
                DO K = 1,12
                   DO P = 1,Q
                      BL(P) = BL(P) + BETAL(I,J,K,P)/12.
@@ -368,35 +353,20 @@ c
                   if(cleaf_pft(i,j,p) .gt. 0.0 .and.
      &                cfroot_pft(i,j,p).gt. 0.0) then
                      if(wood(p) .le. 0.0) then
-                        if(abs(bl(p)) .gt. 20.0 .or.
-     $                      abs(bf(p)) .gt. 20.0) then
-                      cleaf1_pft(p) =  cleafmes(p) + ((bl(p)*1e-6))
-c     &                      * 365.)
-                      cfroot1_pft(p)= cfrootmes(p) + ((bf(p)*1e-6))
-c     &                      * 365.)
-c     print*, abs(bl(p)),abs(bf(p)), abs(bw(p)), p, n
-                           goto 10
+                        if(abs(bl(p)) .gt. 250.0 .or.
+     $                     abs(bf(p)) .gt. 250.0) then  
+                            nerro = nerro + 1
                         ENDIF
                      else
-                        if(abs(bl(p)) .gt. 20.0 .or.
-     $                      abs(bf(p)) .gt. 20.0 .or.
-     $                      abs(bw(p)) .gt. 100.0) then
-                           cleaf1_pft(p) =  cleafmes(p) + ((bl(p)*1e-6))
-c     &                      * 365.)
-                           cawood1_pft(p)= cawoodmes(p) + ((bw(p)*1e-6))
-c     &                      * 365.)
-                           cfroot1_pft(p)= cfrootmes(p) + ((bf(p)*1e-6))
-c     &                      * 365. )
-c     print*, abs(bl(p)),abs(bf(p)), abs(bw(p)), p, n
-                           goto 10 
+                        if(abs(bl(p)) .gt. 250.0 .or.
+     $                      abs(bf(p)) .gt. 250.0 .or.
+     $                      abs(bw(p)) .gt. 700.0) then
+                            nerro = nerro + 1 
                         ENDIF   
                      endif
-c     print*, 'pft equilibrium attained', p
-c     print*, abs(bl(p)),abs(bf(p)), abs(bw(p)), p, n
-c     print*, cleaf1_pft(p), cawood1_pft(p), cfroot1_pft(p),
-c     &                'pft'
                   endif
                enddo
+               if(nerro .gt. 0) goto 10
             endif               ! endif lsmk
 c     finalize ny loop
          enddo                  ! j
