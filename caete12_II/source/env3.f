@@ -1129,7 +1129,7 @@ cc      call save_file12(10, rcm7)
 
 !     PFTS (Leaf Gas Exchange Database
       
-!     1 = Tropical Evergreen Tree  
+!     1 = 
 !     2 = Tropical Deciduous Tree        
 !     3 = Tropical Deciduous Savanna 
 !     4 = Tropical Evergreen Savanna 
@@ -1141,11 +1141,11 @@ cc      call save_file12(10, rcm7)
 !    10 = Temperate Evergreen Shrub 
 !    11 = Boreal Evergreen Tree  
 !    12 = Boreal Deciduous Tree
-!     PFT       1       2       3       4       5       6       7       8       9       10      11      12      
-      data dt1/3.77,   4.15,   2.98,   7.18,   4.5,    3.37,   4.64, !g1
-     &    4.4,    4.6,    3.92,   1.5,    2.72/ 
-      data dt2/5.9E-5, 3.4E-5, 3.2E-5, 6.8E-5, 3.1E-5, 5.1E-5, 3.3E-5, !p21
-     &    3.1E-5, 3.1E-5, 4.4E-5, 4.2E-5, 4.0E-5/ 
+!     PFT       1       2       3       4       5       6       7    !   8       9       10      11      12      
+      data dt1/3.77,   4.15,   2.98,   7.18,   6.5,    3.37,   4.64, !g1
+     &    7.4,    4.6,    3.92,   1.5,    2.72/ 
+      data dt2/5.9E-5, 3.4E-5, 3.2E-5, 6.8E-5, 8.1E-5, 5.1E-5, 3.3E-5, !p21
+     &    9.1E-5, 3.1E-5, 4.4E-5, 4.2E-5, 4.0E-5/ 
       data dt3/0.40,   0.45,   0.37,   0.35,   0.45,   0.40,   0.45, !aleaf
      &    0.45,   0.40,   0.40,   0.40,   0.35/ 
       data dt4/0.30,   0.30,   0.20,   0.25,   0.0,    0.30,   0.35, !aawood

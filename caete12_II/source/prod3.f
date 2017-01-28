@@ -234,31 +234,43 @@ c     &    (1.0+exp(p23*(temp-p24)))
       call canopy_resistence(pft , vpd64, f1a, rc)
       
 !     Water stress response modifier (dimensionless)
-!     ----------------------------------------------     
-      csru = 0.5 
-      pt = csru*(cf1*1000.)*wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
-      alfm = 1.391
-      gm = 3.26 * 86400.           !(*86400 transform s/mm to dia/mm)
+!     ----------------------------------------------
+
+c     Water stress response modifier (dimensionless)
+c     [f5 ; Eq. 21]
+      ! vamos deixar o F5 como antigamente ate este problema ser resolvido
+      if (wa.gt.0.5) then
+         f5 = 1.0               !Not too lower in e.g. Amazonian dry season
+      else if ((wa.ge.0.205).and.(wa.le.0.5)) then
+         f5 = (wa-0.205)/(0.5-0.205)
+      else (wa.lt.0.205) f5 = wa !Below wilting point f5 accompains wa (then Sahara is well represented)
+      endif
+
       
-      if(rc .gt. 0.001) then
-!         gc = rc * 1.15741e-08 ! transfor s/m  to dia/mm)  !testamos, nao muda nada! Bia vai rever
-!         gc = (1./gc)  ! molCO2/mm2/dia
-      else
-         gc =  1.0/0.001 ! BIANCA E HELENA - Mudei este esquema..   
-      endif                     ! tentem entender o algoritmo
-                                ! e tenham certeza que faz sentido ecologico
-      d =(emax*alfm)/(1. + gm/gc) !(based in Gerten et al. 2004)
+c      csru = 0.5 
+c      pt = csru*(cf1*1000.)*wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
+c      alfm = 1.391
+c      gm = 3.26 * 86400.           !(*86400 transform s/mm to dia/mm)
+c      
+c      if(rc .gt. 0.001) then
+c         gc = rc * 1.15741e-08 ! transfor s/m  to dia/mm)  !testamos, nao muda nada! Bia vai rever
+c         gc = (1./gc)  ! molCO2/mm2/dia
+c      else
+c         gc =  1.0/0.001 ! BIANCA E HELENA - Mudei este esquema..   
+c      endif                     ! tentem entender o algoritmo
+c                                ! e tenham certeza que faz sentido ecologico
+c      d =(emax*alfm)/(1. + gm/gc) !(based in Gerten et al. 2004)
 !     BIanca- Eu alterei a estrutura desta equacao para evitar erros
 !     Isso faz a mesma coisa que o calculo que vc implementou - jp
-      if(d .gt. 0.0) then
-         f5_64 = pt/d
-         f5_64 = exp(-1 * f5_64)
-         f5_64 = 1.0 - f5_64
-      else
-         f5_64 = wa  ! eu acrescentei esta parte caso d seja igual a zero
-      endif          ! nao sei se faz sentido!
+c      if(d .gt. 0.0) then
+c         f5_64 = pt/d
+c         f5_64 = exp(-1 * f5_64)
+c         f5_64 = 1.0 - f5_64
+c      else
+c         f5_64 = wa  ! eu acrescentei esta parte caso d seja igual a zero
+c      endif          ! nao sei se faz sentido!
 
-      f5 = real(f5_64,4) !esta funcao transforma o f5 (double precision)
+c      f5 = real(f5_64,4) !esta funcao transforma o f5 (double precision)
 !     em real (32 bits) 
       
 !     Photosysthesis minimum and maximum temperature
@@ -281,7 +293,7 @@ c      if(leaf_t_months .gt. 0) print*, leaf_t_months, leaf_t_coeff, pft
       
 
       
-      laia64 = ((cl1*1000.)  * sla) ! * 1000 transform kg to g - laia64 in m-2 m-2
+      laia64 = ((cl1*1000.)  * sla) ! * 1000 transform kg to g - laia64 in m2 m-2
 c      if(laia64 .gt. 0.0) print*, laia64, 'jp'
 !     ---------------------------------
 !     Specifc Leaf Area----------------
@@ -307,7 +319,7 @@ c      if(laia64 .gt. 0.0) print*, laia64, 'bia'
       f4sun = ((1.0-(exp(-p26*sunlai)))/p26) !sun 90 degrees
       f4shade = ((1.0-(exp(-p27*shadelai)))/p27) !sun ~20 degrees
 
-      laia  = real((f4sun + f4shade), 4) ! pra mim faz sentido que a laia final seja
+      laia  = real(laia64,4) ! real((f4sun + f4shade), 4) ! pra mim faz sentido que a laia final seja
                                          ! a soma da lai em nivel de dossel (sun + shade) - jp
 !     Canopy gross photosynthesis (kgC/m2/yr)
 !     =======================================
