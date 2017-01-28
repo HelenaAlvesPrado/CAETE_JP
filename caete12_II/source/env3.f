@@ -1152,8 +1152,8 @@ cc      call save_file12(10, rcm7)
      &    0.00,   0.20,   0.20,   0.30,   0.35/ 
       data dt5/0.30,   0.25,   0.43,   0.40,   0.55,   0.30,   0.20, !afroot
      &    0.55,   0.40,   0.40,   0.30,   0.30/ 
-      data dt6/6.0,    3.0,    3.0,    6.0,    3.0,    6.0,    3.0, !tleaf
-     &    3.0,    2.0,    5.0,    8.0,    4.0/ 
+      data dt6/2.0,    1.0,    1.0,    1.0,    1.0,    3.0,    1.0, !tleaf
+     &    1.0,    1.0,    5.0,    8.0,    2.0/ 
       data dt7/70.0,   50.0,   40.0,   30.0,   0.0,    50.0,   50.0, !tawood
      &    0.0,    35.0,   35.0,   50.0,   50.0/ 
       data dt8/3.0,    3.0,    3.5,    3.0,    3.0,    3.5,    3.5, !tfroot
@@ -1199,7 +1199,7 @@ c     ==================================================
 c     &     cbwoodini,cstoini,cotherini,crepini) 
       IMPLICIT NONE
 
-      integer, parameter :: nt=10000
+      integer, parameter :: nt=30000
       integer, parameter :: npfts=12
       
 c     inputs
@@ -1212,8 +1212,6 @@ c     outputs
       real :: cleafini(npfts)
       real :: cawoodini(npfts)
       real :: cfrootini(npfts)
-      real :: ocp(npfts)
-      logical :: inutil(npfts)
       real*8 cleafi_aux(nt)
       real*8 cfrooti_aux(nt)
       real*8 cawoodi_aux(nt)
@@ -1235,7 +1233,7 @@ c     outputs
       call pft_par(6, tfroot)
 
  
-      sensitivity = 1.01
+      sensitivity = 1.001
       if(nppot .le. 0.0) goto 200
       do i6=1,npfts
          do k=1,nt
@@ -1289,12 +1287,6 @@ c     outputs
             endif
          enddo                  !nt
       enddo                     ! npfts 
-      call pft_area_frac(cleafini, cfrootini, cawoodini, ocp, inutil)
-c      do i6 = 1,npfts
-c         cleafini(i6) = cleafini(i6) * ocp(i6)
-c         cleafini(i6) = cleafini(i6) * ocp(i6)
-c         cleafini(i6) = cleafini(i6) * ocp(i6)
-c      enddo
  200  continue
       return
       end subroutine spinup
@@ -1385,6 +1377,5 @@ c                  print*, 'NaN found', '---place',i,j,k
             enddo
          enddo
       enddo  
-      
       return
       end subroutine nan2ndt

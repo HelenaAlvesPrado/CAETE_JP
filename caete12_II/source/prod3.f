@@ -288,6 +288,7 @@ c      if(laia64 .gt. 0.0) print*, laia64, 'jp'
 !      sla=((0.0300*1000.)*((365./(((tleaf(pft))/365.)/12.))**(-0.46)))    
 !      laia64 = (cl1 * 365.0 * sla)
 
+
 c      sla=(0.03*(365/(tleaf(pft)/365))**(-0.46))
 c      laia64 = (cl1 * 1000 * 365.0 * sla)
 c      if(laia64 .gt. 0.0) print*, laia64, 'bia'
@@ -320,22 +321,10 @@ c     Autothrophic respiration
 !     ========================
 !     Maintenance respiration (kgC/m2/yr) (based in Ryan 1991)
       csa= 0.05 * ca1           !sapwood carbon content (kgC/m2). 5% of woody tissues (Pavlick, 2013)
-!     Atencao
-!     eu alterei os valores da razao c:n ...os dados foram chutados por mim,
-!     com base numa leitura superficial do seguinte paper:
-      
-!     http://onlinelibrary.wiley.com/wol1/doi/10.1111/gcb.12022/suppinfo
-      
-!     Notem que eu li apenas o material suplementar.
-!     Assumi que a massa de carbono em todos os tecidos
-!     eh de 50%! Quem concorda? por favor nao coloquem acentuacao
-!     grafica nos comments -- eu sei que eh dificil,
-!     eu esqueço as vezes =P. Mas eu desconfio que essa eh a origem do bug que
-!     nao deixa a bia editar o codigo no notepad++ 
-      
-      ncl = 0.030               !(gN/gC) 
-      ncf = 0.030               !(gN/gC)
-      ncs = 0.006               !(gN/gC)
+            
+      ncl = 1./29.               !(gN/gC) from lpj3 
+      ncf = 1./29.               !(gN/gC)
+      ncs = 1./330.              !(gN/gC)
  
       rml64 = (ncl * cl1) * 27. * exp(0.03*temp)
       rml =  real(rml64,4)
