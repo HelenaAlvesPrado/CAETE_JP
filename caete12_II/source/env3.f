@@ -1232,10 +1232,10 @@ c     outputs
       call pft_par(5, afroot)
       call pft_par(6, tleaf)
       call pft_par(7, tawood)
-      call pft_par(8, tfroot)
+      call pft_par(6, tfroot)
 
  
-      sensitivity = 1.0001
+      sensitivity = 1.01
       if(nppot .le. 0.0) goto 200
       do i6=1,npfts
          do k=1,nt
@@ -1290,11 +1290,11 @@ c     outputs
          enddo                  !nt
       enddo                     ! npfts 
       call pft_area_frac(cleafini, cfrootini, cawoodini, ocp, inutil)
-      do i6 = 1,npfts
-         cleafini(i6) = cleafini(i6) * ocp(i6)
-         cleafini(i6) = cleafini(i6) * ocp(i6)
-         cleafini(i6) = cleafini(i6) * ocp(i6)
-      enddo
+c      do i6 = 1,npfts
+c         cleafini(i6) = cleafini(i6) * ocp(i6)
+c         cleafini(i6) = cleafini(i6) * ocp(i6)
+c         cleafini(i6) = cleafini(i6) * ocp(i6)
+c      enddo
  200  continue
       return
       end subroutine spinup

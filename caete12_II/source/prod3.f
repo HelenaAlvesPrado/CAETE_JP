@@ -623,7 +623,7 @@ c23456
       
 
       DO P = 1,NPFT
-         TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P) ! only sapwood
+         TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P)*0.05 ! only sapwood
          TOTAL_BIOMASS = TOTAL_BIOMASS + TOTAL_BIOMASS_PFT(P)
          TOTAL_WOOD = TOTAL_WOOD + CAWOOD(P)
          TOTAL_W_PFT(P) = CAWOOD(P)

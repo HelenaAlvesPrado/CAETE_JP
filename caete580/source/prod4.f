@@ -644,7 +644,7 @@ c23456
       
 
       DO P = 1,NPFT
-         TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P) * 5e-3 ! only sapwood
+         TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P)*5e-3 ! only sapwood
          TOTAL_BIOMASS = TOTAL_BIOMASS + TOTAL_BIOMASS_PFT(P)
          TOTAL_WOOD = TOTAL_WOOD + CAWOOD(P)
          TOTAL_W_PFT(P) = CAWOOD(P)
@@ -817,8 +817,7 @@ c      roff64 = 11.5*(wa**6.6) * 1000. !From NCEP-NCAR Reanalysis data
       else
          es = 6.1115 * exp((23.036-(t/333.7))*(t/(279.82+t))) ! mbar == hPa
       endif
-c      es = es/10. ! converting to kPa
-!     
+c      es = es/10. ! converting to kPa!     
       return
       end        
 !     =============================================================
@@ -881,12 +880,12 @@ c     initialization
       if(aawood(pft) .gt. 0.0) then
          sca2_128 = sca1 +(aawood(pft)*npp_aux)-(sca1/(tawood(pft)
      &       *365.0))
+        sca2 = real(sca2_128,4)
       else
          sca2 = 0.0
       endif
 
       scf2 = real(scf2_128,4)
-      sca2 = real(sca2_128,4)
       scl2 = real(scl2_128,4)
 
 
@@ -897,4 +896,4 @@ c     initialization
  10   continue
       return
       end
-c
+

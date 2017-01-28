@@ -2,8 +2,8 @@ C23456
       subroutine wbm (prec,temp,lsmk,p0,ca,par,rhs,cleaf_ini,cawood_ini
      &    ,cfroot_ini,emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft
      &    ,clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,evapm_pft
-     &    ,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rg_pft
-     &    ,cleaf_pft,cawood_pft,cfroot_pft,grid_area)
+     &    ,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft
+     &    ,grid_area)
       
 
       implicit none
@@ -62,14 +62,10 @@ c      =========================================================================
       real evapm_pft(nx,ny,12) !Actual evapotranspiration        
       real wsoil_pft(nx,ny,12)  !Soil moisture (mm)
       
-c      real rml_pft  (nx,ny,12) ! Maintenance respiration 
-c      real rmf_pft  (nx,ny,12)
-c      real rms_pft  (nx,ny,12)
+      ! Maintenance respiration 
       real rm_pft   (nx,ny,12)
       
-c      real rgl_pft  (nx,ny,12) ! Growth respiration
-c      real rgf_pft  (nx,ny,12)
-c      real rgs_pft  (nx,ny,12)
+      ! Growth respiration
       real rg_pft   (nx,ny,12)
 c     ===========================================================================================
       
@@ -172,11 +168,11 @@ c     ------------------------- internal variables---------------------
                cleaf1_pft (p) =  cleaf_ini(i,j,p)
                cawood1_pft(p) = cawood_ini(i,j,p)
                cfroot1_pft(p) = cfroot_ini(i,j,p)
-               cleaf_pft(i,j,p)  = no_data ! leaf biomass (KgC/m2)
-               cawood_pft(i,j,p) = no_data ! aboveground biomass (KgC/m2)
-               cfroot_pft(i,j,p) = no_data ! fine root biomass (KgC/m2)
                grid_area(i,j,p)  = no_data ! gridcell area fraction of pfts(%)
             enddo
+               cleaf_pft(i,j)  = no_data ! leaf biomass (KgC/m2)
+               cawood_pft(i,j) = no_data ! aboveground biomass (KgC/m2)
+               cfroot_pft(i,j) = no_data ! fine root biomass (KgC/m2)
 
 c     Write to track program execution     
             if ((mod(j,ny).eq.0).and.(mod(i,10).eq.0))
@@ -353,8 +349,8 @@ c                  betaf(i,j,k,p) = betafmes(p)
                   call pft_par(4,wood)
                   
                   do p = 1,q
-                     if(cleaf_pft(i,j,p) .gt. 0.0 .and.
-     &                   cfroot_pft(i,j,p).gt. 0.0) then
+                     if(cleaf_pft(i,j) .gt. 0.0 .and.
+     &                   cfroot_pft(i,j).gt. 0.0) then
                         if(wood(p) .le. 0.0) then
                            check = .true.
                            biomass = biomass + cleaf1_pft(p) +
@@ -492,7 +488,7 @@ c     Carbon Cycle
       real cs  (npft)           !Soil carbon (kgC/m2) 
       real hr  (npft)           !Heterotrophic (microbial) respiration (kgC/m2/yr)
       real rc2 (npft)           !Canopy resistence (s/m)
-      real f5(npft),f1(npft)
+      real f5(npft),f1(npft),vpd(npft)
       real rm(npft) ! maintenance & growth a.resp
       real rg(npft)
       real cl1(npft),cf1(npft),ca1(npft) ! carbon pre-allocation 
