@@ -12,7 +12,7 @@ mask_fpath = './mask12.npy'
 NO_DATA = [-9999.0, -9999.0]
 lsmk = np.load(mask_fpath)
 
-fdir = '../new_inputs_caete3'
+fdir = '../new_inputs_caete1'
 files = glob.glob1(fdir, '*.bin')
 
 
@@ -25,7 +25,8 @@ def flt_attrs():
             'pr'    : ['precipitation',       'Kg m-2 month-1',            'pr'],      
             'wsoil' : ['soil_water_fraction', '1',                      'wsoil'],
             'et'    : ['evapotranpiration',   'kg m-2 day-1',              'et'],
-            'runoff': ['runoff',              'kg m-2 day-1',          'runoff']}
+            'runoff': ['runoff',              'kg m-2 day-1',          'runoff'],
+            'hurs'  : ['relative humidity',    '1',                      'hurs']}
 
 
 def read_raster(fpath):

@@ -10,7 +10,7 @@ import os
 flip_b = True
 
 if flip_b:
-    path_to_files = '../new_inputs_caete3'
+    path_to_files = '../new_inputs_caete1'
 #GLOBAL VARIABLES 
     nx = 720
     ny = 360
@@ -85,8 +85,8 @@ if flip_b:
                 'NBITS %i%s'%(pixel_depht, os.linesep),
                 'PIXELTYPE %s%s'%(pixel_type, os.linesep),
                 'LAYOUT %s%s'%(bnd_layout, os.linesep),
-                'XLLCORNER %d%s'%(xllcorner,os.linesep),
-                'YLLCORNER %d%s'%(yllcorner,os.linesep),
+                'XLLCORNER %f%s'%(xllcorner,os.linesep),
+                'YLLCORNER %f%s'%(yllcorner,os.linesep),
                 'CELLSIZE %f%s'%(cellsize,os.linesep),
                 'NODATA_VALUE %f%s'%(NO_DATA,os.linesep),
                 'BYTEORDER %s%s'%(byteOrder,os.linesep)
