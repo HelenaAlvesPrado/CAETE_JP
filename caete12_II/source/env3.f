@@ -1234,7 +1234,7 @@ c     outputs
 
  
       sensitivity = 1.001
-      if(nppot .le. 0.0) goto 200
+      if(nppot .lt. 0.0) goto 200
       do i6=1,npfts
          do k=1,nt
             if (k.eq.1) then

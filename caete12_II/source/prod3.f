@@ -243,7 +243,8 @@ c     [f5 ; Eq. 21]
          f5 = 1.0               !Not too lower in e.g. Amazonian dry season
       else if ((wa.ge.0.205).and.(wa.le.0.5)) then
          f5 = (wa-0.205)/(0.5-0.205)
-      else (wa.lt.0.205) f5 = wa !Below wilting point f5 accompains wa (then Sahara is well represented)
+      else if (wa.lt.0.205) then
+         f5 = wa !Below wilting point f5 accompains wa (then Sahara is well represented)
       endif
 
       
@@ -277,7 +278,8 @@ c      f5 = real(f5_64,4) !esta funcao transforma o f5 (double precision)
 !     ----------------------------------------------
       
       if ((temp.ge.-10.0).and.(temp.le.50.0)) then
-         f1 = f1a*real(f5_64,8) !f5:water stress factor-- Notem que aqui a tranformacao eh de 128 pra 64 bits
+c         f1 = f1a*real(f5_64,8) !f5:water stress factor-- Notem que aqui a tranformacao eh de 128 pra 64 bits
+          f1 = f1a * f5
       else
          f1 = 0.0               !Temperature above/below photosynthesis windown
       endif
@@ -845,14 +847,14 @@ c
 c     
 c     
 c     initialization
-      if((scl1 .lt. 0.0000001) .or. (scf1 .lt. 0.0000001)) then
-         IF(NPP .lt. 0.0000001) THEN
-            scl2 = 0.0
-            scf2 = 0.0
-            sca2 = 0.0 
-            goto 10
-         ENDIF
-      endif   
+c      if((scl1 .lt. 0.0000001) .or. (scf1 .lt. 0.0000001)) then
+c         IF(NPP .lt. 0.0000001) THEN
+c            scl2 = 0.0
+c            scf2 = 0.0
+c            sca2 = 0.0 
+c            goto 10
+c         ENDIF
+c      endif   
       npp_aux = npp/365.0       !transform (KgC/m2/yr) in (KgC/m2/day)
       scl2_128 = scl1 + (aleaf(pft) * npp_aux) -(scl1 /(tleaf(pft)
      &    *365.0))
