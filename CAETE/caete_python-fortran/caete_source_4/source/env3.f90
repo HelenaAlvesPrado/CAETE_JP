@@ -212,8 +212,7 @@ program env
   !     Atmospheric CO2 pressure (Pa) !Ppmv / Pa
   ca= 363/9.901             !Pa (=363 ppmv; 1981-2010)
 
-!$OMP PARALLEL PRIVATE(i)
-!$OMP DO SCHEDULE(STATIC),ORDERED 
+!$OMP PARALLEL DO SCHEDULE(STATIC),PRIVATE(I),ORDERED,DEFAULT(SHARED) 
   do i=1,nx
      if(mod(I,72) .eq. 0) print*, nint(real(i)/real(nx) * 100.)
      do j=1,ny       
@@ -288,8 +287,7 @@ program env
            cwfim(i,j,:) = cawood_pft(p)
      enddo
   enddo
-!$OMP END DO 
-!$OMP END PARALLEL!$OMP
+!$OMP END PARALLEL DO 
 
         open(10,file='../spinup/gridcell_ocp.bin',&
      &    status='unknown',form='unformatted',&
