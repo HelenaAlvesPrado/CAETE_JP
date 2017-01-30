@@ -213,8 +213,9 @@ program env
   ca= 363/9.901             !Pa (=363 ppmv; 1981-2010)
 
 !$OMP PARALLEL PRIVATE(i)
-!$OMP DO SCHEDULE(STATIC)  
+!$OMP DO SCHEDULE(STATIC),ORDERED 
   do i=1,nx
+     if(mod(I,72) .eq. 0) print*, nint(real(i)/real(nx) * 100.)
      do j=1,ny       
         if(nint(lsmk(i,j)) .ne. 0) then
            npp_sca = aux_npp(i,j)
@@ -273,15 +274,18 @@ program env
               cleafin(p)  = no_data
               cfrootin(p) = no_data
               cawoodin(p) = no_data
+              cleaf_pft(p) = no_data
+              cfroot_pft(p) = no_data
+              cawood_pft(p) = no_data
            enddo
         endif
-        grd_ocp(i,j,p) = gridcell_ocp(p)
-        clini(i,j,p) = cleafin(p)
-        cfini(i,j,p) = cfrootin(p)
-        cwini(i,j,p) = cawoodin(p)
-        clfim(i,j,p) = cleaf_pft(p)
-        cffim(i,j,p) = cfroot_pft(p)
-        cwfim(i,j,p) = cawood_pft(p)
+           grd_ocp(i,j,:) = gridcell_ocp(p)
+           clini(i,j,:) = cleafin(p)
+           cfini(i,j,:) = cfrootin(p)
+           cwini(i,j,:) = cawoodin(p)
+           clfim(i,j,:) = cleaf_pft(p)
+           cffim(i,j,:) = cfroot_pft(p)
+           cwfim(i,j,:) = cawood_pft(p)
      enddo
   enddo
 !$OMP END DO 
@@ -307,7 +311,7 @@ program env
      &    access='direct',recl=4*nx*ny)
       call savex(10, cfroot_pft,q)
           
-      open(10,file='../spinip/clini.bin',&
+      open(10,file='../spinup/clini.bin',&
      &    status='unknown',form='unformatted',&
      &    access='direct',recl=4*nx*ny)
       call savex(10, clini, q)
