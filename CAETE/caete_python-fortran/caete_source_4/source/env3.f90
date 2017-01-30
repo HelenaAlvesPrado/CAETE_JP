@@ -20,44 +20,57 @@ program env
   real(kind=r4),parameter :: no_data = -9999.0
   !     
   !   Model  Inputs
-  !   -------------
-  !     
+  !   -------------  
   real(kind=r4) :: ca                   !CO2 concentration (Pa)
   real(kind=r4) :: lsmk(nx,ny)          !Land=1/Ocean=0
-  real(kind=r4) :: p0(nx,ny,nt)         !Atmospheric pressure (mb)
+  real(kind=r4) :: p0(nt)         !Atmospheric pressure (mb)
   real(kind=r4) :: ps(nx,ny,nt)         ! auxiliar to read atm pressure information
-  real(kind=r4) :: prec(nx,ny,nt)       !Precipitation (mm/month)
+  real(kind=r4) :: prec(nt)       !Precipitation (mm/month)
   real(kind=r4) :: pr(nx,ny,nt)         !Auxiliar_precipitation (mm/month)
-  real(kind=r4) :: temp(nx,ny,nt)       !Temperature (oC)
+  real(kind=r4) :: temp(nt)       !Temperature (oC)
   real(kind=r4) :: t(nx,ny,nt)          !Auxiliar_temperature (oC)
-  real(kind=r4) :: par(nx,ny,nt)        !Incident photosynthetic active radiation (Ein/m2/s)
+  real(kind=r4) :: par(nt)        !Incident photosynthetic active radiation (Ein/m2/s)
   real(kind=r4) :: ipar(nx,ny,nt)       !Auxiliar_incident photosynthetic active radiation (w/m2)
-  real(kind=r4) :: rhs(nx,ny,nt)        !Relative humidity
+  real(kind=r4) :: rhs(nt)        !Relative humidity
   real(kind=r4) :: rhaux(nx,ny,nt)      !RHS auxiliar
-  real(kind=r4),dimension(nx,ny,q) :: cleafin = no_data ,cawoodin = no_data ,cfrootin = no_data
-
+  
+  real(kind=r4),dimension(q) :: cleafin = 0.0
+  real(kind=r4),dimension(q) :: cawoodin = 0.0
+  real(kind=r4),dimension(q) :: cfrootin = 0.0
+  
   !    Model Outputs
   !    -------------
-  real(kind=r4) :: emaxm(nx,ny,nt)
-  real(kind=r4) :: tsoil(nx,ny,nt)
+  real(kind=r4),dimension(nt) :: emaxm = 0.0
+  real(kind=r4),dimension(nt) :: tsoil = 0.0
   
-  real(kind=r4) :: photo_pft(nx,ny,nt,q) !Monthly photosynthesis   (kgC/m2)
-  real(kind=r4) :: aresp_pft(nx,ny,nt,q) !Monthly autotrophic res  (kgC/m2)
-  real(kind=r4), dimension(nx,ny,nt,q) :: rm_pft,rg_pft
-  real(kind=r4) :: npp_pft(nx,ny,nt,q)  !Monthly net primary produ (kgC/m2)
+  real(kind=r4),dimension(nt,q) :: photo_pft = 0.0 !Monthly photosynthesis   (kgC/m2)
+  real(kind=r4),dimension(nt,q) :: aresp_pft = 0.0 !Monthly autotrophic res  (kgC/m2)
+  real(kind=r4),dimension(nt,q) :: rm_pft    = 0.0
+  real(kind=r4),dimension(nt,q) :: rg_pft    = 0.0
+  real(kind=r4),dimension(nt,q) :: npp_pft   = 0.0  !Monthly net primary produ (kgC/m2)
       
-  real(kind=r4) :: lai_pft(nx,ny,nt,q)  !Monthly leaf area index
-  real(kind=r4) :: clit_pft(nx,ny,nt,q) !Monthly litter carbon
-  real(kind=r4) :: csoil_pft(nx,ny,nt,q) !Monthly soil carbon
-  real(kind=r4) :: hresp_pft(nx,ny,nt,q) !Monthly het resp          (kgC/m2)
-  real(kind=r4) :: rcm_pft(nx,ny,nt,q) 
+  real(kind=r4),dimension(nt,q) :: lai_pft = 0.0  !Monthly leaf area index
+  real(kind=r4),dimension(nt,q) :: clit_pft = 0.0 !Monthly litter carbon
+  real(kind=r4),dimension(nt,q) :: csoil_pft = 0.0 !Monthly soil carbon
+  real(kind=r4),dimension(nt,q) :: hresp_pft = 0.0 !Monthly het resp          (kgC/m2)
+  real(kind=r4),dimension(nt,q) :: rcm_pft = 0.0 
   
-  real(kind=r4) :: runom_pft(nx,ny,nt,q) !Runoff
-  real(kind=r4) :: evapm_pft(nx,ny,nt,q) !Actual evapotranspiration        
-  real(kind=r4) :: wsoil_pft(nx,ny,nt,q) !Soil moisture (mm)
+  real(kind=r4),dimension(nt,q) :: runom_pft = 0.0 !Runoff
+  real(kind=r4),dimension(nt,q) :: evapm_pft = 0.0 !Actual evapotranspiration        
+  real(kind=r4),dimension(nt,q) :: wsoil_pft = 0.0 !Soil moisture (mm)
   
-  real(kind=r4),dimension(nx,ny,q) :: cleaf_pft,cawood_pft,cfroot_pft
-  real(kind=r4) :: gridcell_ocp(nx,ny,q) !  final grid cell occupation for each pft (percentage of area)
+  real(kind=r4),dimension(q) :: cleaf_pft = 0.0
+  real(kind=r4),dimension(q) :: cawood_pft = 0.0
+  real(kind=r4),dimension(q) :: cfroot_pft = 0.0
+  real(kind=r4),dimension(q) :: gridcell_ocp = 0.0 !  final grid cell occupation for each pft (percentage of area)
+
+  real(kind=r4),dimension(nx,ny,q) :: grd_ocp = 0.0
+  real(kind=r4),dimension(nx,ny,q) :: clini = 0.0
+  real(kind=r4),dimension(nx,ny,q) :: cfini = 0.0
+  real(kind=r4),dimension(nx,ny,q) :: cwini = 0.0
+  real(kind=r4),dimension(nx,ny,q) :: clfim = 0.0
+  real(kind=r4),dimension(nx,ny,q) :: cffim = 0.0
+  real(kind=r4),dimension(nx,ny,q) :: cwfim = 0.0
 
 
   !     variaveis do spinup
@@ -65,6 +78,7 @@ program env
   real(kind=r4) :: npp_pot(nx,ny,nt)
   real(kind=r4),dimension(q) :: aux1, aux2, aux3
   real(kind=r4),dimension(nx,ny) :: aux_npp 
+
   
   real(kind=r4),dimension(nx,ny) :: ave_ph = 0.0
   real(kind=r4),dimension(nx,ny) :: ave_ar = 0.0
@@ -93,195 +107,9 @@ program env
   
   real(kind=r4), dimension(nx,ny,nt) :: rm
   real(kind=r4), dimension(nx,ny,nt) :: rg
-            
-  !     Open INPUT files
-  !     ==========
-  open( 9,file='../inputs/lsmk.bin',status='old',form='unformatted'&
-       &,access='direct',recl=4*nx*ny)
 
-  open(10,file='../inputs/ps.bin',status='old',form='unformatted'&
-       &,access='direct',recl=4*nx*ny)
+ ! initialize arrays
 
-  open(11,file='../inputs/pr.bin',status='old',form='unformatted'&
-       &,access='direct',recl=4*nx*ny)
-      
-  open(12,file='../inputs/tas.bin',status='old',form='unformatted'&
-       &,access='direct',recl=4*nx*ny)
-      
-  open(13,file='../inputs/rsds.bin',status='old',form='unformatted'&
-       &,access='direct',recl=4*nx*ny)
-
-  open(14,file='../inputs/hurs.bin',status='old',form='unformatted'&
-       &,access='direct',recl=4*nx*ny)
-
-  open(26,file='../inputs/npp.bin',status='old',form='unformatted'&
-       &,access='direct',recl=4*nx*ny)
-
-!c      open(27,file='../spinup/clini.bin',status='old',
-!c     &    form='unformatted',access='direct',recl=4*nx*ny)
-!c
-!c      open(28,file='../spinup/cfini.bin',status='old',
-!c     &    form='unformatted',access='direct',recl=4*nx*ny)
-!c
-!c      open(29,file='../spinup/cwini.bin',status='old',
-!c     &    form='unformatted',access='direct',recl=4*nx*ny)
-
-
-  !     Read data
-  !     =========
-      
-  read (9,rec=1) lsmk
-  !c     read (26,rec=1) aux_npp 
-      
-  call readx(10,ps,12)
-  call readx(11,pr,12)
-  call readx(12,t,12)
-  call readx(13,ipar,12)
-  call readx(14,rhaux,12)
-  call readx(26,npp_pot,12)
-  !c     call readx(29,cleafin,q)
-  !c     call readx(28,cfrootin,q)
-  !c     call readx(29,cawoodin,q)
-      
-  !     Close files
-  !     ===========
-  !     
-  close( 9)
-  close(10)
-  close(11)
-  close(12)
-  close(13)
-  close(14)
-  close(26)
-  !c       close(27)
-  !c       close(28)
-  !c       close(29)
-       
-
-  !c     Calculating annual npp
-  do i =1,nx
-     do j=1,ny
-        if(nint(lsmk(i,j)) .ne. 0) then 
-           aux_npp(i,j) = 0.0
-           do k = 1,12
-              aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
-           enddo
-        else
-           aux_npp(i,j) = no_data
-        endif
-     enddo
-  enddo
-       
-  !     calling spinup
-  print*, 'running spinup'
-  do i=1,nx
-     do j=1,ny
-        if (nint(lsmk(i,j)) .ne. 0) then
-           npp_sca = aux_npp(i,j)
-           
-           do p=1,q   
-              aux1(p) = 0.0
-              aux2(p) = 0.0
-              aux3(p) = 0.0
-              gridcell_ocp(i,j,p) = 0.0
-           enddo
-           
-           call spinup(npp_sca, aux1, aux2, aux3)
-           
-           do p=1,q   
-              cleafin(i,j,p)  = aux1(p)
-              cfrootin(i,j,p) = aux2(p)
-              cawoodin(i,j,p) = aux3(p)
-           enddo
-        else
-           do p = 1,q
-              cleafin(i,j,p)  = no_data
-              cfrootin(i,j,p) = no_data
-              cawoodin(i,j,p) = no_data
-           enddo
-        endif
-     enddo
-  enddo
-      
-  open(10,file='../spinup/clini.bin',&
-       &    status='unknown',form='unformatted',&
-       &    access='direct',recl=4*nx*ny)
-  
-  call savex(10, cleafin, q)
-  
-  open(10,file='../spinup/cfini.bin',&
-       &    status='unknown',form='unformatted',&
-       &    access='direct',recl=4*nx*ny)
-  call savex(10, cfrootin, q)
-  
-  open(10,file='../spinup/cwini.bin',&
-       &    status='unknown',form='unformatted',&
-       &    access='direct',recl=4*nx*ny)
-  call savex(10, cawoodin, q)
-  
-  do i=1,nx
-     do j=1,ny
-        
-        !     this block set ocean grid cells to no_data 
-        if(nint(lsmk(i,j)) .eq. 0) then
-           do p = 1,q
-              cleaf_pft(i,j,p)  = no_data
-              cfroot_pft(i,j,p) = no_data
-              cawood_pft(i,j,p) = no_data
-              gridcell_ocp(i,j,p) = no_data
-           enddo
-        endif
-        !     ------------------------------------------
-        
-        do k=1,12
-           rhs(i,j,k) =  rhaux(i,j,k) / 100. !(rhaux(60,41,10) / 100.0) !Humidade relativa de manaus em outubro
-           par(i,j,k) = ipar(i,j,k)/2.18E5 !Converting to Ein/m2/s
-           temp(i,j,k) = t(i,j,k) !+ant(i,j,k) !uncomment to use future anomalies
-           p0(i,j,k) = ps(i,j,k) * 0.01 ! transforamando de pascal pra mbar (kPa)
-           prec(i,j,k) = pr(i,j,k) !+anpr(i,j,k) !+pr(i,j,k)*0.2 !uncomment to use future anomalies
-           !c     if (prec(i,j,k).lt.0.0) prec (i,j,k) = 0.0  
-        enddo
-     enddo
-  enddo
-      
-  !     Atmospheric CO2 pressure (Pa) !Ppmv / Pa
-  ca= 363/9.901             !Pa (=363 ppmv; 1981-2010)
-      
-      
-  !     =======================================
-  !     Calculate environmental variables (wbm)
-  !     =======================================
-      
-  call wbm (prec,temp,lsmk,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,&
-       &    emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,&
-       &    clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,&
-       &    evapm_pft,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,&
-       &    cfroot_pft,gridcell_ocp)   
-      
-      
-      
-      
-  !     SAVE RESULTS TO FILES
-  open(10,file='../outputs/gridcell_ocp.bin',&
-       &    status='unknown',form='unformatted',&
-       &    access='direct',recl=4*nx*ny)
-  call savex(10, gridcell_ocp, q)
-  
-  open(10,file='../outputs/cleaf.bin',&
-       &    status='unknown',form='unformatted',&
-       &    access='direct',recl=4*nx*ny)
-  call savex(10, cleaf_pft, q)
-  
-  open(10,file='../outputs/cawood.bin',&
-       &    status='unknown',form='unformatted',&
-       &    access='direct',recl=4*nx*ny)
-  call savex(10,cawood_pft,q)
-      
-  open(10,file='../outputs/cfroot.bin',&
-       &    status='unknown',form='unformatted',&
-       &    access='direct',recl=4*nx*ny)
-  call savex(10, cfroot_pft,q)
-  
   do i = 1,nx
      do j = 1,ny
         do k = 1,12
@@ -317,89 +145,183 @@ program env
         enddo
      enddo
   enddo
-  do i = 1,nx
-     do j = 1,ny
-        if(nint(lsmk(i,j)) .ne. 0) then
-           do k = 1,nt
-              do p = 1,q
-                 ph(i,j,k) = ph(i,j,k) + photo_pft(i,j,k,p)
-                 ar(i,j,k) = ar(i,j,k) + aresp_pft(i,j,k,p)
-                 npp(i,j,k) = npp(i,j,k) + npp_pft(i,j,k,p)
-                 lai(i,j,k) = lai(i,j,k) + lai_pft(i,j,k,p)
-                 clit(i,j,k) = clit(i,j,k) + clit_pft(i,j,k,p)
-                 csoil(i,j,k) = csoil(i,j,k) + csoil_pft(i,j,k,p)
-                 hr(i,j,k) = hr(i,j,k) + hresp_pft(i,j,k,p)
-                 rcm(i,j,k) = rcm(i,j,k) + rcm_pft(i,j,k,p)
-                 runom(i,j,k) = runom(i,j,k) + runom_pft(i,j,k,p)
-                 evaptr(i,j,k) = evaptr(i,j,k) + evapm_pft(i,j,k,p)
-                 wsoil(i,j,k) = wsoil(i,j,k) + wsoil_pft(i,j,k,p)
-                 rm(i,j,k)  = rm(i,j,k) + rm_pft(i,j,k,p)
-                 rg(i,j,k)  = rg(i,j,k) + rg_pft(i,j,k,p)
-              enddo
+  
+  
+  !     Open INPUT files
+  !     ==========
+  open( 9,file='../inputs/lsmk.bin',status='old',form='unformatted'&
+       &,access='direct',recl=4*nx*ny)
+
+  open(10,file='../inputs/ps.bin',status='old',form='unformatted'&
+       &,access='direct',recl=4*nx*ny)
+
+  open(11,file='../inputs/pr.bin',status='old',form='unformatted'&
+       &,access='direct',recl=4*nx*ny)
+      
+  open(12,file='../inputs/tas.bin',status='old',form='unformatted'&
+       &,access='direct',recl=4*nx*ny)
+      
+  open(13,file='../inputs/rsds.bin',status='old',form='unformatted'&
+       &,access='direct',recl=4*nx*ny)
+
+  open(14,file='../inputs/hurs.bin',status='old',form='unformatted'&
+       &,access='direct',recl=4*nx*ny)
+
+  open(26,file='../inputs/npp.bin',status='old',form='unformatted'&
+       &,access='direct',recl=4*nx*ny)
+
+  !     Read data
+  !     =========
+      
+  read (9,rec=1) lsmk
+  !c     read (26,rec=1) aux_npp 
+      
+  call readx(10,ps,12)
+  call readx(11,pr,12)
+  call readx(12,t,12)
+  call readx(13,ipar,12)
+  call readx(14,rhaux,12)
+  call readx(26,npp_pot,12)      
+  !     Close files
+  !     ===========
+  !     
+  close( 9)
+  close(10)
+  close(11)
+  close(12)
+  close(13)
+  close(14)
+  close(26)
+       
+
+  !c     Calculating annual npp
+  do i =1,nx
+     do j=1,ny
+        if(nint(lsmk(i,j)) .ne. 0) then 
+           aux_npp(i,j) = 0.0
+           do k = 1,12
+              aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
            enddo
+        else
+           aux_npp(i,j) = no_data
         endif
      enddo
   enddo
 
-  open(10,file='../outputs/ph.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, ph)
   
-  open(10,file='../outputs/ar.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, ar)
-  
-  open(10,file='../outputs/npp.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, npp)
-  
-  open(10,file='../outputs/clit.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, clit)
-  
-  open(10,file='../outputs/csoil.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, csoil)
-  
-  open(10,file='../outputs/hr.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, hr)
-  
-  open(10,file='../outputs/rcm.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, rcm)
-  
-  open(10,file='../outputs/runom.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, runom)
-  
-  open(10,file='../outputs/evaptr.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, evaptr)
-  
-  open(10,file='../outputs/wsoil.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, wsoil)
-    
-  open(10,file='../outputs/rm.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, rm)
-  
-  open(10,file='../outputs/rg.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, rg)
+  !     Atmospheric CO2 pressure (Pa) !Ppmv / Pa
+  ca= 363/9.901             !Pa (=363 ppmv; 1981-2010)
+
+!$OMP PARALLEL PRIVATE(i)
+!$OMP DO SCHEDULE(STATIC)  
+  do i=1,nx
+     do j=1,ny       
+        if(nint(lsmk(i,j)) .ne. 0) then
+           npp_sca = aux_npp(i,j)
+           
+           do p=1,q   
+              aux1(p) = 0.0
+              aux2(p) = 0.0
+              aux3(p) = 0.0
+              gridcell_ocp(p) = 0.0
+           enddo
+           
+           call spinup(npp_sca, aux1, aux2, aux3)
+           
+           do p=1,q   
+              cleafin(p)  = aux1(p)
+              cfrootin(p) = aux2(p)
+              cawoodin(p) = aux3(p)
+           enddo
+           !     ------------------------------------------
+           do k=1,nt
+              rhs (k) = rhaux(i,j,k) / 100. !(rhaux(60,41,10) / 100.0) !Humidade relativa de manaus em outubro
+              par (k) = ipar  (i,j,k)/2.18E5 !Converting to Ein/m2/s
+              temp(k) = t     (i,j,k) !+ant(i,j,k) !uncomment to use future anomalies
+              p0  (k) = ps    (i,j,k) * 0.01 ! transforamando de pascal pra mbar (kPa)
+              prec(k) = pr    (i,j,k) !+anpr(i,j,k) !+pr(i,j,k)*0.2 !uncomment to use future anomalies
+              !c     if (prec(i,j,k).lt.0.0) prec (i,j,k) = 0.0  
+           enddo
+           
+           call wbm (prec,temp,lsmk,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,&
+                &    emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,&
+                &    clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,&
+                &    evapm_pft,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,&
+                &    cfroot_pft,gridcell_ocp)
+           
+           
+           do k = 1,nt
+              do p = 1,q
+                 ph(i,j,k) = ph(i,j,k) + photo_pft(k,p)
+                 ar(i,j,k) = ar(i,j,k) + aresp_pft(k,p)
+                 npp(i,j,k) = npp(i,j,k) + npp_pft(k,p)
+                 lai(i,j,k) = lai(i,j,k) + lai_pft(k,p)
+                 clit(i,j,k) = clit(i,j,k) + clit_pft(k,p)
+                 csoil(i,j,k) = csoil(i,j,k) + csoil_pft(k,p)
+                 hr(i,j,k) = hr(i,j,k) + hresp_pft(k,p)
+                 rcm(i,j,k) = rcm(i,j,k) + rcm_pft(k,p)
+                 runom(i,j,k) = runom(i,j,k) + runom_pft(k,p)
+                 evaptr(i,j,k) = evaptr(i,j,k) + evapm_pft(k,p)
+                 wsoil(i,j,k) = wsoil(i,j,k) + wsoil_pft(k,p)
+                 rm(i,j,k)  = rm(i,j,k) + rm_pft(k,p)
+                 rg(i,j,k)  = rg(i,j,k) + rg_pft(k,p)
+              enddo
+           enddo
+        else
+           do p=1,q
+              gridcell_ocp(p) = no_data
+              cleafin(p)  = no_data
+              cfrootin(p) = no_data
+              cawoodin(p) = no_data
+           enddo
+        endif
+        grd_ocp(i,j,p) = gridcell_ocp(p)
+        clini(i,j,p) = cleafin(p)
+        cfini(i,j,p) = cfrootin(p)
+        cwini(i,j,p) = cawoodin(p)
+        clfim(i,j,p) = cleaf_pft(p)
+        cffim(i,j,p) = cfroot_pft(p)
+        cwfim(i,j,p) = cawood_pft(p)
+     enddo
+  enddo
+!$OMP END DO 
+!$OMP END PARALLEL!$OMP
+
+        open(10,file='../spinup/gridcell_ocp.bin',&
+     &    status='unknown',form='unformatted',&
+     &    access='direct',recl=4*nx*ny)
+      call savex(10, grd_ocp, q)
+      
+      open(10,file='../spinup/cleaf.bin',&
+     &    status='unknown',form='unformatted',&
+     &    access='direct',recl=4*nx*ny)
+      call savex(10, cleaf_pft, q)
+      
+      open(10,file='../spinup/cawood.bin',&
+     &    status='unknown',form='unformatted',&
+     &    access='direct',recl=4*nx*ny)
+      call savex(10,cawood_pft,q)
+      
+      open(10,file='../spinup/cfroot.bin',&
+     &    status='unknown',form='unformatted',&
+     &    access='direct',recl=4*nx*ny)
+      call savex(10, cfroot_pft,q)
+          
+      open(10,file='../spinip/clini.bin',&
+     &    status='unknown',form='unformatted',&
+     &    access='direct',recl=4*nx*ny)
+      call savex(10, clini, q)
+      
+      open(10,file='../spinup/cwini.bin',&
+     &    status='unknown',form='unformatted',&
+     &    access='direct',recl=4*nx*ny)
+      call savex(10,cwini,q)
+      
+      open(10,file='../spinup/cfini.bin',&
+     &    status='unknown',form='unformatted',&
+     &    access='direct',recl=4*nx*ny)
+      call savex(10, cfini,q)
+
   
   do i = 1,nx
      do j = 1,ny
@@ -449,6 +371,67 @@ program env
   write(50,rec=11) ave_ph
   close(50)
   
+  
+  open(10,file='../outputs/ph.bin',&
+       &     status='unknown',form='unformatted',&
+       &     access='direct',recl=4*nx*ny)
+  call save_file12(10, ph)
+  
+  open(10,file='../outputs/ar.bin',&
+       &     status='unknown',form='unformatted',&
+       &     access='direct',recl=4*nx*ny)
+  call save_file12(10, ar)
+  
+  open(10,file='../outputs/npp.bin',&
+       &     status='unknown',form='unformatted',&
+       &     access='direct',recl=4*nx*ny)
+  call save_file12(10, npp)
+  
+  open(10,file='../outputs/clit.bin',&
+       &     status='unknown',form='unformatted',&
+       &     access='direct',recl=4*nx*ny)
+  call save_file12(10, clit)
+  
+  open(10,file='../outputs/csoil.bin',&
+       &     status='unknown',form='unformatted',&
+       &     access='direct',recl=4*nx*ny)
+  call save_file12(10, csoil)
+  
+  open(10,file='../outputs/hr.bin',&
+       &     status='unknown',form='unformatted',&
+       &     access='direct',recl=4*nx*ny)
+  call save_file12(10, hr)
+  
+  open(10,file='../outputs/rcm.bin',&
+       &     status='unknown',form='unformatted',&
+       &     access='direct',recl=4*nx*ny)
+  call save_file12(10, rcm)
+  
+  open(10,file='../outputs/runom.bin',&
+       &     status='unknown',form='unformatted',&
+       &     access='direct',recl=4*nx*ny)
+  call save_file12(10, runom)
+  
+  open(10,file='../outputs/evaptr.bin',&
+       &     status='unknown',form='unformatted',&
+       &     access='direct',recl=4*nx*ny)
+  call save_file12(10, evaptr)
+  
+  open(10,file='../outputs/wsoil.bin',&
+       &     status='unknown',form='unformatted',&
+       &     access='direct',recl=4*nx*ny)
+  call save_file12(10, wsoil)
+  
+  open(10,file='../outputs/rm.bin',&
+       &     status='unknown',form='unformatted',&
+       &     access='direct',recl=4*nx*ny)
+  call save_file12(10, rm)
+  
+  open(10,file='../outputs/rg.bin',&
+       &     status='unknown',form='unformatted',&
+       &     access='direct',recl=4*nx*ny)
+  call save_file12(10, rg)
+
   stop
 end program env
     
