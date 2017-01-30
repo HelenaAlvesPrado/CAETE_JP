@@ -306,10 +306,6 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
   use global_pars
   implicit none
   integer(kind=i4),parameter :: npft = npls
-  integer,parameter :: i4 = kind(0)
-  integer,parameter :: r4 = kind(0.0)
-  integer,parameter :: r8 = kind(0.0D0)
-  integer,parameter :: rbig = selected_real_kind(16,300)
   
   
 !     ----------------------------INPUTS-------------------------------
@@ -637,7 +633,7 @@ subroutine soil_temp(temp, tsoil)
   real(kind=r4), parameter :: DIFFU = 4.e7 * (30.0 * 86400.0) ! soil thermal diffusivity (m2/mes)
   real(kind=r4), parameter :: TAU = (H ** 2) / (2.0 * DIFFU)  ! e-folding times (months) 
   ! i/o
-  integer(kind=i4),intent(in) :: m
+
   real(kind=r4),dimension(m), intent( in) :: temp ! future __ make temps an allocatable array
   real(kind=r4),dimension(m), intent(out) :: tsoil
    

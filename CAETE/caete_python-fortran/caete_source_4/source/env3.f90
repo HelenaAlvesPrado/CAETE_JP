@@ -255,9 +255,8 @@ program env
   call wbm (prec,temp,lsmk,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,&
        &    emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,&
        &    clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,&
-       &    evapm_pft,wsoil_pft,rml_pft,rmf_pft,rms_pft,rm_pft,rgl_pft&
-       &    ,rgf_pft,rgs_pft,rg_pft,cleaf_pft,cawood_pft, cfroot_pft&
-       &    ,gridcell_ocp,betal,betaw,betaf)   
+       &    evapm_pft,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,&
+       &    cfroot_pft,gridcell_ocp)   
       
       
       
@@ -298,13 +297,7 @@ program env
               runom(i,j,k) = 0.0
               evaptr(i,j,k) = 0.0
               wsoil(i,j,k) = 0.0
-              rml(i,j,k)  = 0.0
-              rmf(i,j,k)  = 0.0
-              rms(i,j,k)  = 0.0
               rm(i,j,k)  = 0.0
-              rgl(i,j,k)  = 0.0
-              rgf(i,j,k)  = 0.0
-              rgs(i,j,k)  = 0.0
               rg(i,j,k)  = 0.0
            else
               ph(i,j,k) = no_data
@@ -318,13 +311,7 @@ program env
               runom(i,j,k) = no_data
               evaptr(i,j,k) = no_data
               wsoil(i,j,k) = no_data
-              rml(i,j,k)  = no_data
-              rmf(i,j,k)  = no_data
-              rms(i,j,k)  = no_data
               rm(i,j,k)  = no_data
-              rgl(i,j,k)  = no_data
-              rgf(i,j,k)  = no_data
-              rgs(i,j,k)  = no_data
               rg(i,j,k)  = no_data
            endif
         enddo
@@ -346,13 +333,7 @@ program env
                  runom(i,j,k) = runom(i,j,k) + runom_pft(i,j,k,p)
                  evaptr(i,j,k) = evaptr(i,j,k) + evapm_pft(i,j,k,p)
                  wsoil(i,j,k) = wsoil(i,j,k) + wsoil_pft(i,j,k,p)
-                 rml(i,j,k)  = rml(i,j,k) + rml_pft(i,j,k,p)
-                 rmf(i,j,k)  = rmf(i,j,k) + rmf_pft(i,j,k,p)
-                 rms(i,j,k)  = rms(i,j,k) + rms_pft(i,j,k,p)
                  rm(i,j,k)  = rm(i,j,k) + rm_pft(i,j,k,p)
-                 rgl(i,j,k)  = rgl(i,j,k) + rgl_pft(i,j,k,p)
-                 rgf(i,j,k)  = rgf(i,j,k) + rgf_pft(i,j,k,p)
-                 rgs(i,j,k)  = rgs(i,j,k) + rgs_pft(i,j,k,p)
                  rg(i,j,k)  = rg(i,j,k) + rg_pft(i,j,k,p)
               enddo
            enddo
@@ -409,41 +390,11 @@ program env
        &     status='unknown',form='unformatted',&
        &     access='direct',recl=4*nx*ny)
   call save_file12(10, wsoil)
-  
-  open(10,file='../outputs/rml.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, rml)
-  
-  open(10,file='../outputs/rms.bin',&
-     &     status='unknown',form='unformatted',&
-     &     access='direct',recl=4*nx*ny)
-  call save_file12(10, rms)
-  
-  open(10,file='../outputs/rmf.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, rmf)
-  
+    
   open(10,file='../outputs/rm.bin',&
        &     status='unknown',form='unformatted',&
        &     access='direct',recl=4*nx*ny)
   call save_file12(10, rm)
-  
-  open(10,file='../outputs/rgl.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, rgl)
-  
-  open(10,file='../outputs/rgf.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, rgf)
-  
-  open(10,file='../outputs/rgs.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, rgs)
   
   open(10,file='../outputs/rg.bin',&
        &     status='unknown',form='unformatted',&
