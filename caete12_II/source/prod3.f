@@ -321,7 +321,7 @@ c      if(laia64 .gt. 0.0) print*, laia64, 'bia'
       f4sun = ((1.0-(exp(-p26*sunlai)))/p26) !sun 90 degrees
       f4shade = ((1.0-(exp(-p27*shadelai)))/p27) !sun ~20 degrees
 
-      laia  = real(laia64,4) ! real((f4sun + f4shade), 4) ! pra mim faz sentido que a laia final seja
+      laia  = real((f4sun + f4shade), 4) !real(laia64,4) ! pra mim faz sentido que a laia final seja
                                          ! a soma da lai em nivel de dossel (sun + shade) - jp
 !     Canopy gross photosynthesis (kgC/m2/yr)
 !     =======================================
@@ -626,7 +626,7 @@ c23456
       
 
       DO P = 1,NPFT
-         TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P)*0.05 ! only sapwood
+         TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P)
          TOTAL_BIOMASS = TOTAL_BIOMASS + TOTAL_BIOMASS_PFT(P)
          TOTAL_WOOD = TOTAL_WOOD + CAWOOD(P)
          TOTAL_W_PFT(P) = CAWOOD(P)

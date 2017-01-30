@@ -332,7 +332,7 @@ c     Write to track program execution
                   do kk=1,12
                      wsaux1 = wsoilt(i,j,kk) + gsoilt(i,j,kk)   
                      dwww = (wsaux1 - wg0(i,j,kk)) / wmax
-                     if (abs(dwww).gt.0.015) nerro = nerro + 1
+                     if (abs(dwww).gt.0.01) nerro = nerro + 1
                   enddo
                   
                   if (nerro.ne.0) then
@@ -355,7 +355,7 @@ c     Write to track program execution
                   biomass = 0.0
                   biomass0 = 0.0
                   check = .false.
-                  sensi = 0.4 ! (kg/m2/y) if biomas change .le. sensi: equilibrium
+                  sensi = 1.0 ! (kg/m2/y) if biomas change .le. sensi: equilibrium
                   call pft_par(4,wood)
 
                   do p = 1,q
