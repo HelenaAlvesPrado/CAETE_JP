@@ -215,7 +215,7 @@ program env
   !     Atmospheric CO2 pressure (Pa) !Ppmv / Pa
   ca= 363/9.901             !Pa (=363 ppmv; 1981-2010)
 
-!$OMP PARALLEL DO SCHEDULE(STATIC),PRIVATE(I,J,K,P),ORDERED,DEFAULT(SHARED) 
+!$OMP PARALLEL DO SCHEDULE(STATIC),PRIVATE(I),ORDERED,DEFAULT(SHARED) 
   do i=1,nx
      if(mod(I,72) .eq. 0) print*, nint(real(i)/real(nx) * 100.)
      do j=1,ny       

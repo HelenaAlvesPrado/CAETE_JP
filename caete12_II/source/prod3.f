@@ -847,14 +847,14 @@ c
 c     
 c     
 c     initialization
-c      if((scl1 .lt. 0.0000001) .or. (scf1 .lt. 0.0000001)) then
-c         IF(NPP .lt. 0.0000001) THEN
-c            scl2 = 0.0
-c            scf2 = 0.0
-c            sca2 = 0.0 
-c            goto 10
-c         ENDIF
-c      endif   
+      if((scl1 .lt. 1e-12) .or. (scf1 .lt. 1e-12)) then
+         IF(NPP .lt. 1e-12) THEN
+            scl2 = 0.0
+            scf2 = 0.0
+            sca2 = 0.0 
+            goto 10
+         ENDIF
+      endif   
       npp_aux = npp/365.0       !transform (KgC/m2/yr) in (KgC/m2/day)
       scl2_128 = scl1 + (aleaf(pft) * npp_aux) -(scl1 /(tleaf(pft)
      &    *365.0))
