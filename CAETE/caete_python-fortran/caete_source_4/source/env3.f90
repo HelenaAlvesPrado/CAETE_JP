@@ -108,44 +108,7 @@ program env
   real(kind=r4), dimension(nx,ny,nt) :: rm
   real(kind=r4), dimension(nx,ny,nt) :: rg
 
- ! initialize arrays
-
-  do i = 1,nx
-     do j = 1,ny
-        do k = 1,12
-           if(nint(lsmk(i,j)) .ne. 0) then
-              ph(i,j,k) = 0.0
-              ar(i,j,k) = 0.0
-              npp(i,j,k) = 0.0
-              lai(i,j,k) = 0.0
-              clit(i,j,k) = 0.0
-              csoil(i,j,k) = 0.0
-              hr(i,j,k) = 0.0
-              rcm(i,j,k) = 0.0
-              runom(i,j,k) = 0.0
-              evaptr(i,j,k) = 0.0
-              wsoil(i,j,k) = 0.0
-              rm(i,j,k)  = 0.0
-              rg(i,j,k)  = 0.0
-           else
-              ph(i,j,k) = no_data
-              ar(i,j,k) = no_data
-              npp(i,j,k) = no_data
-              lai(i,j,k) = no_data
-              clit(i,j,k) = no_data
-              csoil(i,j,k) = no_data
-              hr(i,j,k) = no_data
-              rcm(i,j,k) = no_data
-              runom(i,j,k) = no_data
-              evaptr(i,j,k) = no_data
-              wsoil(i,j,k) = no_data
-              rm(i,j,k)  = no_data
-              rg(i,j,k)  = no_data
-           endif
-        enddo
-     enddo
-  enddo
-  
+ ! initialize arrays  
   
   !     Open INPUT files
   !     ==========
@@ -192,6 +155,46 @@ program env
   close(13)
   close(14)
   close(26)
+
+
+
+
+  do i = 1,nx
+     do j = 1,ny
+        do k = 1,nt
+           if(nint(lsmk(i,j)) .ne. 0) then
+              ph(i,j,k) = 0.0
+              ar(i,j,k) = 0.0
+              npp(i,j,k) = 0.0
+              lai(i,j,k) = 0.0
+              clit(i,j,k) = 0.0
+              csoil(i,j,k) = 0.0
+              hr(i,j,k) = 0.0
+              rcm(i,j,k) = 0.0
+              runom(i,j,k) = 0.0
+              evaptr(i,j,k) = 0.0
+              wsoil(i,j,k) = 0.0
+              rm(i,j,k)  = 0.0
+              rg(i,j,k)  = 0.0
+           else
+              ph(i,j,k) = no_data
+              ar(i,j,k) = no_data
+              npp(i,j,k) = no_data
+              lai(i,j,k) = no_data
+              clit(i,j,k) = no_data
+              csoil(i,j,k) = no_data
+              hr(i,j,k) = no_data
+              rcm(i,j,k) = no_data
+              runom(i,j,k) = no_data
+              evaptr(i,j,k) = no_data
+              wsoil(i,j,k) = no_data
+              rm(i,j,k)  = no_data
+              rg(i,j,k)  = no_data
+           endif
+        enddo
+     enddo
+  enddo
+
        
 
   !c     Calculating annual npp
@@ -199,8 +202,8 @@ program env
      do j=1,ny
         if(nint(lsmk(i,j)) .ne. 0) then 
            aux_npp(i,j) = 0.0
-           do k = 1,12
-              aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/12.) 
+           do k = 1,nt
+              aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/real(nt)) 
            enddo
         else
            aux_npp(i,j) = no_data
@@ -212,7 +215,7 @@ program env
   !     Atmospheric CO2 pressure (Pa) !Ppmv / Pa
   ca= 363/9.901             !Pa (=363 ppmv; 1981-2010)
 
-!$OMP PARALLEL DO SCHEDULE(STATIC),PRIVATE(I),ORDERED,DEFAULT(SHARED) 
+!$OMP PARALLEL DO SCHEDULE(STATIC),PRIVATE(I,J,K,P),ORDERED,DEFAULT(SHARED) 
   do i=1,nx
      if(mod(I,72) .eq. 0) print*, nint(real(i)/real(nx) * 100.)
      do j=1,ny       
