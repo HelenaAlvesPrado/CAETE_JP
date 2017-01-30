@@ -245,14 +245,13 @@ program env
               prec(k) = pr    (i,j,k) !+anpr(i,j,k) !+pr(i,j,k)*0.2 !uncomment to use future anomalies
               !c     if (prec(i,j,k).lt.0.0) prec (i,j,k) = 0.0  
            enddo
-           
+        
            call wbm (prec,temp,lsmk,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,&
                 &    emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,&
                 &    clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,&
                 &    evapm_pft,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,&
                 &    cfroot_pft,gridcell_ocp)
-           
-           
+        
            do k = 1,nt
               do p = 1,q
                  ph(i,j,k) = ph(i,j,k) + photo_pft(k,p)
@@ -281,15 +280,18 @@ program env
               cawood_pft(p) = no_data
            enddo
         endif
-           grd_ocp(i,j,:) = gridcell_ocp(p)
-           clini(i,j,:) = cleafin(p)
-           cfini(i,j,:) = cfrootin(p)
-           cwini(i,j,:) = cawoodin(p)
-           clfim(i,j,:) = cleaf_pft(p)
-           cffim(i,j,:) = cfroot_pft(p)
-           cwfim(i,j,:) = cawood_pft(p)
-     enddo
+        do p=1,q
+           grd_ocp(i,j,p) = gridcell_ocp(p)
+           clini(i,j,p) = cleafin(p)
+           cfini(i,j,p) = cfrootin(p)
+           cwini(i,j,p) = cawoodin(p)
+           clfim(i,j,p) = cleaf_pft(p)
+           cffim(i,j,p) = cfroot_pft(p)
+           cwfim(i,j,p) = cawood_pft(p)
+        enddo
+     enddo           
   enddo
+
 !$OMP END PARALLEL DO 
 
         open(10,file='../spinup/gridcell_ocp.bin',&
