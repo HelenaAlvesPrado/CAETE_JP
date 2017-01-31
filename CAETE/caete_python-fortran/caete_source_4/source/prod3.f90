@@ -170,7 +170,31 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
   ae = 2.895*ta+52.326 !Available energy (W/m2) - From NCEP-NCAR reanalysis data
 !     
 !     Monthly water budget
-!     ====================
+  !     ====================
+  do p=1,q
+     wfim(p) = 0.0
+     gfim(p) = 0.0
+     sfim(p) = 0.0
+     smes(p) = 0.0
+     rmes(p) = 0.0
+     emes(p) = 0.0
+     epmes(p) = 0.0
+     phmes(p) = 0.0
+     armes(p) = 0.0
+     nppmes(p) = 0.0
+     laimes(p) = 0.0
+     clmes(p) = 0.0
+     csmes(p) = 0.0
+     hrmes(p) = 0.0
+     rcmes(p) = 0.0
+     rmmes(p) = 0.0
+     rgmes(p) = 0.0
+     cleafmes(p) = 0.0
+     cawoodmes(p) = 0.0
+     cfrootmes(p) = 0.0
+     gridocpmes(p) = 0.0
+  enddo
+  
   
   call budget (mes,wini,gini,sini,td,ta,pr,spre,ae,ca,ipar,ru&
        &,cleaf1_pft,cawood1_pft,cfroot1_pft ,wfim,gfim, sfim,smes&
@@ -910,7 +934,7 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
    alfm = 1.391
    gm = 3.26 * 86400.           !(*86400 transform s/mm to dia/mm)    
    if(rc .gt. 0.001) then
-      gc = rc !* 1.15741e-08 ! transfor s/m  to dia/mm)  !testamos, nao muda nada! Bia vai rever
+      gc = rc * 1.15741e-08 ! transfor s/m  to dia/mm)  !testamos, nao muda nada! Bia vai rever
       gc = (1./gc)  ! molCO2/mm2/dia
    else
       gc =  1.0/0.001 ! BIANCA E HELENA - Mudei este esquema..   
@@ -934,7 +958,7 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
 !     ----------------------------------------------
       
   if ((temp.ge.-10.0).and.(temp.le.50.0)) then
-     f1 = f1a * (f5 + 0.0d0) !f5:water stress factor-- Notem que aqui a tranformacao eh de 128 pra 64 bits
+     f1 = f1a * f5_64 !f5:water stress factor-- Notem que aqui a tranformacao eh de 128 pra 64 bits
   else
      f1 = 0.0               !Temperature above/below photosynthesis windown
   endif
@@ -1257,7 +1281,7 @@ SUBROUTINE PFT_AREA_FRAC(CLEAF, CFROOT, CAWOOD, OCP_COEFFS, OCP_WOOD)
   enddo
   
   DO P = 1,NPFT
-     TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + (CAWOOD(P)*0.05) ! only sapwood
+     TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P) ! only sapwood
      TOTAL_BIOMASS = TOTAL_BIOMASS + TOTAL_BIOMASS_PFT(P)
      TOTAL_WOOD = TOTAL_WOOD + CAWOOD(P)
      TOTAL_W_PFT(P) = CAWOOD(P)

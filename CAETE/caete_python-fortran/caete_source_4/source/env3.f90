@@ -181,6 +181,23 @@ program env
      enddo
   enddo
 
+  do i = 1,nx
+     do j = 1,ny
+        do p = 1,q
+           if(nint(lsmk(i,j)) .eq. 0) then
+              clfim(i,j,p)   = no_data
+              cffim(i,j,p)   = no_data
+              cwfim(i,j,p)   = no_data
+              grd_ocp(i,j,p) = no_data
+              clini(i,j,p)   = no_data
+              cfini(i,j,p)   = no_data
+              cwini(i,j,p)   = no_data
+           endif
+        enddo
+     enddo
+  enddo
+
+  
   !c     Calculating annual npp
   do i =1,nx
      do j=1,ny
@@ -272,9 +289,16 @@ program env
                 &    clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,&
                 &    evapm_pft,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,&
                 &    cfroot_pft,gridcell_ocp)
-        
-           do k = 1,nt
-              do p = 1,q
+
+           do p = 1,q
+              clfim(i,j,p) = cleaf_pft(p)
+              cffim(i,j,p) = cfroot_pft(p)
+              cwfim(i,j,p) = cawood_pft(p)
+              grd_ocp(i,j,p) = gridcell_ocp(p)
+              clini(i,j,p) = cleafin(p)
+              cfini(i,j,p) = cfrootin(p)
+              cwini(i,j,p) = cawoodin(p)
+              do k = 1,nt
                  ph(i,j,k) = ph(i,j,k) + photo_pft(k,p)
                  ar(i,j,k) = ar(i,j,k) + aresp_pft(k,p)
                  npp(i,j,k) = npp(i,j,k) + npp_pft(k,p)
@@ -290,26 +314,7 @@ program env
                  rg(i,j,k)  = rg(i,j,k) + rg_pft(k,p)
               enddo
            enddo
-        else
-           do p=1,q
-              gridcell_ocp(p) = no_data
-              cleafin(p)  = no_data
-              cfrootin(p) = no_data
-              cawoodin(p) = no_data
-              cleaf_pft(p) = no_data
-              cfroot_pft(p) = no_data
-              cawood_pft(p) = no_data
-           enddo
         endif
-        do p=1,q
-           grd_ocp(i,j,p) = gridcell_ocp(p)
-           clini(i,j,p) = cleafin(p)
-           cfini(i,j,p) = cfrootin(p)
-           cwini(i,j,p) = cawoodin(p)
-           clfim(i,j,p) = cleaf_pft(p)
-           cffim(i,j,p) = cfroot_pft(p)
-           cwfim(i,j,p) = cawood_pft(p)
-        enddo
      enddo           
   enddo
 
