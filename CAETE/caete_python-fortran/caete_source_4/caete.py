@@ -1,12 +1,41 @@
 # "CAETE module"
+#-*-coding:utf-8-*- 
 
 # author: jpdarela
 import os
 import glob
 import numpy as np
-import gdal
 from netCDF4 import Dataset as dt
-import carbon5 as C
+import carbon as C
+
+def catch_nt(input_file, nx, ny, pixel_depht):
+
+    """Get the number of layers in input_file
+    input_file = flat binary (from fortran unfformated output)filename
+    nx = (int) number of columns
+    ny = (int) number of rows
+    pixel_depth = (int) stride length in bits
+    returns nt = number of layers(records) stored in input_file"""
+
+    image_size = (nx * ny * (pixel_depht / 8)) / 1024 # in bytes
+    num_lay = (os.path.getsize(input_file)) / 1024 / image_size
+    return int(num_lay)
+
+
+def catch_data(input_file, layers, nx, ny):
+
+
+    """Loads the input_file as a np.array once you know
+    the number of records in input_file
+    input_file = flat binary filename (e.g. '.bin')
+    nx = (int) number of columns
+    ny = (int) number of rows
+    layers = (int) number of layers in input_file * ease with catch_nt()
+    returns np.array shape(layers,nx,ny)"""
+    
+    Bcount = nx * ny * layers
+    return np.fromfile(input_file, count=Bcount,
+                    dtype=np.float32).reshape((layers,ny,nx))
 
 
 class datasets:
@@ -199,7 +228,8 @@ def rm_appy(gridcell_obj):
 
 #npp for spinup
 
-npp_init = gdal.Open('./inputs/npp.bin').ReadAsArray()
+lr  = catch_nt('./inputs/npp.bin',720,360,32)
+npp_init = catch_data('./inputs/npp.bin',lr,720,360)
 mask = np.load('mask.npy')
 npp_init = np.mean(npp_init,axis=0,)
 npp_init = np.ma.masked_array(npp_init)

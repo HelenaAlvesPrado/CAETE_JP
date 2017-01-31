@@ -242,7 +242,6 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      endif
   endif
   goto 10               
-100 continue
   !     PFTs equilibrium check
   !     ==================================================
   !     tentativa 1 - usando variacao no pool de C vegetal
@@ -291,6 +290,7 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
         continue
      endif
   endif
+  100 continue
   return
   
 end subroutine wbm
@@ -496,7 +496,7 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
      do p = 1,npft
         
         call productivity1 (p,ocp_coeffs(p),OCP_WOOD(P),temp,p0,w(p)&
-             &,wmax,ca,ipar,rh,cl1(p),ca1(p),cf1(p),beta_leaf(p)&
+             &,wmax,ca,ipar,rh,emax,cl1(p),ca1(p),cf1(p),beta_leaf(p)&
              &,beta_awood(p),beta_froot(p),ph(p),ar(p),nppa(p)&
              &,laia(p),f5(p),f1(p),vpd(p),rm(p),rg(p),rc2(p))
 
@@ -657,7 +657,7 @@ end subroutine soil_temp
 
 
 subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
-     wmax,ca,ipar,rh,cl1,ca1,cf1,beta_leaf,beta_awood,& ! inputs
+     wmax,ca,ipar,rh,emax,cl1,ca1,cf1,beta_leaf,beta_awood,& ! inputs
      beta_froot,ph,ar,nppa,laia,f5,f1,vpd,rm,rg,rc) ! outputs
 
   use global_pars
@@ -673,7 +673,7 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   real(kind=r4), intent(in) :: ocp_pft              !PFT area occupation (%)
   real(kind=r4), intent(in) :: temp                 !Mean monthly temperature (oC)
   real(kind=r4), intent(in) :: p0                   !Mean surface pressure (hPa)
-  real(kind=r4), intent(in) :: w,wmax            !Soil moisture (dimensionless)
+  real(kind=r4), intent(in) :: w,wmax,emax            !Soil moisture (dimensionless)
   real(kind=r4), intent(in) :: ca                   !Atmospheric CO2 concentration (Pa)
   real(kind=r4), intent(in) :: ipar                 !Incident photosynthetic active radiation (w/m2)'
   real(kind=r4), intent(in) :: rh                   !Relative humidity
@@ -739,7 +739,7 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   real(kind=r8) :: ncs      !sapwood N:C ratio(gN/gC)
   real(kind=r8) :: csai
   real(kind=rbig) :: f5_64
-  real(kind=r8) :: pt       !taxa potencial de fornecimento para transpiração (mm/dia)
+  real(kind=r8) :: pt,d       !taxa potencial de fornecimento para transpiração (mm/dia)
   real(kind=r8) :: csru     !Specific root water uptake (0.5 mm/gC/dia; based in jedi
   real(kind=r8) :: alfm     !maximum Priestley-Taylor coefficient (based in Gerten et al. 2004
   real(kind=r8) :: gm       !scaling conductance (dia/mm)(based in Gerten et al. 2004;
@@ -894,13 +894,13 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
 !  c     Water stress response modifier (dimensionless)
 !  c     [f5 ; Eq. 21]
   ! vamos deixar o F5 como antigamente ate este problema ser resolvido
-c  if (wa.gt.0.5) then
-c     f5 = 1.0               !Not too lower in e.g. Amazonian dry season
-c  else if((wa.ge.0.205).and.(wa.le.0.5)) then
-c     f5 = (wa-0.205)/(0.5-0.205)
-c  else if(wa.lt.0.205) then
-c     f5 = wa !Below wilting point f5 accompains wa (then Sahara is well represented)
-c  endif
+!!$c  if (wa.gt.0.5) then
+!!$c     f5 = 1.0               !Not too lower in e.g. Amazonian dry season
+!!$c  else if((wa.ge.0.205).and.(wa.le.0.5)) then
+!!$c     f5 = (wa-0.205)/(0.5-0.205)
+!!$c  else if(wa.lt.0.205) then
+!!$c     f5 = wa !Below wilting point f5 accompains wa (then Sahara is well represented)
+!!$c  endif
   
   
    csru = 0.5 
@@ -1241,7 +1241,7 @@ SUBROUTINE PFT_AREA_FRAC(CLEAF, CFROOT, CAWOOD, OCP_COEFFS, OCP_WOOD)
   enddo
   
   DO P = 1,NPFT
-     TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + (CAWOOD(P)*0.05) ! only sapwood
+     TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P) ! only sapwood
      TOTAL_BIOMASS = TOTAL_BIOMASS + TOTAL_BIOMASS_PFT(P)
      TOTAL_WOOD = TOTAL_WOOD + CAWOOD(P)
      TOTAL_W_PFT(P) = CAWOOD(P)
