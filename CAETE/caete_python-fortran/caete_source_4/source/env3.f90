@@ -75,7 +75,7 @@ program env
 
   !     variaveis do spinup
   real(kind=r4) npp_sca 
-  real(kind=r4) :: npp_pot(nx,ny,nt)
+  real(kind=r4),dimension(nx,ny,nt) :: npp_pot
   real(kind=r4),dimension(q) :: aux1, aux2, aux3
   real(kind=r4),dimension(nx,ny) :: aux_npp 
 
@@ -93,20 +93,20 @@ program env
   real(kind=r4),dimension(nx,ny) :: ave_wsoil = 0.0    
 
       
-  real(kind=r4), dimension(nx,ny,nt) :: ph
-  real(kind=r4), dimension(nx,ny,nt) :: ar
-  real(kind=r4), dimension(nx,ny,nt) :: npp
-  real(kind=r4), dimension(nx,ny,nt) :: lai
-  real(kind=r4), dimension(nx,ny,nt) :: clit
-  real(kind=r4), dimension(nx,ny,nt) :: csoil
-  real(kind=r4), dimension(nx,ny,nt) :: hr
-  real(kind=r4), dimension(nx,ny,nt) :: rcm
-  real(kind=r4), dimension(nx,ny,nt) :: evaptr
-  real(kind=r4), dimension(nx,ny,nt) :: wsoil
-  real(kind=r4), dimension(nx,ny,nt) :: runom
+  real(kind=r4), dimension(nx,ny,nt) :: ph = 0.0
+  real(kind=r4), dimension(nx,ny,nt) :: ar = 0.0
+  real(kind=r4), dimension(nx,ny,nt) :: npp = 0.0
+  real(kind=r4), dimension(nx,ny,nt) :: lai = 0.0
+  real(kind=r4), dimension(nx,ny,nt) :: clit = 0.0
+  real(kind=r4), dimension(nx,ny,nt) :: csoil = 0.0
+  real(kind=r4), dimension(nx,ny,nt) :: hr = 0.0
+  real(kind=r4), dimension(nx,ny,nt) :: rcm = 0.0
+  real(kind=r4), dimension(nx,ny,nt) :: evaptr = 0.0
+  real(kind=r4), dimension(nx,ny,nt) :: wsoil = 0.0
+  real(kind=r4), dimension(nx,ny,nt) :: runom = 0.0
   
-  real(kind=r4), dimension(nx,ny,nt) :: rm
-  real(kind=r4), dimension(nx,ny,nt) :: rg
+  real(kind=r4), dimension(nx,ny,nt) :: rm = 0.0
+  real(kind=r4), dimension(nx,ny,nt) :: rg = 0.0
 
  ! initialize arrays  
   
@@ -158,25 +158,11 @@ program env
 
 
 
-
+! apply mask
   do i = 1,nx
      do j = 1,ny
         do k = 1,nt
-           if(nint(lsmk(i,j)) .ne. 0) then
-              ph(i,j,k) = 0.0
-              ar(i,j,k) = 0.0
-              npp(i,j,k) = 0.0
-              lai(i,j,k) = 0.0
-              clit(i,j,k) = 0.0
-              csoil(i,j,k) = 0.0
-              hr(i,j,k) = 0.0
-              rcm(i,j,k) = 0.0
-              runom(i,j,k) = 0.0
-              evaptr(i,j,k) = 0.0
-              wsoil(i,j,k) = 0.0
-              rm(i,j,k)  = 0.0
-              rg(i,j,k)  = 0.0
-           else
+           if(nint(lsmk(i,j)) .eq. 0) then
               ph(i,j,k) = no_data
               ar(i,j,k) = no_data
               npp(i,j,k) = no_data
@@ -195,12 +181,10 @@ program env
      enddo
   enddo
 
-       
-
   !c     Calculating annual npp
   do i =1,nx
      do j=1,ny
-        if(nint(lsmk(i,j)) .ne. 0) then 
+        if(nint(lsmk(i,j)) .eq. 1) then 
            aux_npp(i,j) = 0.0
            do k = 1,nt
               aux_npp(i,j) = aux_npp(i,j) + (npp_pot(i,j,k)/real(nt)) 
@@ -218,34 +202,71 @@ program env
 !$OMP PARALLEL DO SCHEDULE(STATIC),PRIVATE(I,J,K,P),ORDERED,DEFAULT(SHARED) 
   do i=1,nx
      if(mod(I,72) .eq. 0) print*, nint(real(i)/real(nx) * 100.)
-     do j=1,ny       
-        if(nint(lsmk(i,j)) .ne. 0) then
+     do j=1,ny
+        npp_sca = 0.0
+        ! for land grid cells only 
+        if(nint(lsmk(i,j)) .eq. 1) then
+           
+           do k = 1,nt
+              ph(i,j,k) = 0.0
+              ar(i,j,k) = 0.0
+              npp(i,j,k) = 0.0
+              lai(i,j,k) = 0.0
+              clit(i,j,k) = 0.0
+              csoil(i,j,k) = 0.0
+              hr(i,j,k) = 0.0
+              rcm(i,j,k) = 0.0
+              runom(i,j,k) = 0.0
+              evaptr(i,j,k) = 0.0
+              wsoil(i,j,k) = 0.0
+              rm(i,j,k)  = 0.0
+              rg(i,j,k)  = 0.0
+           enddo
+           
+           ! run spinup
            npp_sca = aux_npp(i,j)
            
            do p=1,q   
               aux1(p) = 0.0
               aux2(p) = 0.0
               aux3(p) = 0.0
-              gridcell_ocp(p) = 0.0
            enddo
            
            call spinup(npp_sca, aux1, aux2, aux3)
            
-           do p=1,q   
+           do p=1,q
               cleafin(p)  = aux1(p)
               cfrootin(p) = aux2(p)
               cawoodin(p) = aux3(p)
            enddo
            !     ------------------------------------------
            do k=1,nt
-              rhs (k) = rhaux(i,j,k) / 100. !(rhaux(60,41,10) / 100.0) !Humidade relativa de manaus em outubro
+              do p=1,q
+                 photo_pft(k,p)  = 0.0
+                 aresp_pft(k,p)  = 0.0
+                 npp_pft(k,p)    = 0.0
+                 lai_pft(k,p)    = 0.0
+                 clit_pft(k,p)   = 0.0
+                 csoil_pft(k,p)  = 0.0
+                 hresp_pft(k,p)  = 0.0
+                 rcm_pft(k,p)    = 0.0
+                 runom_pft(k,p)  = 0.0
+                 evapm_pft(k,p)  = 0.0
+                 wsoil_pft(k,p)  = 0.0
+                 rm_pft(k,p)     = 0.0
+                 rg_pft(k,p)     = 0.0
+                 cleaf_pft(p)    = 0.0
+                 cawood_pft(p)   = 0.0
+                 cfroot_pft(p)   = 0.0
+                 gridcell_ocp(p) = 0.0
+              enddo
+              rhs (k) = rhaux(i,j,k) / 100. 
               par (k) = ipar  (i,j,k)/2.18E5 !Converting to Ein/m2/s
-              temp(k) = t     (i,j,k) !+ant(i,j,k) !uncomment to use future anomalies
-              p0  (k) = ps    (i,j,k) * 0.01 ! transforamando de pascal pra mbar (kPa)
-              prec(k) = pr    (i,j,k) !+anpr(i,j,k) !+pr(i,j,k)*0.2 !uncomment to use future anomalies
-              !c     if (prec(i,j,k).lt.0.0) prec (i,j,k) = 0.0  
+              temp(k) = t     (i,j,k) 
+              p0  (k) = ps    (i,j,k) 
+              prec(k) = pr    (i,j,k) 
            enddo
-        
+           
            call wbm (prec,temp,lsmk,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,&
                 &    emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,&
                 &    clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,&

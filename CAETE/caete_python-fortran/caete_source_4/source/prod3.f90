@@ -161,12 +161,12 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
   k = mod(n,12)
   if (k.eq.0) k = 12
   mes = k
-  spre = p0(k)
+  spre = p0(k) * 0.01 ! transforamando de Pascal pra mbar (hPa)
   td = tsoil(k)
   ta = temp(k)
   pr = prec(k)
-  ipar = par(k) / 2.18e5   !converting to Ein/m2/s
-  ru = rhs(k)/100.
+  ipar = par(k)
+  ru = rhs(k)
   ae = 2.895*ta+52.326 !Available energy (W/m2) - From NCEP-NCAR reanalysis data
 !     
 !     Monthly water budget
@@ -291,7 +291,7 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
         continue
      endif
   endif
-100 continue
+100 continue !mudar para linha 245 para incluir pft check
   return
   
 end subroutine wbm
