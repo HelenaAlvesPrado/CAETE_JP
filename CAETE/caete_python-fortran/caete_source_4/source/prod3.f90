@@ -1658,7 +1658,7 @@ subroutine runoff (wa,roff)
    call pft_par(6, tfroot)
    
    
-   sensitivity = 1.001
+   sensitivity = 1.01
    if(nppot .lt. 0.0) goto 200
    do i6=1,npfts
       do k=1,nt
