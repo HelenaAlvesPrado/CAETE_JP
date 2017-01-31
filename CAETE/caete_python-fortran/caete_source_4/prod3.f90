@@ -738,12 +738,12 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   real(kind=r8) :: ncf      !fine roots N:C ratio (gN/gC)
   real(kind=r8) :: ncs      !sapwood N:C ratio(gN/gC)
   real(kind=r8) :: csai
-  
-!!$  real(kind=r8) :: pt       !taxa potencial de fornecimento para transpiração (mm/dia)
-!!$  real(kind=r8) :: csru     !Specific root water uptake (0.5 mm/gC/dia; based in jedi
-!!$  real(kind=r8) :: alfm     !maximum Priestley-Taylor coefficient (based in Gerten et al. 2004
-!!$  real(kind=r8) :: gm       !scaling conductance (dia/mm)(based in Gerten et al. 2004;
-!!$  real(kind=r8) :: gc       !Canopy conductance (dia/mm)(based in Gerten et al. 2004;
+  real(kind=rbig) :: f5_64
+  real(kind=r8) :: pt       !taxa potencial de fornecimento para transpiração (mm/dia)
+  real(kind=r8) :: csru     !Specific root water uptake (0.5 mm/gC/dia; based in jedi
+  real(kind=r8) :: alfm     !maximum Priestley-Taylor coefficient (based in Gerten et al. 2004
+  real(kind=r8) :: gm       !scaling conductance (dia/mm)(based in Gerten et al. 2004;
+  real(kind=r8) :: gc       !Canopy conductance (dia/mm)(based in Gerten et al. 2004;
 
   ! SOME MODEL PARAMETERS
   real(kind=r8) ::  p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14
@@ -894,46 +894,40 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
 !  c     Water stress response modifier (dimensionless)
 !  c     [f5 ; Eq. 21]
   ! vamos deixar o F5 como antigamente ate este problema ser resolvido
-  if (wa.gt.0.5) then
-     f5 = 1.0               !Not too lower in e.g. Amazonian dry season
-  else if((wa.ge.0.205).and.(wa.le.0.5)) then
-     f5 = (wa-0.205)/(0.5-0.205)
-  else if(wa.lt.0.205) then
-     f5 = wa !Below wilting point f5 accompains wa (then Sahara is well represented)
-  endif
+c  if (wa.gt.0.5) then
+c     f5 = 1.0               !Not too lower in e.g. Amazonian dry season
+c  else if((wa.ge.0.205).and.(wa.le.0.5)) then
+c     f5 = (wa-0.205)/(0.5-0.205)
+c  else if(wa.lt.0.205) then
+c     f5 = wa !Below wilting point f5 accompains wa (then Sahara is well represented)
+c  endif
   
   
-!!$  c      csru = 0.5 
-!!$  c      pt = csru*(cf1*1000.)*wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
-!!$  c      alfm = 1.391
-!!$  c      gm = 3.26 * 86400.           !(*86400 transform s/mm to dia/mm)
+   csru = 0.5 
+   pt = csru*(cf1*1000.)*wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
+   alfm = 1.391
+   gm = 3.26 * 86400.           !(*86400 transform s/mm to dia/mm)
 !!$  c      
-!!$  c      if(rc .gt. 0.001) then
-!!$  c         gc = rc * 1.15741e-08 ! transfor s/m  to dia/mm)  !testamos, nao muda nada! Bia vai rever
-!!$  c         gc = (1./gc)  ! molCO2/mm2/dia
-!!$  c      else
-!!$  c         gc =  1.0/0.001 ! BIANCA E HELENA - Mudei este esquema..   
-!!$  c      endif                     ! tentem entender o algoritmo
-!!$c                                ! e tenham certeza que faz sentido ecologico
-!!$c      d =(emax*alfm)/(1. + gm/gc) !(based in Gerten et al. 2004)
-!!$!     BIanca- Eu alterei a estrutura desta equacao para evitar erros
-!!$!     Isso faz a mesma coisa que o calculo que vc implementou - jp
-!!$c      if(d .gt. 0.0) then
-!!$c         f5_64 = pt/d
-!!$c         f5_64 = exp(-1 * f5_64)
-!!$c         f5_64 = 1.0 - f5_64
-!!$c      else
-!!$c         f5_64 = wa  ! eu acrescentei esta parte caso d seja igual a zero
-!!$c      endif          ! nao sei se faz sentido!
-!!$
-!!$c      f5 = real(f5_64,4) !esta funcao transforma o f5 (double precision)
-!     em real (32 bits) 
-      
+   if(rc .gt. 0.001) then
+      gc = rc * 1.15741e-08 ! transfor s/m  to dia/mm)  !testamos, nao muda nada! Bia vai rever
+      gc = (1./gc)  ! molCO2/mm2/dia
+   else
+      gc =  1.0/0.001 !    
+   endif                
+   d =(emax*alfm)/(1. + gm/gc) !(based in Gerten et al. 2004)
+   if(d .gt. 0.0) then
+      f5_64 = pt/d
+      f5_64 = exp(-1 * f5_64)
+      f5_64 = 1.0 - f5_64
+   else
+       f5_64 = wa
+   endif          
+   f5 = real(f5_64,4) 
 !     Photosysthesis minimum and maximum temperature
 !     ----------------------------------------------
       
   if ((temp.ge.-10.0).and.(temp.le.50.0)) then
-     f1 = f1a * (f5 + 0.0d0) !f5:water stress factor-- Notem que aqui a tranformacao eh de 128 pra 64 bits
+     f1 = f1a * real(f5_64,kind=r8) !f5:water stress factor-- Notem que aqui a tranformacao eh de 128 pra 64 bits
   else
      f1 = 0.0               !Temperature above/below photosynthesis windown
   endif
@@ -941,23 +935,14 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   !     Leaf area index (m2/m2)
   leaf_t_months = tleaf(pft)*12. ! turnover time in months
   leaf_t_coeff = leaf_t_months/100. !1 - 100 months == ~ 1/12 to 8.3 years (TRY-kattge et al. 2011; Jedi-Pavlick 2012)
-  !  c      if(leaf_t_months .gt. 0) print*, leaf_t_months, leaf_t_coeff, pft
+ 
   if (leaf_t_coeff .gt. 1.) leaf_t_coeff = 1. 
   leaf_turnover =  (365.0/12.0) * (10. **(2.0*leaf_t_coeff))
+
   sla = (3e-2 * (365.0/leaf_turnover)**(-0.46))     
+
   laia64 = ((cl1*1000.)  * sla) ! * 1000 transform kg to g - laia64 in m2 m-2
-  !  c      if(laia64 .gt. 0.0) print*, laia64, 'jp'
-  !     ---------------------------------
-  !     Specifc Leaf Area----------------
-  !      sla=((0.0300*1000.)*((365./(((tleaf(pft))/365.)/12.))**(-0.46)))    
-  !      laia64 = (cl1 * 365.0 * sla)
-  
-!!$
-!!$c      sla=(0.03*(365/(tleaf(pft)/365))**(-0.46))
-!!$c      laia64 = (cl1 * 1000 * 365.0 * sla)
-!!$c      if(laia64 .gt. 0.0) print*, laia64, 'bia'
-  !     LAI
-  !     ------
+
   sunlai = (1.0-(exp(-p26*laia64)))/p26
   !     --------
   shadelai = laia64 - sunlai
@@ -971,7 +956,7 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   f4sun = ((1.0-(exp(-p26*sunlai)))/p26) !sun 90 degrees
   f4shade = ((1.0-(exp(-p27*shadelai)))/p27) !sun ~20 degrees
   
-  laia  = real(laia64,4) ! real((f4sun + f4shade), 4) ! pra mim faz sentido que a laia final seja
+  laia  = real((f4sun + f4shade), 4) ! real(laia64,4) pra mim faz sentido que a laia final seja
   ! a soma da lai em nivel de dossel (sun + shade) - jp
   !     Canopy gross photosynthesis (kgC/m2/yr)
   !     =======================================
