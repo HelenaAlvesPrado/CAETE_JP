@@ -355,7 +355,7 @@ c     Write to track program execution
                   biomass = 0.0
                   biomass0 = 0.0
                   check = .false.
-                  sensi = 0.15 ! (kg/m2/y) if biomas change .le. sensi: equilibrium
+                  sensi = 1.0 ! (kg/m2/y) if biomas change .le. sensi: equilibrium
                   call pft_par(4,wood)
 
                   do p = 1,q

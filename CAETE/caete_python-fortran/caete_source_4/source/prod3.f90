@@ -241,8 +241,8 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
         goto 100
      endif
   endif
-  goto 10               
-100 continue
+  goto 10
+               
   !     PFTs equilibrium check
   !     ==================================================
   !     tentativa 1 - usando variacao no pool de C vegetal
@@ -291,6 +291,7 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
         continue
      endif
   endif
+100 continue
   return
   
 end subroutine wbm
@@ -496,7 +497,7 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
      do p = 1,npft
         
         call productivity1 (p,ocp_coeffs(p),OCP_WOOD(P),temp,p0,w(p)&
-             &,wmax,ca,ipar,rh,cl1(p),ca1(p),cf1(p),beta_leaf(p)&
+             &,wmax,ca,ipar,rh,emax,cl1(p),ca1(p),cf1(p),beta_leaf(p)&
              &,beta_awood(p),beta_froot(p),ph(p),ar(p),nppa(p)&
              &,laia(p),f5(p),f1(p),vpd(p),rm(p),rg(p),rc2(p))
 
@@ -658,7 +659,7 @@ end subroutine soil_temp
 
 
 subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
-     wmax,ca,ipar,rh,cl1,ca1,cf1,beta_leaf,beta_awood,& ! inputs
+     wmax,ca,ipar,rh,emax,cl1,ca1,cf1,beta_leaf,beta_awood,& ! inputs
      beta_froot,ph,ar,nppa,laia,f5,f1,vpd,rm,rg,rc) ! outputs
 
   use global_pars
@@ -677,7 +678,7 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   real(kind=r4), intent(in) :: w,wmax            !Soil moisture (dimensionless)
   real(kind=r4), intent(in) :: ca                   !Atmospheric CO2 concentration (Pa)
   real(kind=r4), intent(in) :: ipar                 !Incident photosynthetic active radiation (w/m2)'
-  real(kind=r4), intent(in) :: rh                   !Relative humidity
+  real(kind=r4), intent(in) :: rh,emax                   !Relative humidity
   real(kind=r4), intent(in) :: cl1, cf1, ca1        !Carbon in plant tissues (kg/m2)
   real(kind=r4), intent(in) :: beta_leaf            !npp allocation to carbon pools (kg/m2/day)
   real(kind=r4), intent(in) :: beta_awood
@@ -699,7 +700,7 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   
   !     Internal
   !     --------
-  !real(kind=rbig) :: f5_64                           !f5 auxiliar(more precision)
+  real(kind=rbig) :: f5_64                           !f5 auxiliar(more precision)
   
   real(kind=r4) :: es, es2,wa                        !Saturation partial pressure (hPa) == mbar
   real(kind=r4) :: aux_ipar
@@ -740,11 +741,11 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   real(kind=r8) :: ncs      !sapwood N:C ratio(gN/gC)
   real(kind=r8) :: csai
   
-!!$  real(kind=r8) :: pt       !taxa potencial de fornecimento para transpiração (mm/dia)
-!!$  real(kind=r8) :: csru     !Specific root water uptake (0.5 mm/gC/dia; based in jedi
-!!$  real(kind=r8) :: alfm     !maximum Priestley-Taylor coefficient (based in Gerten et al. 2004
-!!$  real(kind=r8) :: gm       !scaling conductance (dia/mm)(based in Gerten et al. 2004;
-!!$  real(kind=r8) :: gc       !Canopy conductance (dia/mm)(based in Gerten et al. 2004;
+  real(kind=r8) :: pt,d     !taxa potencial de fornecimento para transpiração (mm/dia)
+  real(kind=r8) :: csru     !Specific root water uptake (0.5 mm/gC/dia; based in jedi
+  real(kind=r8) :: alfm     !maximum Priestley-Taylor coefficient (based in Gerten et al. 2004
+  real(kind=r8) :: gm       !scaling conductance (dia/mm)(based in Gerten et al. 2004;
+  real(kind=r8) :: gc       !Canopy conductance (dia/mm)(based in Gerten et al. 2004;
 
   ! SOME MODEL PARAMETERS
   real(kind=r8) ::  p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14
@@ -894,40 +895,39 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   
 !  c     Water stress response modifier (dimensionless)
 !  c     [f5 ; Eq. 21]
-  ! vamos deixar o F5 como antigamente ate este problema ser resolvido
-  if (wa.gt.0.5) then
-     f5 = 1.0               !Not too lower in e.g. Amazonian dry season
-  else if((wa.ge.0.205).and.(wa.le.0.5)) then
-     f5 = (wa-0.205)/(0.5-0.205)
-  else if(wa.lt.0.205) then
-     f5 = wa !Below wilting point f5 accompains wa (then Sahara is well represented)
-  endif
+!  ! vamos deixar o F5 como antigamente ate este problema ser resolvido
+!  if (wa.gt.0.5) then
+!     f5 = 1.0               !Not too lower in e.g. Amazonian dry season
+!  else if((wa.ge.0.205).and.(wa.le.0.5)) then
+!     f5 = (wa-0.205)/(0.5-0.205)
+!  else if(wa.lt.0.205) then
+!     f5 = wa !Below wilting point f5 accompains wa (then Sahara is well represented)
+!  endif
   
   
-!!$  c      csru = 0.5 
-!!$  c      pt = csru*(cf1*1000.)*wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
-!!$  c      alfm = 1.391
-!!$  c      gm = 3.26 * 86400.           !(*86400 transform s/mm to dia/mm)
-!!$  c      
-!!$  c      if(rc .gt. 0.001) then
-!!$  c         gc = rc * 1.15741e-08 ! transfor s/m  to dia/mm)  !testamos, nao muda nada! Bia vai rever
-!!$  c         gc = (1./gc)  ! molCO2/mm2/dia
-!!$  c      else
-!!$  c         gc =  1.0/0.001 ! BIANCA E HELENA - Mudei este esquema..   
-!!$  c      endif                     ! tentem entender o algoritmo
+   csru = 0.5 
+   pt = csru*(cf1*1000.)*wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
+   alfm = 1.391
+   gm = 3.26 * 86400.           !(*86400 transform s/mm to dia/mm)    
+   if(rc .gt. 0.001) then
+      gc = rc !* 1.15741e-08 ! transfor s/m  to dia/mm)  !testamos, nao muda nada! Bia vai rever
+      gc = (1./gc)  ! molCO2/mm2/dia
+   else
+      gc =  1.0/0.001 ! BIANCA E HELENA - Mudei este esquema..   
+   endif                     ! tentem entender o algoritmo
 !!$c                                ! e tenham certeza que faz sentido ecologico
-!!$c      d =(emax*alfm)/(1. + gm/gc) !(based in Gerten et al. 2004)
+   d =(emax*alfm)/(1. + gm/gc) !(based in Gerten et al. 2004)
 !!$!     BIanca- Eu alterei a estrutura desta equacao para evitar erros
 !!$!     Isso faz a mesma coisa que o calculo que vc implementou - jp
-!!$c      if(d .gt. 0.0) then
-!!$c         f5_64 = pt/d
-!!$c         f5_64 = exp(-1 * f5_64)
-!!$c         f5_64 = 1.0 - f5_64
-!!$c      else
-!!$c         f5_64 = wa  ! eu acrescentei esta parte caso d seja igual a zero
-!!$c      endif          ! nao sei se faz sentido!
+   if(d .gt. 0.0) then
+      f5_64 = pt/d
+      f5_64 = exp(-1 * f5_64)
+      f5_64 = 1.0 - f5_64
+   else
+      f5_64 = wa  ! eu acrescentei esta parte caso d seja igual a zero
+  endif          ! nao sei se faz sentido!
 !!$
-!!$c      f5 = real(f5_64,4) !esta funcao transforma o f5 (double precision)
+      f5 = real(f5_64,4) !esta funcao transforma o f5 (double precision)
 !     em real (32 bits) 
       
 !     Photosysthesis minimum and maximum temperature
