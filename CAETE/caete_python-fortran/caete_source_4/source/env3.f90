@@ -215,7 +215,7 @@ program env
   !     Atmospheric CO2 pressure (Pa) !Ppmv / Pa
   ca= 363/9.901             !Pa (=363 ppmv; 1981-2010)
 
-!$OMP PARALLEL DO SCHEDULE(DYNAMIC),PRIVATE(I,J,K,P),ORDERED,DEFAULT(SHARED) 
+!$OMP PARALLEL DO SCHEDULE(STATIC),PRIVATE(I,J,K,P),ORDERED,DEFAULT(SHARED) 
   do i=1,nx
      if(mod(I,72) .eq. 0) print*, nint(real(i)/real(nx) * 100.)
      do j=1,ny       
@@ -379,65 +379,65 @@ program env
   close(50)
   
   
-  open(10,file='../outputs/ph.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, ph)
-  
-  open(10,file='../outputs/ar.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, ar)
-  
-  open(10,file='../outputs/npp.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, npp)
-  
-  open(10,file='../outputs/clit.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, clit)
-  
-  open(10,file='../outputs/csoil.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, csoil)
-  
-  open(10,file='../outputs/hr.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, hr)
-  
-  open(10,file='../outputs/rcm.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, rcm)
-  
-  open(10,file='../outputs/runom.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, runom)
-  
-  open(10,file='../outputs/evaptr.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, evaptr)
-  
-  open(10,file='../outputs/wsoil.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, wsoil)
-  
-  open(10,file='../outputs/rm.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, rm)
-  
-  open(10,file='../outputs/rg.bin',&
-       &     status='unknown',form='unformatted',&
-       &     access='direct',recl=4*nx*ny)
-  call save_file12(10, rg)
+!!$  open(10,file='../outputs/ph.bin',&
+!!$       &     status='unknown',form='unformatted',&
+!!$       &     access='direct',recl=4*nx*ny)
+!!$  call save_file12(10, ph)
+!!$  
+!!$  open(10,file='../outputs/ar.bin',&
+!!$       &     status='unknown',form='unformatted',&
+!!$       &     access='direct',recl=4*nx*ny)
+!!$  call save_file12(10, ar)
+!!$  
+!!$  open(10,file='../outputs/npp.bin',&
+!!$       &     status='unknown',form='unformatted',&
+!!$       &     access='direct',recl=4*nx*ny)
+!!$  call save_file12(10, npp)
+!!$  
+!!$  open(10,file='../outputs/clit.bin',&
+!!$       &     status='unknown',form='unformatted',&
+!!$       &     access='direct',recl=4*nx*ny)
+!!$  call save_file12(10, clit)
+!!$  
+!!$  open(10,file='../outputs/csoil.bin',&
+!!$       &     status='unknown',form='unformatted',&
+!!$       &     access='direct',recl=4*nx*ny)
+!!$  call save_file12(10, csoil)
+!!$  
+!!$  open(10,file='../outputs/hr.bin',&
+!!$       &     status='unknown',form='unformatted',&
+!!$       &     access='direct',recl=4*nx*ny)
+!!$  call save_file12(10, hr)
+!!$  
+!!$  open(10,file='../outputs/rcm.bin',&
+!!$       &     status='unknown',form='unformatted',&
+!!$       &     access='direct',recl=4*nx*ny)
+!!$  call save_file12(10, rcm)
+!!$  
+!!$  open(10,file='../outputs/runom.bin',&
+!!$       &     status='unknown',form='unformatted',&
+!!$       &     access='direct',recl=4*nx*ny)
+!!$  call save_file12(10, runom)
+!!$  
+!!$  open(10,file='../outputs/evaptr.bin',&
+!!$       &     status='unknown',form='unformatted',&
+!!$       &     access='direct',recl=4*nx*ny)
+!!$  call save_file12(10, evaptr)
+!!$  
+!!$  open(10,file='../outputs/wsoil.bin',&
+!!$       &     status='unknown',form='unformatted',&
+!!$       &     access='direct',recl=4*nx*ny)
+!!$  call save_file12(10, wsoil)
+!!$  
+!!$  open(10,file='../outputs/rm.bin',&
+!!$       &     status='unknown',form='unformatted',&
+!!$       &     access='direct',recl=4*nx*ny)
+!!$  call save_file12(10, rm)
+!!$  
+!!$  open(10,file='../outputs/rg.bin',&
+!!$       &     status='unknown',form='unformatted',&
+!!$       &     access='direct',recl=4*nx*ny)
+!!$  call save_file12(10, rg)
 
   stop
 end program env
