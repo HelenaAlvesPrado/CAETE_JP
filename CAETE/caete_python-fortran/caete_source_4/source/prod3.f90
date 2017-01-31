@@ -171,6 +171,7 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
 !     
 !     Monthly water budget
   !     ====================
+  epmes = 0.0  
   do p=1,q
      wfim(p) = 0.0
      gfim(p) = 0.0
@@ -178,7 +179,6 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      smes(p) = 0.0
      rmes(p) = 0.0
      emes(p) = 0.0
-     epmes(p) = 0.0
      phmes(p) = 0.0
      armes(p) = 0.0
      nppmes(p) = 0.0
@@ -958,7 +958,7 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
 !     ----------------------------------------------
       
   if ((temp.ge.-10.0).and.(temp.le.50.0)) then
-     f1 = f1a * f5_64 !f5:water stress factor-- Notem que aqui a tranformacao eh de 128 pra 64 bits
+     f1 = f1a * real(f5_64,kind=r8) !f5:water stress factor-- Notem que aqui a tranformacao eh de 128 pra 64 bits
   else
      f1 = 0.0               !Temperature above/below photosynthesis windown
   endif
