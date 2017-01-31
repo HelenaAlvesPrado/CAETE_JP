@@ -229,7 +229,7 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      do kk=1,nt
         wsaux1 = wsoilt(kk) + gsoilt(kk)   
         dwww = (wsaux1 - wg0(kk)) / wmax
-        if (abs(dwww).gt.0.0001) nerro = nerro + 1
+        if (abs(dwww).gt.0.001) nerro = nerro + 1
      enddo
                   
      if (nerro.ne.0) then
