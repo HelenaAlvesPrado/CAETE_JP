@@ -36,6 +36,7 @@ program env
   real(kind=r4) :: rhaux(nx,ny,nt)      !RHS auxiliar
   real(kind=r4),dimension(nx,ny,q) :: cleafin = no_data ,cawoodin = no_data ,cfrootin = no_data
 
+  
   !    Model Outputs
   !    -------------
   real(kind=r4) :: emaxm(nx,ny,nt)

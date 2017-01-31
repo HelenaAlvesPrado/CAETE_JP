@@ -229,7 +229,7 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      do kk=1,nt
         wsaux1 = wsoilt(kk) + gsoilt(kk)   
         dwww = (wsaux1 - wg0(kk)) / wmax
-        if (abs(dwww).gt.0.01) nerro = nerro + 1
+        if (abs(dwww).gt.0.0001) nerro = nerro + 1
      enddo
                   
      if (nerro.ne.0) then
@@ -252,7 +252,7 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      biomass = 0.0
      biomass0 = 0.0
      check = .false.
-     sensi = 0.3! (kg/m2/y) if biomas change .le. sensi: equilibrium
+     sensi = 0.5 ! (kg/m2/y) if biomas change .le. sensi: equilibrium
      ! brienen et al. 2015 mean biomass change in Amazon forest - 1995 
      call pft_par(4,wood)
      
@@ -306,10 +306,6 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
   use global_pars
   implicit none
   integer(kind=i4),parameter :: npft = npls
-  integer,parameter :: i4 = kind(0)
-  integer,parameter :: r4 = kind(0.0)
-  integer,parameter :: r8 = kind(0.0D0)
-  integer,parameter :: rbig = selected_real_kind(16,300)
   
   
 !     ----------------------------INPUTS-------------------------------
@@ -637,7 +633,6 @@ subroutine soil_temp(temp, tsoil)
   real(kind=r4), parameter :: DIFFU = 4.e7 * (30.0 * 86400.0) ! soil thermal diffusivity (m2/mes)
   real(kind=r4), parameter :: TAU = (H ** 2) / (2.0 * DIFFU)  ! e-folding times (months) 
   ! i/o
-  integer(kind=i4),intent(in) :: m
   real(kind=r4),dimension(m), intent( in) :: temp ! future __ make temps an allocatable array
   real(kind=r4),dimension(m), intent(out) :: tsoil
    
