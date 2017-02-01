@@ -1499,7 +1499,7 @@ subroutine runoff (wa,roff)
    real(kind=r4),intent( in) :: scf1 !previous day carbon content on fine roots compartment (KgC/m2)
    real(kind=r4),intent(out) :: scf2 !final carbon content on fine roots compartment (KgC/m2)      
    real(kind=r4),intent(out) :: bio_litter
-   real(kind=rbig) :: scf2_128, sca2_128, scl2_128
+   real(kind=rbig) :: scf2_128 = 0.0, sca2_128 = 0.0, scl2_128 = 0.0
    
    real(kind=r4), dimension(npfts) :: aleaf             !npp percentage allocated compartment
    real(kind=r4), dimension(npfts) :: aawood
