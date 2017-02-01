@@ -243,8 +243,8 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      gsoilt(k) = 0.0
 
      do p = 1,q
-        wsoilt(k) = wsoilt(k) + (wsoil_pft(k,p) * grid_area(p))
-        gsoilt(k) = gsoilt(k) + (gsoil(k,p) * grid_area(p))
+        wsoilt(k) = wsoilt(k) + wsoil_pft(k,p)
+        gsoilt(k) = gsoilt(k) + gsoil(k,p)
      enddo
                   
      wmax = 500.
@@ -624,9 +624,9 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
   !     monthly values
   do p=1,NPFT
      if (p .eq. 1) epavg = epavg/real(ndmonth(month))
-     w2(p) = w(p) !* (ocp_mm(p)/real(ndmonth(month)))
-     g2(p) = g(p) !* (ocp_mm(p)/real(ndmonth(month)))
-     s2(p) = s(p) !* (ocp_mm(p)/real(ndmonth(month)))
+     w2(p) = w(p) * (ocp_mm(p)/real(ndmonth(month)))
+     g2(p) = g(p) * (ocp_mm(p)/real(ndmonth(month)))
+     s2(p) = s(p) * (ocp_mm(p)/real(ndmonth(month)))
      smavg(p) = smavg(p)/real(ndmonth(month))
      ruavg(p) = ruavg(p)/real(ndmonth(month))
      evavg(p) = evavg(p)/real(ndmonth(month))
