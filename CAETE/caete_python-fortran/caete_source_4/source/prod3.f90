@@ -267,7 +267,7 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
   endif
   goto 10
   ! continue 100 goes here for pft check
-  100 continue !mudar para linha 245 para incluir pft check
+  100 continue
                
   !     PFTs equilibrium check
   !     ==================================================
@@ -278,9 +278,9 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      biomass = 0.0
      biomass0 = 0.0
      check = .false.
-     sensi = 1.0! (kg/m2/y) if biomas change .le. sensi: equilibrium
+     sensi = 2.0! (kg/m2/y) if biomas change .le. sensi: equilibrium
      ! brienen et al. 2015 mean biomass change in Amazon forest - 1995 - 1.0 Mg/ha/y
-     ! here I'm using a larger value (10 Mg/ha/y) 
+     ! here I'm using a larger value (20 Mg/ha/y) 
      call pft_par(4,wood)
      
      do p = 1,q
@@ -430,7 +430,7 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
   real(kind=r4 ) ::  rg(npft)
   real(kind=r4 ) ::  cl1(npft),cf1(npft),ca1(npft) ! carbon pre-allocation 
   real(kind=r4 ) ::  cl2(npft),cf2(npft),ca2(npft) ! carbon pos-allocation
-      
+  real(kind=r4) :: dl(npft)      ! litter resulting from pft exclusion
 
   !     Initialize Parameters
   !     ---------------------------------------
@@ -481,7 +481,8 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
 
      alfa_leaf(p) = 0.0
      alfa_awood(p) = 0.0
-     alfa_froot(p) = 0.0    
+     alfa_froot(p) = 0.0
+
   enddo
       
   !     Numerical integration
@@ -507,7 +508,7 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
         rc2(p)   = 0.0
         rm(p)    = 0.0
         rg(p)    = 0.0
-        
+        dl(p) = 0.0        
         if ((i.eq.1).and.(month.eq.1)) then    
            beta_leaf(p) = 0.00000001
            beta_awood(p) = 0.00000001
@@ -536,7 +537,7 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
         !c     Carbon allocation (carbon content on each compartment)
         !     =====================================================
         call allocation (p, nppa(p), cl1(p), ca1(p),cf1(p),cl2(p),&
-             & ca2(p), cf2(p)) 
+             & ca2(p), cf2(p), dl(p)) 
 
             
         alfa_leaf(p)  = cl2(p) - cl1(p)
@@ -590,7 +591,7 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
            
            !     Carbon cycle (Microbial respiration, litter and soil carbon)
            !     ============================================================     
-           call carbon2 (ts,f5(p),evap(p),laia(p),cl(p),cs(p),hr(p))   
+           call carbon2 (ts,f5(p),evap(p),laia(p),dl(p),cl(p),cs(p),hr(p))   
         endif
 
 !     Accumulate daily budgets weighted by occupation coefficients
@@ -777,7 +778,7 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   real(kind=r8) :: alfm     !maximum Priestley-Taylor coefficient (based in Gerten et al. 2004
   real(kind=r8) :: gm       !scaling conductance (dia/mm)(based in Gerten et al. 2004;
   real(kind=r8) :: gc       !Canopy conductance (dia/mm)(based in Gerten et al. 2004;
-
+  
   ! SOME MODEL PARAMETERS
   real(kind=r8) ::  p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14
   real(kind=r8) ::  p15,p19,p20,p22,p23,p24,p25,p26,p27,p28,p29,p30,p31
@@ -1150,11 +1151,11 @@ end subroutine canopy_resistence
 !     =====================================
 !     Microbial (heterotrophic) respiration
 !     =====================================
-subroutine carbon2 (tsoil,f5c,evap,laia,cl,cs,hr)
+subroutine carbon2 (tsoil,f5c,evap,laia,d_litter,cl,cs,hr)
+  use global_pars
   implicit none
   !     Variables
   !     =========
-  integer,parameter :: r4 = kind(0.0)
      
   !     Inputs
   !     ------
@@ -1162,7 +1163,7 @@ subroutine carbon2 (tsoil,f5c,evap,laia,cl,cs,hr)
   real(kind=r4),intent(in) :: f5c                  !Stress response to soil moisture (dimensionless)
   real(kind=r4),intent(in) :: evap                 !Actual evapotranspiration (mm/day)
   real(kind=r4),intent(in) :: laia
-
+  real(kind=r4),intent(in) :: d_litter
   !     Outputs 
   !     -------
   real(kind=r4),intent(out) :: cl                   !Litter carbon (kgC/m2)
@@ -1208,7 +1209,7 @@ subroutine carbon2 (tsoil,f5c,evap,laia,cl,cs,hr)
 
   !     Litterfall (kgC/m2)
   !     ------------------
-  lf = p33 * laia
+  lf = p33 * (laia + d_litter)
 
   !     Litter carbon (kgC/m2)
   !     ----------------------  
@@ -1481,7 +1482,7 @@ subroutine runoff (wa,roff)
  !c     
  !c=====================================================================
       
- subroutine allocation (pft, npp ,scl1,sca1,scf1,scl2,sca2,scf2)
+ subroutine allocation (pft, npp ,scl1,sca1,scf1,scl2,sca2,scf2,bio_litter)
    use global_pars
    implicit none
    
@@ -1497,7 +1498,7 @@ subroutine runoff (wa,roff)
    real(kind=r4),intent(out) :: sca2 !final carbon content on aboveground woody biomass compartment (KgC/m2)
    real(kind=r4),intent( in) :: scf1 !previous day carbon content on fine roots compartment (KgC/m2)
    real(kind=r4),intent(out) :: scf2 !final carbon content on fine roots compartment (KgC/m2)      
-
+   real(kind=r4),intent(out) :: bio_litter
    real(kind=rbig) :: scf2_128, sca2_128, scl2_128
    
    real(kind=r4), dimension(npfts) :: aleaf             !npp percentage allocated compartment
@@ -1518,14 +1519,13 @@ subroutine runoff (wa,roff)
    !c     
    !c     
    !c     initialization
-!   if((scl1 .lt. 1e-12) .or. (scf1 .lt. 1e-12)) then
-!      IF(NPP .lt. 1e-12) THEN
-!         scl2 = 0.0
-!         scf2 = 0.0
-!         sca2 = 0.0 
-!         goto 10
-!      ENDIF
-!   endif
+   if(((scl1 .lt. 1e-12) .or. (scf1 .lt. 1e-12)) .and. (sca1 .gt. 0.0)) then
+      bio_litter = scl1 + scf1 + sca1
+      scl2 = 0.0
+      scf2 = 0.0
+      sca2 = 0.0
+      goto 10
+   endif
    npp_aux = npp/365.0       !transform (KgC/m2/yr) in (KgC/m2/day)
    scl2_128 = scl1 + (aleaf(pft) * npp_aux) -(scl1 /(tleaf(pft)*365.0))
    scf2_128 = scf1 +(afroot(pft) * npp_aux)-(scf1 /(tfroot(pft)*365.0))
@@ -1540,17 +1540,48 @@ subroutine runoff (wa,roff)
    scl2 = real(scl2_128,4)
    
    
-   if(scl2 .lt. 0.0) scl2 = 0.0
-   if(scf2 .lt. 0.0) scf2 = 0.0
-   if(sca2 .lt. 0.0) sca2 = 0.0
+   if(scl2_128 .lt. 1e-12) scl2 = 0.0
+   if(scf2_128 .lt. 1e-12) scf2 = 0.0
+   if(sca2_128 .lt. 1e-12) sca2 = 0.0
    
-!10 continue
+10 continue
    return
  end subroutine allocation
  
 
  
- !     ==============================================================     
+ !     ==============================================================
+ ! new version
+!!$ subroutine pft_par(par, dt)
+!!$   use global_pars
+!!$   implicit none
+!!$    
+!!$   integer(kind=i4),intent(in) :: par            ! parameter number 
+!!$   real(kind=r4), dimension(npls),intent(out) :: dt
+!!$   
+!!$   !     dt1 = aleaf
+!!$   !     dt2 = aawood
+!!$   !     dt3 = afroot
+!!$   !     dt4 = tleaf
+!!$   !     dt5 = tawood
+!!$   !     dt6 = tfroot
+!!$   !     dt7 = g1
+!!$   !     dt8 = p21
+!!$   !     DT9 = JMAX
+!!$   
+!!$   open(233,file='../inputs/pls.bin',status='old',
+!!$   &    form='unformatted',access='direct',recl=4*npls)
+!!$   
+!!$   if(par .gt. 0 .and. par .lt. 10) then
+!!$      read(233,rec=par) dt
+!!$   else
+!!$      print*, 'search failed'
+!!$   endif
+!!$   close(233)
+!!$   return
+!!$ end subroutine pft_par
+ 
+ 
  subroutine pft_par(par, dt) !!!!!!!!!  mudamos os valores de dt
    use global_pars
    implicit none
