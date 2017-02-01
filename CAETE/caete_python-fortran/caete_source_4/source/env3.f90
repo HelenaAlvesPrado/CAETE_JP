@@ -284,12 +284,17 @@ program env
               prec(k) = pr    (i,j,k) 
            enddo
            
-           call wbm (prec,temp,lsmk,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,&
+           call wbm (prec,temp,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,&
                 &    emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,&
                 &    clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,&
                 &    evapm_pft,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,&
                 &    cfroot_pft,gridcell_ocp)
-
+!!$
+!!$subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
+!!$     &,cfroot_ini,emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft&
+!!$     &,clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,evapm_pft&
+!!$     &,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft,grid_area)
+           
            do p = 1,q
               clfim(i,j,p) = cleaf_pft(p)
               cffim(i,j,p) = cfroot_pft(p)
@@ -317,7 +322,6 @@ program env
         endif
      enddo           
   enddo
-
 !$OMP END PARALLEL DO 
 
         open(10,file='../spinup/gridcell_ocp.bin',&

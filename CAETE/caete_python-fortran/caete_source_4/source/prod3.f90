@@ -243,8 +243,8 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      gsoilt(k) = 0.0
 
      do p = 1,q
-        wsoilt(k) = wsoilt(k) + wsoil_pft(k,p)
-        gsoilt(k) = gsoilt(k) + gsoil(k,p)
+        wsoilt(k) = wsoilt(k) + (wsoil_pft(k,p) * grid_area(p))
+        gsoilt(k) = gsoilt(k) + (gsoil(k,p) * grid_area(p))
      enddo
                   
      wmax = 500.
@@ -321,7 +321,11 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
 end subroutine wbm
 
 
-
+!!$
+!!$mes,wini,gini,sini,td,ta,pr,spre,ae,ca,ipar,ru&
+!!$       &,cleaf1_pft,cawood1_pft,cfroot1_pft ,wfim,gfim, sfim,smes&
+!!$       &,rmes,emes,epmes,phmes,armes,nppmes,laimes,clmes,csmes,hrmes&
+!!$       &,rcmes,rmmes,rgmes,cleafmes,cawoodmes,cfrootmes, gridocpmes)
 
 subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
      &,cl1_pft,ca1_pft,cf1_pft,w2,g2,s2,smavg,ruavg,evavg,epavg&
@@ -620,9 +624,9 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
   !     monthly values
   do p=1,NPFT
      if (p .eq. 1) epavg = epavg/real(ndmonth(month))
-     w2(p) = w(p) * (ocp_mm(p)/real(ndmonth(month)))
-     g2(p) = g(p) * (ocp_mm(p)/real(ndmonth(month)))
-     s2(p) = s(p) * (ocp_mm(p)/real(ndmonth(month)))
+     w2(p) = w(p) !* (ocp_mm(p)/real(ndmonth(month)))
+     g2(p) = g(p) !* (ocp_mm(p)/real(ndmonth(month)))
+     s2(p) = s(p) !* (ocp_mm(p)/real(ndmonth(month)))
      smavg(p) = smavg(p)/real(ndmonth(month))
      ruavg(p) = ruavg(p)/real(ndmonth(month))
      evavg(p) = evavg(p)/real(ndmonth(month))
@@ -1011,9 +1015,9 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   !     Maintenance respiration (kgC/m2/yr) (based in Ryan 1991)
   csa= 0.05 * ca1           !sapwood carbon content (kgC/m2). 5% of woody tissues (Pavlick, 2013)
   
-  ncl = 1./29.               !(gN/gC) from lpj3 
-  ncf = 1./29.               !(gN/gC)
-  ncs = 1./330.              !(gN/gC)
+  ncl = 1./29.              !(gN/KgC) from lpj3 
+  ncf = 1./29.              !(gN/KgC)
+  ncs = 1./330.             !(gN/KgC)
   
   rml64 = (ncl * cl1) * 27. * exp(0.03*temp)
   
@@ -1545,12 +1549,10 @@ subroutine runoff (wa,roff)
  
  !     ==============================================================     
  subroutine pft_par(par, dt) !!!!!!!!!  mudamos os valores de dt
+   use global_pars
    implicit none
-
-   integer,parameter :: i4 = kind(0)
-   integer,parameter :: r4 = kind(0.0)
    
-   integer(kind=i4),parameter :: vars = 12
+   integer(kind=i4),parameter :: vars = npls
    
    !     input
    integer(kind=i4),intent(in) :: par            ! parameter number 
@@ -1582,6 +1584,7 @@ subroutine runoff (wa,roff)
    !    10 = Temperate Evergreen Shrub 
    !    11 = Boreal Evergreen Tree  
    !    12 = Boreal Deciduous Tree
+   
    
    !PFT       1       2       3       4       5       6       7      8       9       10      11      12      
    data dt1/3.77,   4.15,   2.98,   7.18,   4.5,    3.37,   4.64,   4.4,    4.6,    3.92,   1.5,    2.72/   !g1
@@ -1618,13 +1621,11 @@ subroutine runoff (wa,roff)
  
  !c     ==================================================
  subroutine spinup(nppot,cleafini,cfrootini,cawoodini)
-   !c     &     cbwoodini,cstoini,cotherini,crepini) 
+   !c     &     cbwoodini,cstoini,cotherini,crepini)
+   use global_pars
    IMPLICIT NONE
-   integer,parameter :: i4 = kind(0)
-   integer,parameter :: r4 = kind(0.0)
-   integer,parameter :: r8 = kind(0.0D0)
    
-   integer(kind=i4),parameter :: npfts = 12
+   integer(kind=i4),parameter :: npfts = npls
    integer(kind=i4),parameter :: nt=30000
    
    !   c     inputs
