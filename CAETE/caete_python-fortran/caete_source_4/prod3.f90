@@ -2,7 +2,6 @@
 !code based in CPTEC-PVM2
 !LAST UPDATE: 28 Jan 2017 00:37:49 BRST JP 
 ! =================================================================
-
 subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      &,cfroot_ini,emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft&
      &,clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,evapm_pft&
@@ -161,16 +160,40 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
   k = mod(n,12)
   if (k.eq.0) k = 12
   mes = k
-  spre = p0(k)
+  spre = p0(k) * 0.01 ! transforamando de Pascal pra mbar (hPa)
   td = tsoil(k)
   ta = temp(k)
   pr = prec(k)
-  ipar = par(k) / 2.18e5   !converting to Ein/m2/s
-  ru = rhs(k)/100.
+  ipar = par(k)
+  ru = rhs(k)
   ae = 2.895*ta+52.326 !Available energy (W/m2) - From NCEP-NCAR reanalysis data
 !     
 !     Monthly water budget
-!     ====================
+  !     ====================
+  epmes = 0.0  
+  do p=1,q
+     wfim(p) = 0.0
+     gfim(p) = 0.0
+     sfim(p) = 0.0
+     smes(p) = 0.0
+     rmes(p) = 0.0
+     emes(p) = 0.0
+     phmes(p) = 0.0
+     armes(p) = 0.0
+     nppmes(p) = 0.0
+     laimes(p) = 0.0
+     clmes(p) = 0.0
+     csmes(p) = 0.0
+     hrmes(p) = 0.0
+     rcmes(p) = 0.0
+     rmmes(p) = 0.0
+     rgmes(p) = 0.0
+     cleafmes(p) = 0.0
+     cawoodmes(p) = 0.0
+     cfrootmes(p) = 0.0
+     gridocpmes(p) = 0.0
+  enddo
+  
   
   call budget (mes,wini,gini,sini,td,ta,pr,spre,ae,ca,ipar,ru&
        &,cleaf1_pft,cawood1_pft,cfroot1_pft ,wfim,gfim, sfim,smes&
@@ -229,7 +252,7 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      do kk=1,nt
         wsaux1 = wsoilt(kk) + gsoilt(kk)   
         dwww = (wsaux1 - wg0(kk)) / wmax
-        if (abs(dwww).gt.0.0001) nerro = nerro + 1
+        if (abs(dwww).gt.0.01) nerro = nerro + 1
      enddo
                   
      if (nerro.ne.0) then
@@ -241,7 +264,10 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
         goto 100
      endif
   endif
-  goto 10               
+  goto 10
+  ! continue 100 goes here for pft check
+  100 continue
+               
   !     PFTs equilibrium check
   !     ==================================================
   !     tentativa 1 - usando variacao no pool de C vegetal
@@ -251,8 +277,9 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      biomass = 0.0
      biomass0 = 0.0
      check = .false.
-     sensi = 0.5 ! (kg/m2/y) if biomas change .le. sensi: equilibrium
-     ! brienen et al. 2015 mean biomass change in Amazon forest - 1995 
+     sensi = 2.0! (kg/m2/y) if biomas change .le. sensi: equilibrium
+     ! brienen et al. 2015 mean biomass change in Amazon forest - 1995 - 1.0 Mg/ha/y
+     ! here I'm using a larger value (20 Mg/ha/y) 
      call pft_par(4,wood)
      
      do p = 1,q
@@ -290,13 +317,23 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
         continue
      endif
   endif
-  100 continue
+! continue 100 goes here to exclude pft_check
   return
   
 end subroutine wbm
+!=================================================================
+!=================================================================
 
 
 
+!=================================================================
+!=================================================================
+
+!!$
+!!$mes,wini,gini,sini,td,ta,pr,spre,ae,ca,ipar,ru&
+!!$       &,cleaf1_pft,cawood1_pft,cfroot1_pft ,wfim,gfim, sfim,smes&
+!!$       &,rmes,emes,epmes,phmes,armes,nppmes,laimes,clmes,csmes,hrmes&
+!!$       &,rcmes,rmmes,rgmes,cleafmes,cawoodmes,cfrootmes, gridocpmes)
 
 subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
      &,cl1_pft,ca1_pft,cf1_pft,w2,g2,s2,smavg,ruavg,evavg,epavg&
@@ -398,7 +435,7 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
   real(kind=r4 ) ::  rg(npft)
   real(kind=r4 ) ::  cl1(npft),cf1(npft),ca1(npft) ! carbon pre-allocation 
   real(kind=r4 ) ::  cl2(npft),cf2(npft),ca2(npft) ! carbon pos-allocation
-      
+  real(kind=r4) :: dl(npft)      ! litter resulting from pft exclusion
 
   !     Initialize Parameters
   !     ---------------------------------------
@@ -449,7 +486,8 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
 
      alfa_leaf(p) = 0.0
      alfa_awood(p) = 0.0
-     alfa_froot(p) = 0.0    
+     alfa_froot(p) = 0.0
+
   enddo
       
   !     Numerical integration
@@ -475,7 +513,7 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
         rc2(p)   = 0.0
         rm(p)    = 0.0
         rg(p)    = 0.0
-        
+        dl(p) = 0.0        
         if ((i.eq.1).and.(month.eq.1)) then    
            beta_leaf(p) = 0.00000001
            beta_awood(p) = 0.00000001
@@ -504,7 +542,7 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
         !c     Carbon allocation (carbon content on each compartment)
         !     =====================================================
         call allocation (p, nppa(p), cl1(p), ca1(p),cf1(p),cl2(p),&
-             & ca2(p), cf2(p)) 
+             & ca2(p), cf2(p), dl(p)) 
 
             
         alfa_leaf(p)  = cl2(p) - cl1(p)
@@ -558,7 +596,7 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
            
            !     Carbon cycle (Microbial respiration, litter and soil carbon)
            !     ============================================================     
-           call carbon2 (ts,f5(p),evap(p),laia(p),cl(p),cs(p),hr(p))   
+           call carbon2 (ts,f5(p),evap(p),laia(p),dl(p),cl(p),cs(p),hr(p))   
         endif
 
 !     Accumulate daily budgets weighted by occupation coefficients
@@ -615,9 +653,13 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
   enddo
   return
 end subroutine budget
+!=================================================================
+!=================================================================
 
 
 
+!=================================================================
+!=================================================================
 
 subroutine soil_temp(temp, tsoil)
   ! Calcula a temperatura do solo. Aqui vamos mudar no futuro!
@@ -633,6 +675,7 @@ subroutine soil_temp(temp, tsoil)
   real(kind=r4), parameter :: DIFFU = 4.e7 * (30.0 * 86400.0) ! soil thermal diffusivity (m2/mes)
   real(kind=r4), parameter :: TAU = (H ** 2) / (2.0 * DIFFU)  ! e-folding times (months) 
   ! i/o
+
   real(kind=r4),dimension(m), intent( in) :: temp ! future __ make temps an allocatable array
   real(kind=r4),dimension(m), intent(out) :: tsoil
    
@@ -652,9 +695,13 @@ subroutine soil_temp(temp, tsoil)
      t0 = t1
   enddo
 end subroutine soil_temp
+!=================================================================
+!=================================================================
 
 
 
+!=================================================================
+!=================================================================
 
 subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
      wmax,ca,ipar,rh,emax,cl1,ca1,cf1,beta_leaf,beta_awood,& ! inputs
@@ -673,10 +720,10 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   real(kind=r4), intent(in) :: ocp_pft              !PFT area occupation (%)
   real(kind=r4), intent(in) :: temp                 !Mean monthly temperature (oC)
   real(kind=r4), intent(in) :: p0                   !Mean surface pressure (hPa)
-  real(kind=r4), intent(in) :: w,wmax,emax            !Soil moisture (dimensionless)
+  real(kind=r4), intent(in) :: w,wmax            !Soil moisture (dimensionless)
   real(kind=r4), intent(in) :: ca                   !Atmospheric CO2 concentration (Pa)
   real(kind=r4), intent(in) :: ipar                 !Incident photosynthetic active radiation (w/m2)'
-  real(kind=r4), intent(in) :: rh                   !Relative humidity
+  real(kind=r4), intent(in) :: rh,emax                   !Relative humidity
   real(kind=r4), intent(in) :: cl1, cf1, ca1        !Carbon in plant tissues (kg/m2)
   real(kind=r4), intent(in) :: beta_leaf            !npp allocation to carbon pools (kg/m2/day)
   real(kind=r4), intent(in) :: beta_awood
@@ -698,7 +745,7 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   
   !     Internal
   !     --------
-  !real(kind=rbig) :: f5_64                           !f5 auxiliar(more precision)
+  real(kind=rbig) :: f5_64                           !f5 auxiliar(more precision)
   
   real(kind=r4) :: es, es2,wa                        !Saturation partial pressure (hPa) == mbar
   real(kind=r4) :: aux_ipar
@@ -738,13 +785,13 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   real(kind=r8) :: ncf      !fine roots N:C ratio (gN/gC)
   real(kind=r8) :: ncs      !sapwood N:C ratio(gN/gC)
   real(kind=r8) :: csai
-  real(kind=rbig) :: f5_64
-  real(kind=r8) :: pt,d       !taxa potencial de fornecimento para transpiração (mm/dia)
+  
+  real(kind=r8) :: pt,d     !taxa potencial de fornecimento para transpiração (mm/dia)
   real(kind=r8) :: csru     !Specific root water uptake (0.5 mm/gC/dia; based in jedi
   real(kind=r8) :: alfm     !maximum Priestley-Taylor coefficient (based in Gerten et al. 2004
   real(kind=r8) :: gm       !scaling conductance (dia/mm)(based in Gerten et al. 2004;
   real(kind=r8) :: gc       !Canopy conductance (dia/mm)(based in Gerten et al. 2004;
-
+  
   ! SOME MODEL PARAMETERS
   real(kind=r8) ::  p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14
   real(kind=r8) ::  p15,p19,p20,p22,p23,p24,p25,p26,p27,p28,p29,p30,p31
@@ -893,36 +940,41 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   
 !  c     Water stress response modifier (dimensionless)
 !  c     [f5 ; Eq. 21]
-  ! vamos deixar o F5 como antigamente ate este problema ser resolvido
-!!$c  if (wa.gt.0.5) then
-!!$c     f5 = 1.0               !Not too lower in e.g. Amazonian dry season
-!!$c  else if((wa.ge.0.205).and.(wa.le.0.5)) then
-!!$c     f5 = (wa-0.205)/(0.5-0.205)
-!!$c  else if(wa.lt.0.205) then
-!!$c     f5 = wa !Below wilting point f5 accompains wa (then Sahara is well represented)
-!!$c  endif
+!  ! vamos deixar o F5 como antigamente ate este problema ser resolvido
+!  if (wa.gt.0.5) then
+!     f5 = 1.0               !Not too lower in e.g. Amazonian dry season
+!  else if((wa.ge.0.205).and.(wa.le.0.5)) then
+!     f5 = (wa-0.205)/(0.5-0.205)
+!  else if(wa.lt.0.205) then
+!     f5 = wa !Below wilting point f5 accompains wa (then Sahara is well represented)
+!  endif
   
   
    csru = 0.5 
    pt = csru*(cf1*1000.)*wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
    alfm = 1.391
-   gm = 3.26 * 86400.           !(*86400 transform s/mm to dia/mm)
-!!$  c      
+   gm = 3.26 * 86400.           !(*86400 transform s/mm to dia/mm)    
    if(rc .gt. 0.001) then
       gc = rc * 1.15741e-08 ! transfor s/m  to dia/mm)  !testamos, nao muda nada! Bia vai rever
       gc = (1./gc)  ! molCO2/mm2/dia
    else
-      gc =  1.0/0.001 !    
-   endif                
+      gc =  1.0/0.001 ! BIANCA E HELENA - Mudei este esquema..   
+   endif                     ! tentem entender o algoritmo
+!!$c                                ! e tenham certeza que faz sentido ecologico
    d =(emax*alfm)/(1. + gm/gc) !(based in Gerten et al. 2004)
+!!$!     BIanca- Eu alterei a estrutura desta equacao para evitar erros
+!!$!     Isso faz a mesma coisa que o calculo que vc implementou - jp
    if(d .gt. 0.0) then
       f5_64 = pt/d
       f5_64 = exp(-1 * f5_64)
       f5_64 = 1.0 - f5_64
    else
-       f5_64 = wa
-   endif          
-   f5 = real(f5_64,4) 
+      f5_64 = wa  ! eu acrescentei esta parte caso d seja igual a zero
+  endif          ! nao sei se faz sentido!
+!!$
+      f5 = real(f5_64,4) !esta funcao transforma o f5 (double precision)
+!     em real (32 bits) 
+      
 !     Photosysthesis minimum and maximum temperature
 !     ----------------------------------------------
       
@@ -935,14 +987,23 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   !     Leaf area index (m2/m2)
   leaf_t_months = tleaf(pft)*12. ! turnover time in months
   leaf_t_coeff = leaf_t_months/100. !1 - 100 months == ~ 1/12 to 8.3 years (TRY-kattge et al. 2011; Jedi-Pavlick 2012)
- 
+  !  c      if(leaf_t_months .gt. 0) print*, leaf_t_months, leaf_t_coeff, pft
   if (leaf_t_coeff .gt. 1.) leaf_t_coeff = 1. 
   leaf_turnover =  (365.0/12.0) * (10. **(2.0*leaf_t_coeff))
-
   sla = (3e-2 * (365.0/leaf_turnover)**(-0.46))     
-
   laia64 = ((cl1*1000.)  * sla) ! * 1000 transform kg to g - laia64 in m2 m-2
-
+  !  c      if(laia64 .gt. 0.0) print*, laia64, 'jp'
+  !     ---------------------------------
+  !     Specifc Leaf Area----------------
+  !      sla=((0.0300*1000.)*((365./(((tleaf(pft))/365.)/12.))**(-0.46)))    
+  !      laia64 = (cl1 * 365.0 * sla)
+  
+!!$
+!!$c      sla=(0.03*(365/(tleaf(pft)/365))**(-0.46))
+!!$c      laia64 = (cl1 * 1000 * 365.0 * sla)
+!!$c      if(laia64 .gt. 0.0) print*, laia64, 'bia'
+  !     LAI
+  !     ------
   sunlai = (1.0-(exp(-p26*laia64)))/p26
   !     --------
   shadelai = laia64 - sunlai
@@ -956,10 +1017,10 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   f4sun = ((1.0-(exp(-p26*sunlai)))/p26) !sun 90 degrees
   f4shade = ((1.0-(exp(-p27*shadelai)))/p27) !sun ~20 degrees
   
-  laia  = real((f4sun + f4shade), 4) ! real(laia64,4) pra mim faz sentido que a laia final seja
+  laia  =  real((f4sun + f4shade), 4) !real(laia64,4) ! pra mim faz sentido que a laia final seja
   ! a soma da lai em nivel de dossel (sun + shade) - jp
   !     Canopy gross photosynthesis (kgC/m2/yr)
-  !     =======================================
+  !     =======================================x
   !     (0.012 converts molCO2 to kgC)
   !     (31557600 converts seconds to year [with 365.25 days])
   ph64 = 0.012*31557600.0*f1*f4sun*f4shade
@@ -971,9 +1032,9 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   !     Maintenance respiration (kgC/m2/yr) (based in Ryan 1991)
   csa= 0.05 * ca1           !sapwood carbon content (kgC/m2). 5% of woody tissues (Pavlick, 2013)
   
-  ncl = 1./29.               !(gN/gC) from lpj3 
-  ncf = 1./29.               !(gN/gC)
-  ncs = 1./330.              !(gN/gC)
+  ncl = 1./29.              !(gN/KgC) from lpj3 
+  ncf = 1./29.              !(gN/KgC)
+  ncs = 1./330.             !(gN/KgC)
   
   rml64 = (ncl * cl1) * 27. * exp(0.03*temp)
   
@@ -1026,10 +1087,14 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   !     dos tecidos vegetais... e uma possivel extincao do pft/pls da celula de grid.
   return
 end subroutine productivity1
+!=================================================================
+!=================================================================
 
 
 
-!     ==================================================================
+!=================================================================
+!=================================================================
+
 subroutine canopy_resistence(pft,vpd_in,f1_in,rc2_in)
   use global_pars
   implicit none
@@ -1097,17 +1162,22 @@ subroutine canopy_resistence(pft,vpd_in,f1_in,rc2_in)
 110 continue
   return
 end subroutine canopy_resistence
+!=================================================================
+!=================================================================
 
 
+
+!=================================================================
+!=================================================================
 
 !     =====================================
 !     Microbial (heterotrophic) respiration
 !     =====================================
-subroutine carbon2 (tsoil,f5c,evap,laia,cl,cs,hr)
+subroutine carbon2 (tsoil,f5c,evap,laia,d_litter,cl,cs,hr)
+  use global_pars
   implicit none
   !     Variables
   !     =========
-  integer,parameter :: r4 = kind(0.0)
      
   !     Inputs
   !     ------
@@ -1115,7 +1185,7 @@ subroutine carbon2 (tsoil,f5c,evap,laia,cl,cs,hr)
   real(kind=r4),intent(in) :: f5c                  !Stress response to soil moisture (dimensionless)
   real(kind=r4),intent(in) :: evap                 !Actual evapotranspiration (mm/day)
   real(kind=r4),intent(in) :: laia
-
+  real(kind=r4),intent(in) :: d_litter
   !     Outputs 
   !     -------
   real(kind=r4),intent(out) :: cl                   !Litter carbon (kgC/m2)
@@ -1161,7 +1231,7 @@ subroutine carbon2 (tsoil,f5c,evap,laia,cl,cs,hr)
 
   !     Litterfall (kgC/m2)
   !     ------------------
-  lf = p33 * laia
+  lf = p33 * (laia + d_litter)
 
   !     Litter carbon (kgC/m2)
   !     ----------------------  
@@ -1216,6 +1286,15 @@ end subroutine carbon2
 !!$end subroutine critical_value3
 !     =================================================================
 
+!=================================================================
+!=================================================================
+
+
+
+!=================================================================
+!=================================================================
+
+
 SUBROUTINE PFT_AREA_FRAC(CLEAF, CFROOT, CAWOOD, OCP_COEFFS, OCP_WOOD)
   use global_pars
   implicit none
@@ -1268,9 +1347,14 @@ SUBROUTINE PFT_AREA_FRAC(CLEAF, CFROOT, CAWOOD, OCP_COEFFS, OCP_WOOD)
   
   RETURN
 END SUBROUTINE PFT_AREA_FRAC
+!=================================================================
+!=================================================================
 
 
-!     =========================================================
+
+!=================================================================
+!=================================================================
+
 
 subroutine penman (spre,temp,ur,rn,rc2,evap)
   use global_pars
@@ -1329,8 +1413,14 @@ subroutine penman (spre,temp,ur,rn,rc2,evap)
   
   return
 end subroutine penman
-!     ============================================
-!     
+!=================================================================
+!=================================================================
+
+
+
+!=================================================================
+!=================================================================
+     
 subroutine evpot2 (spre,temp,ur,rn,evap) 
   use global_pars
   implicit none
@@ -1389,10 +1479,14 @@ subroutine evpot2 (spre,temp,ur,rn,evap)
   !     
   return
 end subroutine evpot2
-!     
-!     =================================================================
+!=================================================================
+!=================================================================
 
-!     
+
+
+!=================================================================
+!=================================================================
+
 subroutine runoff (wa,roff)
   use global_pars
   implicit none
@@ -1406,8 +1500,14 @@ subroutine runoff (wa,roff)
    roff = real(roff64, 4)
    return
  end subroutine runoff
-!     
-!     =================================================================    
+!=================================================================
+!=================================================================
+
+
+
+!=================================================================
+!=================================================================
+
  subroutine tetens (t,es)  !Saturation Vapor Pressure (hPa)!
    use global_pars
    implicit none
@@ -1422,10 +1522,13 @@ subroutine runoff (wa,roff)
    endif
    return
  end subroutine tetens
- 
+!=================================================================
+!=================================================================
 
 
- 
+
+!=================================================================
+!=================================================================
  !=====================================================================
  !c     subroutine allocation calculates the daily carbon content of each
  !c     compartment
@@ -1434,7 +1537,7 @@ subroutine runoff (wa,roff)
  !c     
  !c=====================================================================
       
- subroutine allocation (pft, npp ,scl1,sca1,scf1,scl2,sca2,scf2)
+ subroutine allocation (pft, npp ,scl1,sca1,scf1,scl2,sca2,scf2,bio_litter)
    use global_pars
    implicit none
    
@@ -1450,8 +1553,8 @@ subroutine runoff (wa,roff)
    real(kind=r4),intent(out) :: sca2 !final carbon content on aboveground woody biomass compartment (KgC/m2)
    real(kind=r4),intent( in) :: scf1 !previous day carbon content on fine roots compartment (KgC/m2)
    real(kind=r4),intent(out) :: scf2 !final carbon content on fine roots compartment (KgC/m2)      
-
-   real(kind=rbig) :: scf2_128, sca2_128, scl2_128
+   real(kind=r4),intent(out) :: bio_litter
+   real(kind=rbig) :: scf2_128 = 0.0, sca2_128 = 0.0, scl2_128 = 0.0
    
    real(kind=r4), dimension(npfts) :: aleaf             !npp percentage allocated compartment
    real(kind=r4), dimension(npfts) :: aawood
@@ -1471,13 +1574,12 @@ subroutine runoff (wa,roff)
    !c     
    !c     
    !c     initialization
-   if((scl1 .lt. 1e-12) .or. (scf1 .lt. 1e-12)) then
-      IF(NPP .lt. 1e-12) THEN
-         scl2 = 0.0
-         scf2 = 0.0
-         sca2 = 0.0 
-         goto 10
-      ENDIF
+   if(((scl1 .lt. 1e-12) .or. (scf1 .lt. 1e-12)) .and. (sca1 .gt. 0.0)) then
+      bio_litter = scl1 + scf1 + sca1
+      scl2 = 0.0
+      scf2 = 0.0
+      sca2 = 0.0
+      goto 10
    endif
    npp_aux = npp/365.0       !transform (KgC/m2/yr) in (KgC/m2/day)
    scl2_128 = scl1 + (aleaf(pft) * npp_aux) -(scl1 /(tleaf(pft)*365.0))
@@ -1493,24 +1595,67 @@ subroutine runoff (wa,roff)
    scl2 = real(scl2_128,4)
    
    
-   if(scl2 .lt. 0.0) scl2 = 0.0
-   if(scf2 .lt. 0.0) scf2 = 0.0
-   if(sca2 .lt. 0.0) sca2 = 0.0
+   if(scl2_128 .lt. 1e-12) scl2 = 0.0
+   if(scf2_128 .lt. 1e-12) scf2 = 0.0
+   if(sca2_128 .lt. 1e-12) sca2 = 0.0
    
 10 continue
    return
  end subroutine allocation
  
 
- 
- !     ==============================================================     
- subroutine pft_par(par, dt) !!!!!!!!!  mudamos os valores de dt
-   implicit none
+!=================================================================
+!=================================================================
 
-   integer,parameter :: i4 = kind(0)
-   integer,parameter :: r4 = kind(0.0)
+
+
+!=================================================================
+!=================================================================
+ 
+ !     ==============================================================
+ ! new version
+!!$ subroutine pft_par(par, dt)
+!!$   use global_pars
+!!$   implicit none
+!!$    
+!!$   integer(kind=i4),intent(in) :: par            ! parameter number 
+!!$   real(kind=r4), dimension(npls),intent(out) :: dt
+!!$   
+!!$   !     dt1 = aleaf
+!!$   !     dt2 = aawood
+!!$   !     dt3 = afroot
+!!$   !     dt4 = tleaf
+!!$   !     dt5 = tawood
+!!$   !     dt6 = tfroot
+!!$   !     dt7 = g1
+!!$   !     dt8 = p21
+!!$   !     DT9 = JMAX
+!!$   
+!!$   open(233,file='../inputs/pls.bin',status='old',
+!!$   &    form='unformatted',access='direct',recl=4*npls)
+!!$   
+!!$   if(par .gt. 0 .and. par .lt. 10) then
+!!$      read(233,rec=par) dt
+!!$   else
+!!$      print*, 'search failed'
+!!$   endif
+!!$   close(233)
+!!$   return
+!!$ end subroutine pft_par
+!=================================================================
+!=================================================================
+
+
+
+!=================================================================
+!=================================================================
+ 
+ 
+ subroutine pft_par(par, dt) !!!!!!!!!  mudamos os valores de dt
+   use global_pars
+   implicit none
    
-   integer(kind=i4),parameter :: vars = 12
+   integer(kind=i4),parameter :: vars = npls
    
    !     input
    integer(kind=i4),intent(in) :: par            ! parameter number 
@@ -1543,17 +1688,17 @@ subroutine runoff (wa,roff)
    !    11 = Boreal Evergreen Tree  
    !    12 = Boreal Deciduous Tree
    
-   !     PFT       1       2       3       4       5       6       7      8       9       10      11      12      
-   data dt1/3.77,   4.15,   2.98,   7.18,   6.5,    3.37,   4.64,   7.4,    4.6,    3.92,   1.5,    2.72/ !g1  
-   data dt2/5.9E-5, 3.4E-5, 3.2E-5, 6.8E-5, 8.1E-5, 5.1E-5, 3.3E-5, 9.1E-5, 3.1E-5, 4.4E-5, 4.2E-5, 4.0E-5/  !p21
-   data dt3/0.40,   0.45,   0.37,   0.35,   0.45,   0.40,   0.45,   0.45,   0.40,   0.40,   0.40,   0.35/ !aleaf 
-   data dt4/0.30,   0.30,   0.20,   0.25,   0.0,    0.30,   0.35,   0.00,   0.20,   0.20,   0.30,   0.35/ !aawood
-   data dt5/0.30,   0.25,   0.43,   0.40,   0.55,   0.30,   0.20,   0.55,   0.40,   0.40,   0.30,   0.30/ !afroot
-   data dt6/2.0,    1.0,    1.0,    1.0,    1.0,    3.0,    1.0,    1.0,    1.0,    5.0,    8.0,    2.0/  !tleaf
-   data dt7/70.0,   50.0,   40.0,   30.0,   0.0,    50.0,   50.0,   0.0,    35.0,   35.0,   50.0,   50.0/ !tawood
-   data dt8/3.0,    3.0,    3.5,    3.0,    3.0,    3.5,    3.5,    3.5,    3.5,    3.5,    3.5,    3.5/  !tfroot
    
-   
+   !PFT       1       2       3       4       5       6       7      8       9       10      11      12      
+   data dt1/3.77,   4.15,   2.98,   7.18,   4.5,    3.37,   4.64,   4.4,    4.6,    3.92,   1.5,    2.72/   !g1
+   data dt2/5.9E-5, 3.4E-5, 3.2E-5, 6.8E-5, 3.1E-5, 5.1E-5, 3.3E-5, 3.1E-5, 3.1E-5, 4.4E-5, 4.2E-5, 4.0E-5/ !p21
+   data dt3/0.30,   0.35,   0.35,   0.30,   0.45,   0.30,   0.35,   0.45,   0.35,   0.40,   0.30,   0.35/   !aleaf
+   data dt4/0.35,   0.35,   0.20,   0.25,   0.0,    0.35,   0.40,   0.00,   0.20,   0.20,   0.40,   0.35/   !aawood
+   data dt5/0.35,   0.30,   0.45,   0.45,   0.55,   0.35,   0.25,   0.55,   0.45,   0.40,   0.30,   0.30/   !afroot
+   data dt6/2.0,    1.0,    1.0,    2.0,    2.0,    3.0,    1.0,    2.0,    1.0,    3.0,    3.0,    1.0/    !tleaf
+   data dt7/30.0,   30.0,   20.0,   20.0,   0.0,    50.0,   50.0,   0.0,    35.0,   35.0,   50.0,   50.0/   !tawood
+   data dt8/3.0,    3.0,    3.5,    3.0,    3.0,    3.5,    3.5,    3.5,    3.5,    3.5,    3.5,    3.5/    !tfroot
+
    if(par .eq. 1 ) then      ! g1
       dt(:) = dt1(:)
    else if(par .eq. 2) then  ! p21
@@ -1576,16 +1721,21 @@ subroutine runoff (wa,roff)
    
    return
  end subroutine pft_par
+!=================================================================
+!=================================================================
+
+
+
+!=================================================================
+!=================================================================
  
  !c     ==================================================
  subroutine spinup(nppot,cleafini,cfrootini,cawoodini)
-   !c     &     cbwoodini,cstoini,cotherini,crepini) 
+   !c     &     cbwoodini,cstoini,cotherini,crepini)
+   use global_pars
    IMPLICIT NONE
-   integer,parameter :: i4 = kind(0)
-   integer,parameter :: r4 = kind(0.0)
-   integer,parameter :: r8 = kind(0.0D0)
    
-   integer(kind=i4),parameter :: npfts = 12
+   integer(kind=i4),parameter :: npfts = npls
    integer(kind=i4),parameter :: nt=30000
    
    !   c     inputs
@@ -1619,7 +1769,7 @@ subroutine runoff (wa,roff)
    call pft_par(6, tfroot)
    
    
-   sensitivity = 1.001
+   sensitivity = 1.01
    if(nppot .lt. 0.0) goto 200
    do i6=1,npfts
       do k=1,nt

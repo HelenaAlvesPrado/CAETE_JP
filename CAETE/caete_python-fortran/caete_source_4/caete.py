@@ -175,11 +175,11 @@ class gridcell:
     def run_model(self):
 
         if self.filled and not self.complete:
-            leaf, root, wood = C.spinup(self.npp0)
+            self.clin, self.cfin, self.cwin = C.spinup(self.npp0)
 
 #           prec,temp,p0,ca,par, cleaf_ini, cawood_ini, cfroot_ini
             outputs = C.wbm(self.pr, self.tas, self.ps, self.ca, self.rsds,
-                            self.rhs,leaf, wood, root)
+                            self.rhs,self.clin, self.cfin, self.cwin)
 
             
 # subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
