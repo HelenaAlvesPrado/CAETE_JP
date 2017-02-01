@@ -266,6 +266,8 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      endif
   endif
   goto 10
+  ! continue 100 goes here for pft check
+  100 continue !mudar para linha 245 para incluir pft check
                
   !     PFTs equilibrium check
   !     ==================================================
@@ -277,7 +279,8 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      biomass0 = 0.0
      check = .false.
      sensi = 1.0! (kg/m2/y) if biomas change .le. sensi: equilibrium
-     ! brienen et al. 2015 mean biomass change in Amazon forest - 1995 
+     ! brienen et al. 2015 mean biomass change in Amazon forest - 1995 - 1.0 Mg/ha/y
+     ! here I'm using a larger value (10 Mg/ha/y) 
      call pft_par(4,wood)
      
      do p = 1,q
@@ -315,7 +318,7 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
         continue
      endif
   endif
-100 continue !mudar para linha 245 para incluir pft check
+! continue 100 goes here to exclude pft_check
   return
   
 end subroutine wbm
@@ -1000,10 +1003,10 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   f4sun = ((1.0-(exp(-p26*sunlai)))/p26) !sun 90 degrees
   f4shade = ((1.0-(exp(-p27*shadelai)))/p27) !sun ~20 degrees
   
-  laia  = real(laia64,4) ! real((f4sun + f4shade), 4) ! pra mim faz sentido que a laia final seja
+  laia  =  real((f4sun + f4shade), 4) !real(laia64,4) ! pra mim faz sentido que a laia final seja
   ! a soma da lai em nivel de dossel (sun + shade) - jp
   !     Canopy gross photosynthesis (kgC/m2/yr)
-  !     =======================================
+  !     =======================================x
   !     (0.012 converts molCO2 to kgC)
   !     (31557600 converts seconds to year [with 365.25 days])
   ph64 = 0.012*31557600.0*f1*f4sun*f4shade
@@ -1515,14 +1518,14 @@ subroutine runoff (wa,roff)
    !c     
    !c     
    !c     initialization
-   if((scl1 .lt. 1e-12) .or. (scf1 .lt. 1e-12)) then
-      IF(NPP .lt. 1e-12) THEN
-         scl2 = 0.0
-         scf2 = 0.0
-         sca2 = 0.0 
-         goto 10
-      ENDIF
-   endif
+!   if((scl1 .lt. 1e-12) .or. (scf1 .lt. 1e-12)) then
+!      IF(NPP .lt. 1e-12) THEN
+!         scl2 = 0.0
+!         scf2 = 0.0
+!         sca2 = 0.0 
+!         goto 10
+!      ENDIF
+!   endif
    npp_aux = npp/365.0       !transform (KgC/m2/yr) in (KgC/m2/day)
    scl2_128 = scl1 + (aleaf(pft) * npp_aux) -(scl1 /(tleaf(pft)*365.0))
    scf2_128 = scf1 +(afroot(pft) * npp_aux)-(scf1 /(tfroot(pft)*365.0))
@@ -1541,7 +1544,7 @@ subroutine runoff (wa,roff)
    if(scf2 .lt. 0.0) scf2 = 0.0
    if(sca2 .lt. 0.0) sca2 = 0.0
    
-10 continue
+!10 continue
    return
  end subroutine allocation
  

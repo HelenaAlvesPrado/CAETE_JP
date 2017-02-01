@@ -324,41 +324,41 @@ program env
   enddo
 !$OMP END PARALLEL DO 
 
-        open(10,file='../spinup/gridcell_ocp.bin',&
-     &    status='unknown',form='unformatted',&
-     &    access='direct',recl=4*nx*ny)
-      call savex(10, grd_ocp, q)
-      
-      open(10,file='../spinup/cleaf.bin',&
-     &    status='unknown',form='unformatted',&
-     &    access='direct',recl=4*nx*ny)
-      call savex(10, cleaf_pft, q)
-      
-      open(10,file='../spinup/cawood.bin',&
-     &    status='unknown',form='unformatted',&
-     &    access='direct',recl=4*nx*ny)
-      call savex(10,cawood_pft,q)
-      
-      open(10,file='../spinup/cfroot.bin',&
-     &    status='unknown',form='unformatted',&
-     &    access='direct',recl=4*nx*ny)
-      call savex(10, cfroot_pft,q)
-          
-      open(10,file='../spinup/clini.bin',&
-     &    status='unknown',form='unformatted',&
-     &    access='direct',recl=4*nx*ny)
-      call savex(10, clini, q)
-      
-      open(10,file='../spinup/cwini.bin',&
-     &    status='unknown',form='unformatted',&
-     &    access='direct',recl=4*nx*ny)
-      call savex(10,cwini,q)
-      
-      open(10,file='../spinup/cfini.bin',&
-     &    status='unknown',form='unformatted',&
-     &    access='direct',recl=4*nx*ny)
-      call savex(10, cfini,q)
-
+  open(10,file='../spinup/gridcell_ocp.bin',&
+       &    status='unknown',form='unformatted',&
+       &    access='direct',recl=4*nx*ny)
+  call savex(10, grd_ocp, q)
+  
+  open(10,file='../spinup/cleaf.bin',&
+       &    status='unknown',form='unformatted',&
+       &    access='direct',recl=4*nx*ny)
+  call savex(10, clfim, q)
+  
+  open(10,file='../spinup/cawood.bin',&
+       &    status='unknown',form='unformatted',&
+       &    access='direct',recl=4*nx*ny)
+  call savex(10,cwfim,q)
+  
+  open(10,file='../spinup/cfroot.bin',&
+       &    status='unknown',form='unformatted',&
+       &    access='direct',recl=4*nx*ny)
+  call savex(10, cffim,q)
+  
+  open(10,file='../spinup/clini.bin',&
+       &    status='unknown',form='unformatted',&
+       &    access='direct',recl=4*nx*ny)
+  call savex(10, clini, q)
+  
+  open(10,file='../spinup/cwini.bin',&
+       &    status='unknown',form='unformatted',&
+       &    access='direct',recl=4*nx*ny)
+  call savex(10,cwini,q)
+  
+  open(10,file='../spinup/cfini.bin',&
+       &    status='unknown',form='unformatted',&
+       &    access='direct',recl=4*nx*ny)
+  call savex(10, cfini,q)
+  
   
   do i = 1,nx
      do j = 1,ny
