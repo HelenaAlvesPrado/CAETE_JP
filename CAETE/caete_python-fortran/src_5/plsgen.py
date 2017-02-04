@@ -72,9 +72,11 @@ def table_gen(N = n):
 
     
     else:
-        grassN = round(N * g2w_ratio)
+        grassN = math.ceil(N * g2w_ratio)
         woodN = N - grassN
-    
+
+    grassN = int(grassN)
+    woodN = int(woodN)
 
     plsa_wood = np.array(plsa_wood,np.float32)
     plsa_grass = np.array(plsa_grass,np.float32)

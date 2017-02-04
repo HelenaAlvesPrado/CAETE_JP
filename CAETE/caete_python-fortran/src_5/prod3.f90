@@ -38,8 +38,8 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
   real(kind=r4),intent(out) :: clit_pft (nt,q) !Monthly litter carbon
   real(kind=r4),intent(out) :: csoil_pft(nt,q) !Monthly soil carbon
   real(kind=r4),intent(out) :: hresp_pft(nt,q) !Monthly het resp  (kgC/m2)
-  real(kind=r4),intent(out) :: rcm_pft  (nt,q) 
-
+  real(kind=r4),intent(out) :: rcm_pft  (nt,q)
+  
   real(kind=r4),intent(out) :: emaxm    (nt) !Max.evapotranspiration (kg m-2 day-1)
   real(kind=r4),intent(out) :: runom_pft(nt,q) !Runoff 
   real(kind=r4),intent(out) :: evapm_pft(nt,q) !Actual evapotranspiration        
@@ -160,12 +160,12 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
   k = mod(n,12)
   if (k.eq.0) k = 12
   mes = k
-  spre = p0(k) * 0.01 ! transforamando de Pascal pra mbar (hPa)
+  spre = p0(k) * 0.01  ! transforamando de Pascal pra mbar (hPa)
   td = tsoil(k)
   ta = temp(k)
   pr = prec(k)
-  ipar = par(k)
-  ru = rhs(k)
+  ipar = par(k) / 2.18E5
+  ru = rhs(k) /100.
   ae = 2.895*ta+52.326 !Available energy (W/m2) - From NCEP-NCAR reanalysis data
 !     
 !     Monthly water budget
@@ -200,8 +200,8 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
        &,rmes,emes,epmes,phmes,armes,nppmes,laimes,clmes,csmes,hrmes&
        &,rcmes,rmmes,rgmes,cleafmes,cawoodmes,cfrootmes, gridocpmes)
 
+  emaxm(k) = epmes
   do p=1,q
-     if(p .eq. 1) emaxm(k) = epmes
      gsoil    (k,p) = gfim(p)
      ssoil    (k,p) = sfim(p)
      wsoil_pft(k,p) = wfim(p)
@@ -218,7 +218,7 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      hresp_pft(k,p) = hrmes(p)
      rm_pft   (k,p) = rmmes(p)
      rg_pft   (k,p) = rgmes(p)
-                  
+     
      wini(p) = wfim(p)
      gini(p) = gfim(p)
      sini(p) = sfim(p)
@@ -234,18 +234,18 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
         grid_area (p) = gridocpmes(p)
      endif
   enddo
-               
-!     Check if equilibrium is attained
-!     --------------------------------
+  
+  !     Check if equilibrium is attained
+  !     --------------------------------
   if (k.eq.12) then
      wsoilt(k) = 0.0
      gsoilt(k) = 0.0
-
+     
      do p = 1,q
         wsoilt(k) = wsoilt(k) + wsoil_pft(k,p)
         gsoilt(k) = gsoilt(k) + gsoil(k,p)
      enddo
-                  
+     
      wmax = 500.
      nerro = 0
      
@@ -266,8 +266,6 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
   endif
   goto 10
   ! continue 100 goes here for pft check
-  100 continue
-               
   !     PFTs equilibrium check
   !     ==================================================
   !     tentativa 1 - usando variacao no pool de C vegetal
@@ -326,7 +324,8 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
         continue
      endif
   endif
-! continue 100 goes here to exclude pft_check
+  ! continue 100 goes here to exclude pft_check
+100 continue
   return
   
 end subroutine wbm
@@ -972,11 +971,11 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
    pt = csru*(cf1*1000.)*wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
    alfm = 1.391
    gm = 3.26 * 86400.           !(*86400 transform s/mm to dia/mm)    
-   if(rc .gt. 0.001) then
+   if(rc .gt. 100) then
       gc = rc * 1.15741e-08 ! transfor s/m  to dia/mm)  !testamos, nao muda nada! Bia vai rever
       gc = (1./gc)  ! molCO2/mm2/dia
    else
-      gc =  1.0/0.001 ! BIANCA E HELENA - Mudei este esquema..   
+      gc =  1.0/(100. * 1.15741e-08) ! BIANCA E HELENA - Mudei este esquema..   
    endif                     ! tentem entender o algoritmo
 !!$c                                ! e tenham certeza que faz sentido ecologico
    d =(emax*alfm)/(1. + gm/gc) !(based in Gerten et al. 2004)
@@ -990,12 +989,12 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
       f5_64 = wa  ! eu acrescentei esta parte caso d seja igual a zero
   endif          ! nao sei se faz sentido!
 !!$
-      f5 = real(f5_64,4) !esta funcao transforma o f5 (double precision)
-!     em real (32 bits) 
-      
-!     Photosysthesis minimum and maximum temperature
-!     ----------------------------------------------
-      
+  f5 = real(f5_64,4) !esta funcao transforma o f5 (double precision)
+  !     em real (32 bits) 
+  
+  !     Photosysthesis minimum and maximum temperature
+  !     ----------------------------------------------
+  
   if ((temp.ge.-10.0).and.(temp.le.50.0)) then
      f1 = f1a * real(f5_64,kind=r8) !f5:water stress factor-- Notem que aqui a tranformacao eh de 128 pra 64 bits
   else
@@ -1004,7 +1003,7 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   
   !     Leaf area index (m2/m2)
   leaf_t_months = tleaf(pft)*12. ! turnover time in months
-  leaf_t_coeff = leaf_t_months/100. !1 - 100 months == ~ 1/12 to 8.3 years (TRY-kattge et al. 2011; Jedi-Pavlick 2012)
+  leaf_t_coeff = leaf_t_months/90. !1 - 100 months == ~ 1/12 to 8.3 years (TRY-kattge et al. 2011; Jedi-Pavlick 2012)
   !  c      if(leaf_t_months .gt. 0) print*, leaf_t_months, leaf_t_coeff, pft
   if (leaf_t_coeff .gt. 1.) leaf_t_coeff = 1. 
   leaf_turnover =  (365.0/12.0) * (10. **(2.0*leaf_t_coeff))
@@ -1035,7 +1034,7 @@ subroutine productivity1 (pft,ocp_pft,ligth_limit,temp,p0,w,&
   f4sun = ((1.0-(exp(-p26*sunlai)))/p26) !sun 90 degrees
   f4shade = ((1.0-(exp(-p27*shadelai)))/p27) !sun ~20 degrees
   
-  laia  =  real((f4sun + f4shade), 4) !real(laia64,4) ! pra mim faz sentido que a laia final seja
+  laia  =  real(laia64,4) !real((f4sun + f4shade), 4) ! pra mim faz sentido que a laia final seja
   ! a soma da lai em nivel de dossel (sun + shade) - jp
   !     Canopy gross photosynthesis (kgC/m2/yr)
   !     =======================================x
@@ -1157,8 +1156,8 @@ subroutine canopy_resistence(pft,vpd_in,f1_in,rc2_in)
   f1b = (f1_in*10e5)        ! Helena - Mudei algumas coisas aqui
   aa = (f1b/363.)           ! Entenda o algoritmo e tenha certeza de que  
   g0 = 0.01                 ! condiz com a realidade esperada =)
-  rcmax = 553.000
-  rcmin = 100.000
+  rcmax = 700.000
+  rcmin = 10.000
   
   if(f1_in .le. 0.0) then 
      rc2_in = rcmax
@@ -1171,7 +1170,7 @@ subroutine canopy_resistence(pft,vpd_in,f1_in,rc2_in)
      goto 110
   endif
 10 continue
-  if (vpd_in .gt. 0.95) then
+  if (vpd_in .gt. 1.05) then
      rc2_in = rcmax
      goto 110
   else
@@ -1372,6 +1371,11 @@ SUBROUTINE PFT_AREA_FRAC(CLEAF, CFROOT, CAWOOD, OCP_COEFFS, OCP_WOOD)
      OCP_WOOD(I) = .TRUE.
   ENDIF
   
+  DO P = 1,NPFT
+     IF(OCP_COEFFS(P) .LT. 1E-6) OCP_COEFFS(P) = 0.0
+  ENDDO
+
+  
   RETURN
 END SUBROUTINE PFT_AREA_FRAC
 !=================================================================
@@ -1424,8 +1428,8 @@ subroutine penman (spre,temp,ur,rn,rc2,evap)
   call tetens (temp,es)
   delta_e = es*(1. - ur)    !mbar
   
-  if ((delta_e.ge.(1./h5)-0.5).or.(rc2.ge.550.0)) evap = 0.
-  if ((delta_e.lt.(1./h5)-0.5).or.(rc2.lt.550.0)) then
+  if ((delta_e.ge.(1./h5)-0.5).or.(rc2.ge.700.0)) evap = 0.
+  if ((delta_e.lt.(1./h5)-0.5).or.(rc2.lt.700.0)) then
      !     Gama and gama2
      !     --------------
      gama  = spre*(1004.)/(2.45e6*0.622)
@@ -1469,7 +1473,7 @@ subroutine evpot2 (spre,temp,ur,rn,evap)
   real(kind=r4) :: gama, gama2, rc, rcmin
 
   ra      = 100.            !s/m
-  rcmin   = 100.            !s/m
+  rcmin   = 10.            !s/m
   !     
   !     Delta
   !     -----
@@ -1611,7 +1615,7 @@ subroutine runoff (wa,roff)
    !c     
    !c     
    !c     initialization
-   if(((scl1 .lt. 1e-12) .or. (scf1 .lt. 1e-12)) .and. (sca1 .gt. 0.0)) then
+   if(((scl1 .lt. 1e-5) .or. (scf1 .lt. 1e-5))) then
       bio_litter = scl1 + scf1 + sca1
       scl2 = 0.0
       scf2 = 0.0
