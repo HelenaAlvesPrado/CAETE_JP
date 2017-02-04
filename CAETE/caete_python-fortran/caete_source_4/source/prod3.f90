@@ -277,7 +277,7 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      biomass = 0.0
      biomass0 = 0.0
      check = .false.
-     sensi = 2.0! (kg/m2/y) if biomas change .le. sensi: equilibrium
+     sensi = 0.2! (kg/m2/y) if biomas change .le. sensi: equilibrium
      ! brienen et al. 2015 mean biomass change in Amazon forest - 1995 - 1.0 Mg/ha/y
      ! here I'm using a larger value (20 Mg/ha/y) 
      call pft_par(4,wood)
