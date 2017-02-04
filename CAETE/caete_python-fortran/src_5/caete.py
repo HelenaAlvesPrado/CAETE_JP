@@ -181,15 +181,14 @@ class gridcell:
         if self.filled and not self.complete:
             self.clin, self.cfin, self.cwin = C.spinup(self.npp0)
 
-#           prec,temp,p0,ca,par, cleaf_ini, cawood_ini, cfroot_ini
             outputs = C.wbm(self.pr, self.tas, self.ps, self.ca, self.rsds,
-                            self.rhs,self.clin, self.cfin, self.cwin)
+                            self.rhs, self.clin, self.cwin, self.cfin)
 
-            
 # subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
 #      &,cfroot_ini,emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft&
 #      &,clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,evapm_pft&
 #      &,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft,grid_area)
+              
   
             self.emaxm  = outputs[0]
             self.tsoil  = outputs[1]
