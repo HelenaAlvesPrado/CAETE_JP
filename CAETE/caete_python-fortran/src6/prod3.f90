@@ -13,7 +13,7 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
   integer(kind=i4),parameter :: nt = ntimes ! (meses) ! modelo estac. --
 
   
-  !     --------------------------I N P U T S----------------------------
+  !c     --------------------------I N P U T S----------------------------
   real(kind=r4),intent(in) :: ca                   !CO2 atmospheric concentration (ppmv)
   real(kind=r4),intent(in) :: p0(nt)         !Atmospheric pressure (mb)
   real(kind=r4),intent(in) :: prec(nt)       !Precipitation (mm/month)
@@ -22,13 +22,13 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
   real(kind=r4),intent(in) :: rhs(nt)        !Relative humidity
   
   real(kind=r4),intent(in) ::  cleaf_ini(q)  ! Initial carbon content in leaves (kg m-2)
-  real(kind=r4),intent(in) :: cawood_ini(q)  ! Initial carbon content in aboveground wood (kg m-2)
-  real(kind=r4),intent(in) :: cfroot_ini(q)  ! Initial carbon content in fineroots (kg m-2)
-  !     -----------------------------E N D-------------------------------
+  real(kind=r4),intent(in) :: cawood_ini(q) ! Initial carbon content in aboveground wood (kg m-2)
+  real(kind=r4),intent(in) :: cfroot_ini(q) ! Initial carbon content in fineroots (kg m-2)
+  !C     -----------------------------E N D-------------------------------
       
-  !     -------------------------O U T P U T S---------------------------
+  !c     -------------------------O U T P U T S---------------------------
        
-  real(kind=r4),intent(out) :: tsoil(nt)       !soil temperature
+  real(kind=r4),intent(out) :: tsoil(nt)     !soil temperature
   
   real(kind=r4),intent(out) :: photo_pft(nt,q) !Monthly photosynthesis   (kgC m-2)
   real(kind=r4),intent(out) :: aresp_pft(nt,q) !Monthly autotrophic res  (kgC m-2)

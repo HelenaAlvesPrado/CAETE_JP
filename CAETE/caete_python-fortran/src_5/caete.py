@@ -1,11 +1,13 @@
 # "CAETE module"
-#-*-coding:utf-8-*- 
+#-*-coding:utf-8-*-
 
-# author: jpdarela
+__author__ = "https://github.com/jpdarela/"
+
 import os
 import glob
+
 import numpy as np
-from netCDF4 import Dataset as dt
+
 import carbon as C
 import plsgen as pls
 
@@ -47,7 +49,7 @@ class datasets:
     def __init__(self, files_dir):
         
         try:    
-            self.files = sorted(glob.glob1(files_dir, '*.nc'))
+            self.files = sorted(glob.glob1(files_dir, '*.bin'))
             self.NotWork = False
         except:
             self.files = None
@@ -64,7 +66,7 @@ class datasets:
 
 
         if (type(var) == type('str')) and (self.files is not None) and (len(self.files) > 0):
-            fname = [filename for filename in self.files if var == filename.split('_')[0]]
+            fname = [filename for filename in self.files if var == filename.split('.')[0]]
         else:
             self.NotWork = True
             return None
@@ -77,27 +79,18 @@ class datasets:
             return None
         
         try:
-            dataset = dt(fname_comp, 'r')  
+            t1 = (fname_comp,720,360,32)
+            lr = catch_nt(*t1)
+            t2 = (fname_comp,lr,720,360)
+            dataset = catch_data(*t2)
         except IOError:
             print('Cannot open %s file' % var)
             self.NotWork = True
             return None
-            
         else:
-            # data, time, units & etc.
-            calendar = dataset.variables['time'].calendar
-            time_units = dataset.variables['time'].units
-            time_arr = dataset.variables['time'][:]
+            pass
 
-            data_units = dataset.variables[var].units
-            var_longname = dataset.variables[var].long_name
-
-            self.metadata[var] = (calendar, time_units, time_arr, data_units, var_longname)
-            
-            dados = dataset.variables[var][:,:,:]
-            dataset.close()
-
-        return np.fliplr(np.array(dados))
+        return dataset #np.fliplr(np.array(dataset))
 
     def check_dataset(self):
         if self.NotWork:

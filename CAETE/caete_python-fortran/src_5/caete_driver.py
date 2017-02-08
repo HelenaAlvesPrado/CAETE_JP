@@ -4,7 +4,7 @@ from caete import *
 import time
 
 mask = np.load('mask.npy')
-loops = int((mask.shape[0] * mask.shape[1]) - np.sum(mask))
+#loops = int((mask.shape[0] * mask.shape[1]) - np.sum(mask))
 
 # rodando o modelo para todas (land) as celulas do grid
 land_data = dict()
@@ -15,8 +15,8 @@ manaus_landgrid_id = 0
 print('iniciando aplicação do modelo', end='---> ')
 print(time.ctime())
 
-for Y in range(mask.shape[0]):
-    for X in range(mask.shape[1]):
+for Y in range(176,178):
+    for X in range(239,241):
         if not mask[Y][X]:
             dict_key = id_su + str(id_n)
             grd_cell = gridcell(X, Y, dict_key)

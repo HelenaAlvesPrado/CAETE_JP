@@ -114,22 +114,22 @@ program env
   open( 9,file='../inputs/lsmk.bin',status='old',form='unformatted'&
        &,access='direct',recl=4*nx*ny)
 
-  open(10,file='../inputs/ps.bin',status='old',form='unformatted'&
+  open(10,file='./inputs/ps.bin',status='old',form='unformatted'&
        &,access='direct',recl=4*nx*ny)
 
-  open(11,file='../inputs/pr.bin',status='old',form='unformatted'&
+  open(11,file='./inputs/pr.bin',status='old',form='unformatted'&
        &,access='direct',recl=4*nx*ny)
       
-  open(12,file='../inputs/tas.bin',status='old',form='unformatted'&
+  open(12,file='./inputs/tas.bin',status='old',form='unformatted'&
        &,access='direct',recl=4*nx*ny)
       
-  open(13,file='../inputs/rsds.bin',status='old',form='unformatted'&
+  open(13,file='./inputs/rsds.bin',status='old',form='unformatted'&
        &,access='direct',recl=4*nx*ny)
 
-  open(14,file='../inputs/hurs.bin',status='old',form='unformatted'&
+  open(14,file='./inputs/hurs.bin',status='old',form='unformatted'&
        &,access='direct',recl=4*nx*ny)
 
-  open(26,file='../inputs/npp.bin',status='old',form='unformatted'&
+  open(26,file='./inputs/npp.bin',status='old',form='unformatted'&
        &,access='direct',recl=4*nx*ny)
 
   !     Read data
@@ -276,8 +276,8 @@ program env
                  cfroot_pft(p)   = 0.0
                  gridcell_ocp(p) = 0.0
               enddo
-              rhs (k) = rhaux(i,j,k) / 100. 
-              par (k) = ipar  (i,j,k)/2.18E5 !Converting to Ein/m2/s
+              rhs (k) = rhaux(i,j,k) 
+              par (k) = ipar  (i,j,k)
               temp(k) = t     (i,j,k) 
               p0  (k) = ps    (i,j,k) 
               prec(k) = pr    (i,j,k) 
@@ -323,37 +323,37 @@ program env
   enddo
 !$OMP END PARALLEL DO 
 
-  open(10,file='../spinup/gridcell_ocp.bin',&
+  open(10,file='./spinup/gridcell_ocp.bin',&
        &    status='unknown',form='unformatted',&
        &    access='direct',recl=4*nx*ny)
   call savex(10, grd_ocp, q)
   
-  open(10,file='../spinup/cleaf.bin',&
+  open(10,file='./spinup/cleaf.bin',&
        &    status='unknown',form='unformatted',&
        &    access='direct',recl=4*nx*ny)
   call savex(10, clfim, q)
   
-  open(10,file='../spinup/cawood.bin',&
+  open(10,file='./spinup/cawood.bin',&
        &    status='unknown',form='unformatted',&
        &    access='direct',recl=4*nx*ny)
   call savex(10,cwfim,q)
   
-  open(10,file='../spinup/cfroot.bin',&
+  open(10,file='./spinup/cfroot.bin',&
        &    status='unknown',form='unformatted',&
        &    access='direct',recl=4*nx*ny)
   call savex(10, cffim,q)
   
-  open(10,file='../spinup/clini.bin',&
+  open(10,file='./spinup/clini.bin',&
        &    status='unknown',form='unformatted',&
        &    access='direct',recl=4*nx*ny)
   call savex(10, clini, q)
   
-  open(10,file='../spinup/cwini.bin',&
+  open(10,file='./spinup/cwini.bin',&
        &    status='unknown',form='unformatted',&
        &    access='direct',recl=4*nx*ny)
   call savex(10,cwini,q)
   
-  open(10,file='../spinup/cfini.bin',&
+  open(10,file='./spinup/cfini.bin',&
        &    status='unknown',form='unformatted',&
        &    access='direct',recl=4*nx*ny)
   call savex(10, cfini,q)
@@ -391,7 +391,7 @@ program env
      enddo
   enddo
   
-  open(50,file='../outputs/ambientais.bin',&
+  open(50,file='./outputs/ambientais.bin',&
        &        status='unknown',form='unformatted',&
        &        access='direct',recl=4*nx*ny)
   write(50,rec=1) ave_npp
@@ -469,5 +469,7 @@ program env
 !!$  call save_file12(10, rg)
 
   stop
+contains
+  
 end program env
     
