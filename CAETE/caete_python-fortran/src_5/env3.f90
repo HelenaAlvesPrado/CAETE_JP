@@ -111,7 +111,7 @@ program env
   
   !     Open INPUT files
   !     ==========
-  open( 9,file='../inputs/lsmk.bin',status='old',form='unformatted'&
+  open( 9,file='./inputs/lsmk.bin',status='old',form='unformatted'&
        &,access='direct',recl=4*nx*ny)
 
   open(10,file='./inputs/ps.bin',status='old',form='unformatted'&
@@ -282,7 +282,7 @@ program env
               p0  (k) = ps    (i,j,k) 
               prec(k) = pr    (i,j,k) 
            enddo
-           
+           print*, 'calling wbm:', i,j
            call wbm (prec,temp,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,&
                 &    emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,&
                 &    clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,&
