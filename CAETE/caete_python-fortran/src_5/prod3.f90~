@@ -249,7 +249,6 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
   endif
   goto 10
   ! continue 100 goes here for pft check
-
                
   !     PFTs equilibrium check
   !     ==================================================
