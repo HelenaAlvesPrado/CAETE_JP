@@ -140,7 +140,7 @@ program env
 
   !     Open INPUT files
   !     ==========
-  open( 9,file='../inputs/lsmk.bin',status='old',form='unformatted'&
+  open( 9,file='./inputs/lsmk.bin',status='old',form='unformatted'&
        &,access='direct',recl=4*nx*ny)
 
   open(10,file='./inputs/ps.bin',status='old',form='unformatted'&
