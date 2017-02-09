@@ -251,7 +251,7 @@ program env
 !$omp parallel do
   do i=1,nx
      do j=1,ny
-        if (lsmk1(i,j) == 1) then
+        if (nint(lsmk(i,j)) .eq. 1) then
            ! run spinup
            npp_sca = aux_npp(i,j)
            aux1 = 0.0
