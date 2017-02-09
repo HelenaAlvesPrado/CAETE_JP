@@ -1650,15 +1650,15 @@ subroutine runoff (wa,roff)
    !     dt7 = awood
    !     dt8 = aroot
    
-   open(233,file='pls.bin',status='old',&
+   open(30,file='./pls.bin',status='old',&
         &form='unformatted',access='direct',recl=4*npls)
    
    if(par .gt. 0 .and. par .lt. 10) then
-      read(233,rec=par) dt
+      read(30,rec=par) dt
    else
       print*, 'search failed'
    endif
-   close(233)
+   close(30)
    return
  end subroutine pft_par
  

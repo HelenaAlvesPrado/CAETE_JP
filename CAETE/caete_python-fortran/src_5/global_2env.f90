@@ -5,7 +5,7 @@ module global_pars
   integer,parameter :: r8 = kind(0.0D0)
   integer,parameter :: i1 = selected_int_kind(2)
   integer,parameter :: rbig = selected_real_kind(16,300)
-  integer(kind=i4),parameter :: npls = 12
+  integer(kind=i4),parameter :: npls = 50
   integer(kind=i4),parameter :: ntimes = 12
   integer(kind=i4),parameter :: nx = 720
   integer(kind=i4),parameter :: ny = 360
