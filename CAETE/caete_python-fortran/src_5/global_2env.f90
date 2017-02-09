@@ -3,6 +3,7 @@ module global_pars
   integer,parameter :: i4 = kind(0)
   integer,parameter :: r4 = kind(0.0)
   integer,parameter :: r8 = kind(0.0D0)
+  integer,parameter :: i1 = selected_int_kind(1)
   integer,parameter :: rbig = selected_real_kind(16,300)
   integer(kind=i4),parameter :: npls = 12
   integer(kind=i4),parameter :: ntimes = 12

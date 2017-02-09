@@ -99,64 +99,49 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
 !     ============
 !     
 !     For all grid points
-!     -------------------      
-
-  do p = 1,q   
-     cleaf1_pft (p) =  cleaf_ini(p)
-     cawood1_pft(p) = cawood_ini(p)
-     cfroot1_pft(p) = cfroot_ini(p)
+!     -------------------     
+  cleaf1_pft =  cleaf_ini
+  cawood1_pft = cawood_ini
+  cfroot1_pft = cfroot_ini
      
-     leaf0(p) = cleaf_ini(p)
-     froot0(p) = cfroot_ini(p)
-     awood0(p) = cawood_ini(p)
-     
-     cleaf_pft(p)  = 0.0 ! leaf biomass (KgC/m2)
-     cawood_pft(p) = 0.0 ! aboveground biomass (KgC/m2)
-     cfroot_pft(p) = 0.0 ! fine root biomass (KgC/m2)
-     grid_area(p)  = 0.0 ! gridcell area fraction of pfts(%)
-  enddo
+  leaf0 = cleaf_ini
+  froot0 = cfroot_ini
+  awood0 = cawood_ini
+    
+  cleaf_pft  = 0.0 ! leaf biomass (KgC/m2)
+  cawood_pft = 0.0 ! aboveground biomass (KgC/m2)
+  cfroot_pft = 0.0 ! fine root biomass (KgC/m2)
+  grid_area  = 0.0 ! gridcell area fraction of pfts(%)
   
-  ! c     Write to track program execution     
-  !            if ((mod(j,ny).eq.0).and.(mod(i,10).eq.0))
-  !     &          write(*,*) 'working: ', (real(i)/real(nx))*100.0, '%' 
-          
-!     Initialize variables
-  do k=1,nt
-     wg0  (k) = -1.0 !Soil water content in preceeding year integration
-     emaxm(k) =  0.0 !Maximum evapotranspiration
-     do p=1,q
-        photo_pft(k,p) = 0.0 !Monthly photosynthesis (kgC/m2)
-        aresp_pft(k,p) = 0.0 !Monthly autotrophic respiration (kgC/m2)
-        npp_pft  (k,p) = 0.0 !Monthly net primary productivity (average between PFTs) (kgC/m2)
-        lai_pft  (k,p) = 0.0 !Monthly leaf area index
-        clit_pft (k,p) = 0.0 !Monthly litter carbon
-        csoil_pft(k,p) = 0.0 !Monthly soil carbon
-        hresp_pft(k,p) = 0.0 !Monthly heterotrophic respiration (kgC/m2)
-        rcm_pft  (k,p) = 0.0
-        gsoil    (k,p) = 0.0 !Soil ice
-        ssoil    (k,p) = 0.0 !Soil snow
-        runom_pft(k,p) = 0.0 !Runoff
-        evapm_pft(k,p) = 0.0 !Actual evapotranspiration        
-        wsoil_pft(k,p) = 0.0 !Soil moisture (mm)
-        rm_pft   (k,p) = 0.0
-        rg_pft   (k,p) = 0.0 
-     enddo
-  enddo
-  !     Set some variables
-  !     ------------------
-  do p = 1,q
-     wini(p)  = 0.01  !Soil moisture_initial condition (mm)
-     gini(p)  = 0.0   !Soil ice_initial condition (mm)
-     sini(p)  = 0.0   !Overland snow_initial condition (mm)
-  enddo
+  wg0 = -1.0 !Soil water content in preceeding year integration
+  emaxm =  0.0 !Maximum evapotranspiration
+  photo_pft = 0.0 !Monthly photosynthesis (kgC/m2)
+  aresp_pft = 0.0 !Monthly autotrophic respiration (kgC/m2)
+  npp_pft   = 0.0 !Monthly net primary productivity (average between PFTs) (kgC/m2)
+  lai_pft   = 0.0 !Monthly leaf area index
+  clit_pft  = 0.0 !Monthly litter carbon
+  csoil_pft = 0.0 !Monthly soil carbon
+  hresp_pft = 0.0 !Monthly heterotrophic respiration (kgC/m2)
+  rcm_pft   = 0.0
+  gsoil     = 0.0 !Soil ice
+  ssoil     = 0.0 !Soil snow
+  runom_pft = 0.0 !Runoff
+  evapm_pft = 0.0 !Actual evapotranspiration        
+  wsoil_pft = 0.0 !Soil moisture (mm)
+  rm_pft    = 0.0
+  rg_pft    = 0.0
+
+  wini  = 0.01  !Soil moisture_initial condition (mm)
+  gini  = 0.0   !Soil ice_initial condition (mm)
+  sini  = 0.0   !Overland snow_initial condition (mm)
 
   !     =================
   !     START INTEGRATION
   !     =================
+
   n = 0
 10 continue
-  n = n + 1
-  
+  n = n + 1  
   k = mod(n,12)
   if (k.eq.0) k = 12
   mes = k
@@ -171,28 +156,26 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
 !     Monthly water budget
   !     ====================
   epmes = 0.0  
-  do p=1,q
-     wfim(p) = 0.0
-     gfim(p) = 0.0
-     sfim(p) = 0.0
-     smes(p) = 0.0
-     rmes(p) = 0.0
-     emes(p) = 0.0
-     phmes(p) = 0.0
-     armes(p) = 0.0
-     nppmes(p) = 0.0
-     laimes(p) = 0.0
-     clmes(p) = 0.0
-     csmes(p) = 0.0
-     hrmes(p) = 0.0
-     rcmes(p) = 0.0
-     rmmes(p) = 0.0
-     rgmes(p) = 0.0
-     cleafmes(p) = 0.0
-     cawoodmes(p) = 0.0
-     cfrootmes(p) = 0.0
-     gridocpmes(p) = 0.0
-  enddo
+  wfim = 0.0
+  gfim = 0.0
+  sfim = 0.0
+  smes = 0.0
+  rmes = 0.0
+  emes = 0.0
+  phmes = 0.0
+  armes = 0.0
+  nppmes = 0.0
+  laimes = 0.0
+  clmes = 0.0
+  csmes = 0.0
+  hrmes = 0.0
+  rcmes = 0.0
+  rmmes = 0.0
+  rgmes = 0.0
+  cleafmes = 0.0
+  cawoodmes = 0.0
+  cfrootmes = 0.0
+  gridocpmes = 0.0
   
   
   call budget (mes,wini,gini,sini,td,ta,pr,spre,ae,ca,ipar,ru&
@@ -218,22 +201,22 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
      hresp_pft(k,p) = hrmes(p)
      rm_pft   (k,p) = rmmes(p)
      rg_pft   (k,p) = rgmes(p)
-                  
-     wini(p) = wfim(p)
-     gini(p) = gfim(p)
-     sini(p) = sfim(p)
+  enddo                
+
+  wini = wfim
+  gini = gfim
+  sini = sfim
      
-     cleaf1_pft(p)  = cleafmes(p) 
-     cawood1_pft(p) = cawoodmes(p)
-     cfroot1_pft(p) = cfrootmes(p)
+  cleaf1_pft  = cleafmes 
+  cawood1_pft = cawoodmes
+  cfroot1_pft = cfrootmes
      
-     if(k .eq. 12) then
-        cleaf_pft (p) = cleafmes(p)
-        cawood_pft(p) = cawoodmes(p)
-        cfroot_pft(p) = cfrootmes(p)
-        grid_area (p) = gridocpmes(p)
-     endif
-  enddo
+  if(k .eq. 12) then
+     cleaf_pft  = cleafmes
+     cawood_pft = cawoodmes
+     cfroot_pft = cfrootmes
+     grid_area  = gridocpmes
+  endif
                
 !     Check if equilibrium is attained
 !     --------------------------------
@@ -319,7 +302,6 @@ subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
   endif
   ! continue 100 goes here to exclude pft_check
 100 continue  
-  return
   
 end subroutine wbm
 !=================================================================
@@ -495,32 +477,31 @@ subroutine budget (month,w1,g1,s1,ts,temp,prec,p0,ae,ca,ipar,rh&
   !     ---------------------
   do i=1,ndmonth(month)
      emax  = 0.0
-     do p=1,npft
-        cl1(p) = cl1_pft(p)
-        ca1(p) = ca1_pft(p)
-        cf1(p) = cf1_pft(p)
+     
+     cl1 = cl1_pft
+     ca1 = ca1_pft
+     cf1 = cf1_pft
         
-        beta_leaf(p) = alfa_leaf(p)
-        beta_awood(p) = alfa_awood(p)
-        beta_froot(p) = alfa_froot(p)
+     beta_leaf = alfa_leaf
+     beta_awood = alfa_awood
+     beta_froot = alfa_froot
         
-        nppa(p)  = 0.0
-        ph(p)    = 0.0
-        ar(p)    = 0.0
-        laia(p)  = 0.0
-        f5(p)    = 0.0
-        f1(p)    = 0.0
-        vpd(p)   = 0.0
-        rc2(p)   = 0.0
-        rm(p)    = 0.0
-        rg(p)    = 0.0
-        dl(p) = 0.0        
-        if ((i.eq.1).and.(month.eq.1)) then    
-           beta_leaf(p) = 0.00000001
-           beta_awood(p) = 0.00000001
-           beta_froot(p)= 0.00000001
-        endif
-     enddo
+     nppa  = 0.0
+     ph    = 0.0
+     ar    = 0.0
+     laia  = 0.0
+     f5    = 0.0
+     f1    = 0.0
+     vpd   = 0.0
+     rc2   = 0.0
+     rm    = 0.0
+     rg    = 0.0
+     dl = 0.0        
+     if ((i.eq.1).and.(month.eq.1)) then    
+        beta_leaf = 0.00000001
+        beta_awood = 0.00000001
+        beta_froot = 0.00000001
+     endif
          
      !     Grid cell area fraction (%) ocp_coeffs(pft(1), pft(2), ...,pft(p))
      !     =================================================================     
@@ -1859,7 +1840,6 @@ subroutine runoff (wa,roff)
       enddo                  !nt
    enddo                     ! npfts 
 200 continue
-   return
  end subroutine spinup
  !     ================================
  

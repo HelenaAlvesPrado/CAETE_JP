@@ -107,8 +107,37 @@ program env
   real(kind=r4), dimension(nx,ny,nt) :: rm = 0.0
   real(kind=r4), dimension(nx,ny,nt) :: rg = 0.0
 
- ! initialize arrays  
-  
+
+  integer(kind=i1), dimension(nx,ny,nt) :: lsmk12
+  integer(kind=i1), dimension(nx,ny,q)  :: lsmk_npft
+  integer(kind=i1), dimension(nx,ny)  :: lsmk1
+
+
+  !make a integer mask
+  do i=1,nx
+    do j=1,ny
+          lsmk1(i,j) = nint(lsmk(i,j), kind=i1)
+    enddo
+  enddo
+
+  !make lsmk12  
+  do i=1,nx
+    do j=1,ny
+       do k=1,nt
+          lsmk12(i,j,k) = nint(lsmk(i,j), kind=i1)
+       enddo
+    enddo
+  enddo
+  !make lsmk_npft  
+  do i=1,nx
+    do j=1,ny
+       do k=1,q
+          lsmk_npft(i,j,k) = nint(lsmk(i,j), kind=i1)
+       enddo
+    enddo
+  enddo
+
+
   !     Open INPUT files
   !     ==========
   open( 9,file='../inputs/lsmk.bin',status='old',form='unformatted'&
@@ -134,19 +163,17 @@ program env
 
   !     Read data
   !     =========
-      
   read (9,rec=1) lsmk
-  !c     read (26,rec=1) aux_npp 
-      
+  !c     read (26,rec=1) aux_npp       
   call readx(10,ps,12)
   call readx(11,pr,12)
   call readx(12,t,12)
   call readx(13,ipar,12)
   call readx(14,rhaux,12)
-  call readx(26,npp_pot,12)      
+  call readx(26,npp_pot,12)
+      
   !     Close files
   !     ===========
-  !     
   close( 9)
   close(10)
   close(11)
@@ -155,48 +182,58 @@ program env
   close(14)
   close(26)
 
+   
+  !     Atmospheric CO2 pressure (Pa) !Ppmv / Pa
+  ca= 363/9.901             !Pa (=363 ppmv; 1981-2010)
 
+  where (lsmk12 .eq. 0)
+     ph     = no_data
+     ar     = no_data
+     npp    = no_data
+     lai    = no_data
+     clit   = no_data
+     csoil  = no_data
+     hr     = no_data
+     rcm    = no_data
+     runom  = no_data
+     evaptr = no_data
+     wsoil  = no_data
+     rm     = no_data
+     rg     = no_data
+  elsewhere
+     ph     = 0.0
+     ar     = 0.0
+     npp    = 0.0
+     lai    = 0.0
+     clit   = 0.0
+     csoil  = 0.0
+     hr     = 0.0
+     rcm    = 0.0
+     runom  = 0.0
+     evaptr = 0.0
+     wsoil  = 0.0
+     rm     = 0.0
+     rg     = 0.0
+  end where
 
-! apply mask
-  do i = 1,nx
-     do j = 1,ny
-        do k = 1,nt
-           if(nint(lsmk(i,j)) .eq. 0) then
-              ph(i,j,k) = no_data
-              ar(i,j,k) = no_data
-              npp(i,j,k) = no_data
-              lai(i,j,k) = no_data
-              clit(i,j,k) = no_data
-              csoil(i,j,k) = no_data
-              hr(i,j,k) = no_data
-              rcm(i,j,k) = no_data
-              runom(i,j,k) = no_data
-              evaptr(i,j,k) = no_data
-              wsoil(i,j,k) = no_data
-              rm(i,j,k)  = no_data
-              rg(i,j,k)  = no_data
-           endif
-        enddo
-     enddo
-  enddo
+  where (lsmk_npft .eq. 0)
+     clfim   = no_data
+     cffim   = no_data
+     cwfim   = no_data
+     grd_ocp = no_data
+     clini   = no_data
+     cfini   = no_data
+     cwini   = no_data
+  elsewhere
+     clfim   = 0.0
+     cffim   = 0.0
+     cwfim   = 0.0
+     grd_ocp = 0.0
+     clini   = 0.0
+     cfini   = 0.0
+     cwini   = 0.0
+  end where
 
-  do i = 1,nx
-     do j = 1,ny
-        do p = 1,q
-           if(nint(lsmk(i,j)) .eq. 0) then
-              clfim(i,j,p)   = no_data
-              cffim(i,j,p)   = no_data
-              cwfim(i,j,p)   = no_data
-              grd_ocp(i,j,p) = no_data
-              clini(i,j,p)   = no_data
-              cfini(i,j,p)   = no_data
-              cwini(i,j,p)   = no_data
-           endif
-        enddo
-     enddo
-  enddo
-
-  
   !c     Calculating annual npp
   do i =1,nx
      do j=1,ny
@@ -211,97 +248,46 @@ program env
      enddo
   enddo
 
-  
-  !     Atmospheric CO2 pressure (Pa) !Ppmv / Pa
-  ca= 363/9.901             !Pa (=363 ppmv; 1981-2010)
-
-!$OMP PARALLEL DO SCHEDULE(STATIC),PRIVATE(I,J,K,P),ORDERED,DEFAULT(SHARED) 
+!$omp parallel do
   do i=1,nx
-     if(mod(I,72) .eq. 0) print*, nint(real(i)/real(nx) * 100.)
      do j=1,ny
-        npp_sca = 0.0
-        ! for land grid cells only 
-        if(nint(lsmk(i,j)) .eq. 1) then
-           
-           do k = 1,nt
-              ph(i,j,k) = 0.0
-              ar(i,j,k) = 0.0
-              npp(i,j,k) = 0.0
-              lai(i,j,k) = 0.0
-              clit(i,j,k) = 0.0
-              csoil(i,j,k) = 0.0
-              hr(i,j,k) = 0.0
-              rcm(i,j,k) = 0.0
-              runom(i,j,k) = 0.0
-              evaptr(i,j,k) = 0.0
-              wsoil(i,j,k) = 0.0
-              rm(i,j,k)  = 0.0
-              rg(i,j,k)  = 0.0
-           enddo
-           
+        if (lsmk1(i,j) == 1) then
            ! run spinup
            npp_sca = aux_npp(i,j)
+           aux1 = 0.0
+           aux2 = 0.0
+           aux3 = 0.0   
            
-           do p=1,q   
-              aux1(p) = 0.0
-              aux2(p) = 0.0
-              aux3(p) = 0.0
-           enddo
+           call spinup(npp_sca, aux1, aux2, aux3)  
            
-           call spinup(npp_sca, aux1, aux2, aux3)
+           cleafin  = aux1
+           cfrootin = aux2
+           cawoodin = aux3
+           !     ----end spinup
            
-           do p=1,q
-              cleafin(p)  = aux1(p)
-              cfrootin(p) = aux2(p)
-              cawoodin(p) = aux3(p)
-           enddo
-           !     ------------------------------------------
-           do k=1,nt
-              do p=1,q
-                 photo_pft(k,p)  = 0.0
-                 aresp_pft(k,p)  = 0.0
-                 npp_pft(k,p)    = 0.0
-                 lai_pft(k,p)    = 0.0
-                 clit_pft(k,p)   = 0.0
-                 csoil_pft(k,p)  = 0.0
-                 hresp_pft(k,p)  = 0.0
-                 rcm_pft(k,p)    = 0.0
-                 runom_pft(k,p)  = 0.0
-                 evapm_pft(k,p)  = 0.0
-                 wsoil_pft(k,p)  = 0.0
-                 rm_pft(k,p)     = 0.0
-                 rg_pft(k,p)     = 0.0
-                 cleaf_pft(p)    = 0.0
-                 cawood_pft(p)   = 0.0
-                 cfroot_pft(p)   = 0.0
-                 gridcell_ocp(p) = 0.0
-              enddo
-              rhs (k) = rhaux(i,j,k) 
-              par (k) = ipar  (i,j,k)
-              temp(k) = t     (i,j,k) 
-              p0  (k) = ps    (i,j,k) 
-              prec(k) = pr    (i,j,k) 
-           enddo
+           
+           rhs  = rhaux (i,j,1:nt) 
+           par  = ipar  (i,j,1:nt)
+           temp = t     (i,j,1:nt) 
+           p0   = ps    (i,j,1:nt) 
+           prec = pr    (i,j,1:nt)
            
            call wbm (prec,temp,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,&
                 &    emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,&
                 &    clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,&
                 &    evapm_pft,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,&
                 &    cfroot_pft,gridcell_ocp)
-!!$
-!!$subroutine wbm (prec,temp,p0,ca,par,rhs,cleaf_ini,cawood_ini&
-!!$     &,cfroot_ini,emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft&
-!!$     &,clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,evapm_pft&
-!!$     &,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft,grid_area)
+           
+           
+           clfim(i,j,1:p) = cleaf_pft
+           cffim(i,j,1:p) = cfroot_pft
+           cwfim(i,j,1:p) = cawood_pft
+           grd_ocp(i,j,1:p) = gridcell_ocp
+           clini(i,j,1:p) = cleafin
+           cfini(i,j,1:p) = cfrootin
+           cwini(i,j,1:p) = cawoodin
            
            do p = 1,q
-              clfim(i,j,p) = cleaf_pft(p)
-              cffim(i,j,p) = cfroot_pft(p)
-              cwfim(i,j,p) = cawood_pft(p)
-              grd_ocp(i,j,p) = gridcell_ocp(p)
-              clini(i,j,p) = cleafin(p)
-              cfini(i,j,p) = cfrootin(p)
-              cwini(i,j,p) = cawoodin(p)
               do k = 1,nt
                  ph(i,j,k) = ph(i,j,k) + photo_pft(k,p)
                  ar(i,j,k) = ar(i,j,k) + aresp_pft(k,p)
@@ -319,9 +305,9 @@ program env
               enddo
            enddo
         endif
-     enddo           
+     enddo
   enddo
-!$OMP END PARALLEL DO 
+!$omp end parallel do
 
   open(10,file='./spinup/gridcell_ocp.bin',&
        &    status='unknown',form='unformatted',&
@@ -469,7 +455,6 @@ program env
 !!$  call save_file12(10, rg)
 
   stop
-contains
   
 end program env
     
