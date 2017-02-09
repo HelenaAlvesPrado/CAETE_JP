@@ -140,7 +140,7 @@ program env
 
   !     Open INPUT files
   !     ==========
-  open( 9,file='../inputs/lsmk.bin',status='old',form='unformatted'&
+  open( 9,file='./inputs/lsmk.bin',status='old',form='unformatted'&
        &,access='direct',recl=4*nx*ny)
 
   open(10,file='./inputs/ps.bin',status='old',form='unformatted'&
@@ -265,6 +265,7 @@ program env
            cawoodin = aux3
            !     ----end spinup
            
+<<<<<<< HEAD
            
            rhs  = rhaux (i,j,1:nt) 
            par  = ipar  (i,j,1:nt)
@@ -272,6 +273,41 @@ program env
            p0   = ps    (i,j,1:nt) 
            prec = pr    (i,j,1:nt)
            
+=======
+           do p=1,q
+              cleafin(p)  = aux1(p)
+              cfrootin(p) = aux2(p)
+              cawoodin(p) = aux3(p)
+           enddo
+           !     ------------------------------------------
+           do k=1,nt
+              do p=1,q
+                 photo_pft(k,p)  = 0.0
+                 aresp_pft(k,p)  = 0.0
+                 npp_pft(k,p)    = 0.0
+                 lai_pft(k,p)    = 0.0
+                 clit_pft(k,p)   = 0.0
+                 csoil_pft(k,p)  = 0.0
+                 hresp_pft(k,p)  = 0.0
+                 rcm_pft(k,p)    = 0.0
+                 runom_pft(k,p)  = 0.0
+                 evapm_pft(k,p)  = 0.0
+                 wsoil_pft(k,p)  = 0.0
+                 rm_pft(k,p)     = 0.0
+                 rg_pft(k,p)     = 0.0
+                 cleaf_pft(p)    = 0.0
+                 cawood_pft(p)   = 0.0
+                 cfroot_pft(p)   = 0.0
+                 gridcell_ocp(p) = 0.0
+              enddo
+              rhs (k) = rhaux(i,j,k) 
+              par (k) = ipar  (i,j,k)
+              temp(k) = t     (i,j,k) 
+              p0  (k) = ps    (i,j,k) 
+              prec(k) = pr    (i,j,k) 
+           enddo
+           print*, 'calling wbm:', i,j
+>>>>>>> f770fd840375b775d2876efc27739a7c37f0db60
            call wbm (prec,temp,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,&
                 &    emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,&
                 &    clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,&
