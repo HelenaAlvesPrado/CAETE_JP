@@ -271,6 +271,9 @@ program env
            temp = t     (i,j,1:nt) 
            p0   = ps    (i,j,1:nt) 
            prec = pr    (i,j,1:nt)
+
+           print*, rhs
+           print*, 'calling wbm'
            
            call wbm (prec,temp,p0,ca,par,rhs,cleafin,cawoodin,cfrootin,&
                 &    emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft,&
