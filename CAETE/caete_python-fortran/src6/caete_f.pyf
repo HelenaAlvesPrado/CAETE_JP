@@ -1,0 +1,158 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module caete_f ! in 
+    interface  ! in :caete_f
+        module global_pars ! in :caete_f:global.f90
+            real(kind=4), parameter,optional :: ca=363.0
+            integer(kind=kind(0)), optional,dimension(12) :: ndmonth=31
+            integer, parameter,optional :: i4=kind(0)
+            real(kind=8), parameter,optional :: csru=0.5
+            real(kind=8), parameter,optional :: alfm=1.391
+            integer, parameter,optional :: r4=kind(0.0)
+            integer, parameter,optional :: r8=kind(0.0d0)
+            real(kind=4), parameter,optional,depend(diffu,h) :: tau=4.822530864197531e-15
+            real(kind=4), parameter,optional :: rcmin=110.0
+            real(kind=4), parameter,optional :: diffu=103680000000000.0
+            real(kind=4), parameter,optional :: rcmax=2000.0
+            real(kind=8), parameter,optional :: gm=3.26
+            real(kind=4), parameter,optional :: h=1.0
+            real(kind=4), parameter,optional :: wmax=500.0
+            integer, parameter,optional :: l1=kind(.true.)
+        end module global_pars
+        module photo_par ! in :caete_f:global.f90
+            use global_pars, only: r8
+            real(kind=8), parameter,optional :: p9=0.57
+            real(kind=8), parameter,optional :: p25=8e-06
+            real(kind=8), parameter,optional :: p4=0.08
+            real(kind=8), parameter,optional :: p28=0.5
+            real(kind=8), parameter,optional :: p23=0.3
+            real(kind=8), parameter,optional :: p15=1.2
+            real(kind=8), parameter,optional :: p6=2.0
+            real(kind=8), parameter,optional :: a2=0.93
+            real(kind=8), parameter,optional :: p5=0.15
+            real(kind=8), parameter,optional :: p3=21200.0
+            real(kind=8), parameter,optional :: p8=5200.0
+            real(kind=8), parameter,optional :: p13=2.1
+            real(kind=8), parameter,optional :: p27=1.5
+            real(kind=8), parameter,optional :: p12=30.0
+            real(kind=8), parameter,optional :: p14=30000.0
+            real(kind=8), parameter,optional :: p20=0.1
+            real(kind=8), parameter,optional :: p10=0.1
+            real(kind=8), parameter,optional :: a=0.83
+            real(kind=8), parameter,optional :: p24=36.0
+            real(kind=8), parameter,optional :: p31=3.85
+            real(kind=8), parameter,optional :: p29=0.205
+            real(kind=8), parameter,optional :: p7=0.5
+            real(kind=8), parameter,optional :: p26=0.5
+            real(kind=8), parameter,optional :: p22=2.0
+            real(kind=8), parameter,optional :: p11=25.0
+            real(kind=8), parameter,optional :: p30=0.015
+            real(kind=8), parameter,optional :: p19=0.9
+        end module photo_par
+        module photo ! in :caete_f:photo.f90
+            function gross_ph(f1,cleaf,sla) result (ph) ! in :caete_f:photo.f90:photo
+                use global_pars, only: r4
+                real(kind=4) intent(in) :: f1
+                real(kind=4) intent(in) :: cleaf
+                real(kind=4) intent(in) :: sla
+                real(kind=4) :: ph
+            end function gross_ph
+            function laia(cleaf,sla) result (lai) ! in :caete_f:photo.f90:photo
+                use global_pars, only: r4
+                real(kind=4) intent(in) :: cleaf
+                real(kind=4) intent(in) :: sla
+                real(kind=4) :: lai
+            end function laia
+            function f_four(fs,cleaf,sla) result (lai_ss) ! in :caete_f:photo.f90:photo
+                use photo_par, only: p27,p26
+                use global_pars, only: r8,r4,i4
+                integer(kind=kind(0)) intent(in) :: fs
+                real(kind=4) intent(in) :: cleaf
+                real(kind=4) intent(in) :: sla
+                real(kind=4) :: lai_ss
+            end function f_four
+            function spec_leaf_area(tau_leaf) result (sla) ! in :caete_f:photo.f90:photo
+                use global_pars, only: r4
+                real(kind=4) intent(in) :: tau_leaf
+                real(kind=4) :: sla
+            end function spec_leaf_area
+            function water_stress_modifier(w,cfroot,rc,ep) result (f5) ! in :caete_f:photo.f90:photo
+                use global_pars, only: rcmin,gm,csru,alfm,r4,wmax,r8
+                real(kind=4) intent(in) :: w
+                real(kind=4) intent(in) :: cfroot
+                real(kind=4) intent(in) :: rc
+                real(kind=4) intent(in) :: ep
+                real(kind=4) :: f5
+            end function water_stress_modifier
+            function canopy_resistence(vpd_in,f1_in,g1) result (rc2_in) ! in :caete_f:photo.f90:photo
+                use global_pars, only: ca,rcmax,rcmin,r4,r8
+                real(kind=4) intent(in) :: vpd_in
+                real(kind=4) intent(in) :: f1_in
+                real(kind=4) intent(in) :: g1
+                real(kind=4) :: rc2_in
+            end function canopy_resistence
+            function vapor_p_defcit(t,rh) result (vpd_0) ! in :caete_f:photo.f90:photo
+                use global_pars, only: r4
+                real(kind=4) intent(in) :: t
+                real(kind=4) intent(in) :: rh
+                real(kind=4) :: vpd_0
+            end function vapor_p_defcit
+            function photosynthesis_rate(vm,temp,p0,ipar,ll) result (f1a) ! in :caete_f:photo.f90:photo
+                use photo_par
+                use global_pars
+                real(kind=4) intent(in) :: vm
+                real(kind=4) intent(in) :: temp
+                real(kind=4) intent(in) :: p0
+                real(kind=4) intent(in) :: ipar
+                logical(kind=kind(.true.)) intent(in) :: ll
+                real(kind=8) :: f1a
+            end function photosynthesis_rate
+            function tetens(t) result (es) ! in :caete_f:photo.f90:photo
+                use global_pars
+                real(kind=4) intent(in) :: t
+                real(kind=4) :: es
+            end function tetens
+        end module photo
+        module water ! in :caete_f:water.f90
+            function soil_temp(t0,temp) result (tsoil) ! in :caete_f:water.f90:water
+                use global_pars, only: diffu,tau,h,r4,i4
+                real(kind=4) intent(in) :: t0
+                real(kind=4) intent(in) :: temp
+                real(kind=4) :: tsoil
+            end function soil_temp
+            function penman(spre,temp,ur,rn,rc2) result (evap) ! in :caete_f:water.f90:water
+                use global_pars, only: rcmin,r4,rcmax
+                use photo, only: tetens
+                real(kind=4) intent(in) :: spre
+                real(kind=4) intent(in) :: temp
+                real(kind=4) intent(in) :: ur
+                real(kind=4) intent(in) :: rn
+                real(kind=4) intent(in) :: rc2
+                real(kind=4) :: evap
+            end function penman
+            function available_energy(temp) result (ae) ! in :caete_f:water.f90:water
+                use global_pars, only: r4
+                real(kind=4) intent(in) :: temp
+                real(kind=4) :: ae
+            end function available_energy
+            function runoff(wa) result (roff) ! in :caete_f:water.f90:water
+                use global_pars, only: r4
+                real(kind=4) intent(in) :: wa
+                real(kind=4) :: roff
+            end function runoff
+            function evpot2(spre,temp,ur,rn) result (evap) ! in :caete_f:water.f90:water
+                use global_pars, only: rcmin,r4,rcmax
+                use photo, only: tetens
+                real(kind=4) intent(in) :: spre
+                real(kind=4) intent(in) :: temp
+                real(kind=4) intent(in) :: ur
+                real(kind=4) intent(in) :: rn
+                real(kind=4) :: evap
+            end function evpot2
+        end module water
+    end interface 
+end python module caete_f
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

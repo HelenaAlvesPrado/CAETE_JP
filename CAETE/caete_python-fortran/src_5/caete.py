@@ -204,7 +204,7 @@ class gridcell:
             self.area   = outputs[18].T
             self.complete = True
         else:
-            print('the gridcell %s object is either not filled or already completed' % self.name)
+            print('Gridcell %s is either not filled or already completed' % self.name)
 
 # UTIL functions and global variables definition
 
