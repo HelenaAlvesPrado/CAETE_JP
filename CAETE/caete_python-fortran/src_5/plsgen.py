@@ -61,7 +61,7 @@ def table_gen(N = n):
         alloc_w = plsa_wood[:]
         alloc_g = plsa_grass[:]
         while len(alloc_w) <= diffw:
-            alloc_w.append(plsa_wood[np.random.randint(0,len(plsa_wood))])
+            alloc_w.append(plsa_wood[np.random.randint(0,len(plsa_wood))]) # alterar aqui as distribuições para alloc and tau
         while len(alloc_g) <= diffg:
             alloc_g.append(plsa_grass[np.random.randint(0,len(plsa_grass))])
         
@@ -116,7 +116,7 @@ def table_gen(N = n):
         
     #pls_table = np.array(pls_table,np.float32)
 
-
+    # ___side_effects
     with open('pls_attrs.csv', mode='w') as fh:
         writer = csv.writer(fh, delimiter=',')
         writer.writerow(colnames)
@@ -124,5 +124,18 @@ def table_gen(N = n):
         
     out_arr = np.array(pls_table,np.float32).T
     np.savetxt('pls.txt', out_arr, fmt='%.12f')
+
+    print('0','g1')  #'g1','vcmax','tleaf','twood','troot'
+    print('1','vcmax')
+    print('2','tleaf')
+    print('3','twood')
+    print('4','troot')
+    print('5','aleaf')
+    print('6','awood')
+    print('7','aroot')
+    # ___end___
+
+    
+    return out_arr
     
 
