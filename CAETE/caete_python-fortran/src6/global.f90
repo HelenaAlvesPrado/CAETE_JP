@@ -4,7 +4,7 @@ module global_pars
   integer,parameter :: i4 = kind(0)
   integer,parameter :: r4 = kind(0.0)
   integer,parameter :: r8 = kind(0.0D0)
-!  integer,parameter :: rbig = selected_real_kind(16,300)
+  !  integer,parameter :: rbig = selected_real_kind(16,300)
 
   real(kind=r4),parameter :: H = 1.0                         ! soil layer thickness (meters)
   real(kind=r4),parameter :: DIFFU = 4.e7 * (30.0 * 86400.0) ! soil thermal diffusivity (m2/mes)
@@ -18,13 +18,17 @@ module global_pars
   real(kind=r8),parameter :: alfm = 1.391
   real(kind=r8),parameter :: gm = 3.26  !(*86400 transform s/mm to dia/mm)
 
+  real(kind=r8),parameter :: ncl = 1./29.              !(gN/KgC) from lpj3 
+  real(kind=r8),parameter :: ncf = 1./29.              !(gN/KgC)
+  real(kind=r8),parameter :: ncs = 1./330.             !(gN/KgC)
 
   integer(kind=i4) :: ndmonth(12)       !Number of months
   data ndmonth /31,28,31,30,31,30,31,31,30,31,30,31/ !Number of days for each month
 
-!  integer(kind=i4),parameter :: npls = 50
-!  integer(kind=i4),parameter :: ntimes = 12
-!  integer(kind=i4),parameter :: ntraits = 8
+  integer(kind=i4),parameter :: npls = 10
+  integer(kind=i4),parameter :: ntimes = 12
+  integer(kind=i4),parameter :: ntraits = 8
+  
 end module global_pars
 
 module photo_par
@@ -58,5 +62,11 @@ module photo_par
        p28 = 0.500     ,&          !Soil moisture at field capacity
        p29 = 0.205     ,&          !Soil moisture at wilting point
        p30 = 0.015     ,&          !Ratio of respiration to Rubisco carboxylation rates
-       p31 = 3.850                 !Whole plant to leaf respiration ratio
+       p31 = 3.850     ,&            !Whole plant to leaf respiration ratio
+       p32 = 2.00      ,&
+       p33 = 0.10      ,&
+       p34 = 0.30      ,&
+       p35 = 0.05      ,&
+       p36 = 0.25
+    
 end module photo_par

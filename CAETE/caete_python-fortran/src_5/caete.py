@@ -27,7 +27,6 @@ def catch_nt(input_file, nx, ny, pixel_depht):
 
 def catch_data(input_file, layers, nx, ny):
 
-
     """Loads the input_file as a np.array once you know
     the number of records in input_file
     input_file = flat binary filename (e.g. '.bin')
@@ -40,9 +39,11 @@ def catch_data(input_file, layers, nx, ny):
     return np.fromfile(input_file, count=Bcount,
                     dtype=np.float32).reshape((layers,ny,nx))
 
+
 def pls_generator():
     pls.table_gen(C.global_pars.npls)
     C.ascii2bin('pls.txt','pls.bin',C.global_pars.npls,8)
+
 
 class datasets:
     """ """
@@ -96,6 +97,7 @@ class datasets:
         if self.NotWork:
             return False
         return True
+
         
 class gridcell:
     

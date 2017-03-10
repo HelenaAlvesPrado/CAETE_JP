@@ -14,10 +14,15 @@ module photo
        photosynthesis_rate    ,& ! leaf level CO2 assimilation rate (molCO2 m-2 s-1)
        canopy_resistence      ,& ! Canopy resistence (from Medlyn et al. 2011a) (s/m) == m s-1
        vapor_p_defcit         ,& ! Vapor pressure defcit  (kPa)
-       tetens                    ! Maximum vapor pressure (hPa)
-
+       tetens                 ,& ! Maximum vapor pressure (hPa)
+       m_resp                 ,& ! maintenance respiration (plants)
+       g_resp                 ,& ! growth Respiration (kg m-2 yr-1)
+       carbon2                ,& ! soil + litter + heterothrophic respiration
+       pft_area_frac          ,& ! area fraction by biomass
+       pft_par                   ! aux subroutine to read pls data
 contains
-  
+
+
   !=================================================================
   !=================================================================
 
@@ -375,5 +380,250 @@ contains
     endif
     
   end function tetens
+
+
+  !====================================================================
+  !====================================================================
+
+  
+  function m_resp(temp,cl1,cf1,ca1,ocp_coeff) result(rm)
+    use global_pars, only: r4,r8,ncl,ncf,ncs
+    implicit none
+
+    real(kind=r4), intent(in) :: temp
+    real(kind=r4), intent(in) :: cl1
+    real(kind=r4), intent(in) :: cf1
+    real(kind=r4), intent(in) :: ca1
+    real(kind=r4), intent(in) :: ocp_coeff
+    real(kind=r4) :: rm
+    
+    real(kind=r8) :: csa, rm64, rml64, rmf64, rms64
+    
+    
+    !   Autothrophic respiration
+    !   ========================
+    !   Maintenance respiration (kgC/m2/yr) (based in Ryan 1991)
+    
+    csa= 0.05_r8 * ca1           !sapwood carbon content (kgC/m2). 5% of woody tissues (Pavlick, 2013)
+    
+    rml64 = (ncl * cl1) * 27. * exp(0.03*temp)
+    
+    rmf64 = (ncf * cf1) * 27. * exp(0.03*temp)
+    
+    rms64 = (ncs * csa) * 27. * exp(0.03*temp)
+    
+    rm64 = (rml64 + rmf64 + rms64)
+    
+    rm = real(rm64,kind=r4) * ocp_coeff
+
+    if (rm.lt.0) then
+       rm = 0.0
+    endif
+
+  end function m_resp
+
+  !====================================================================
+  !====================================================================
+  
+  function g_resp(beta_leaf,beta_awood, beta_froot, ocp_coeff) result(rg)
+    use global_pars, only: r4,r8
+    implicit none
+
+    real(kind=r4), intent(in) :: beta_leaf
+    real(kind=r4), intent(in) :: beta_froot
+    real(kind=r4), intent(in) :: beta_awood
+    real(kind=r4), intent(in) :: ocp_coeff
+    real(kind=r4) :: rg
+    
+    real(kind=r8) :: csai, rg64, rgl64, rgf64, rgs64
+    
+    !     Autothrophic respiration
+    !     Growth respiration (KgC/m2/yr)(based in Ryan 1991; Sitch et al.
+    !     2003; Levis et al. 2004)         
+    
+    csai =  (beta_awood * 0.05)
+    
+    rgl64 = 0.25 * beta_leaf * 365.
+    
+    rgf64 =  0.25* beta_froot * 365.
+    
+    rgs64 = (0.25 * csai * 365.)
+    
+    rg64 = (rgl64 + rgf64 + rgs64)
+
+    rg = real(rg64,kind=r4) * ocp_coeff
+    
+    if (rg.lt.0) then
+       rg = 0.0
+    endif
+    
+  end function g_resp
+  
+  !====================================================================
+  !====================================================================
+  
+  subroutine carbon2 (tsoil,f5c,evap,laia,d_litter,cl,cs,hr)
+    use global_pars
+    use photo_par
+    implicit none
+    !     Variables
+    !     =========
+    !     Inputs
+    !     ------
+    real(kind=r4),intent(in) :: tsoil                !Mean monthly soil temperature (oC)
+    real(kind=r4),intent(in) :: f5c                  !Stress response to soil moisture (dimensionless)
+    real(kind=r4),intent(in) :: evap                 !Actual evapotranspiration (mm/day)
+    real(kind=r4),intent(in) :: laia
+    real(kind=r4),intent(in) :: d_litter
+    !     Outputs 
+    !     -------
+    real(kind=r4),intent(out) :: cl                   !Litter carbon (kgC/m2)
+    real(kind=r4),intent(out) :: cs                   !Soil carbon (kgC/m2)
+    real(kind=r4),intent(out) :: hr                   !Heterotrophic (microbial) respiration (kgC/m2)
+    
+    !     Internal
+    !     --------
+    real(kind=r8) :: lf                   !Litterfall (kgC/m2)
+    real(kind=r8) :: f6                   !Litter decayment function
+    real(kind=r8) :: f7                   !Soil carbon storage function
+    !     
+    !     Initialize
+    !     ----------
+    !     
+    lf  = 0.0
+    f6  = 0.0
+    f7  = 0.0
+    cl  = 0.0
+    cs  = 0.0
+    
+    !     Litter decayment function                                             !Controlled by annual evapotranspiration
+    !     -------------------------
+    f6 = 1.16*10.**(-1.4553+0.0014175*(evap*365.0))
+    
+    !     Soil carbon storage function                                          !Controlled by temperature
+    !     ----------------------------    
+    f7 = p32**(p10*(tsoil-p11))
+    
+    !     Litterfall (kgC/m2)
+    !     ------------------
+    lf = p33 * (laia + d_litter)
+    
+    !     Litter carbon (kgC/m2)
+    !     ----------------------  
+    cl = real(lf/f6, kind=r4)
+    
+    !     Soil carbon(kgC/m2)
+    !     -------------------
+    cs = real(((p34*cl)/(p35*f7))*f5c, kind=r4)
+    
+    !     Respiration minimum and maximum temperature
+    !     -------------------------------------------
+    !     
+    if ((tsoil.ge.-10.0).and.(tsoil.le.50.0)) then
+       hr = real(p36*(cl*(f6**2)+(cs*f5c*evap*(f7**2))),kind=r4) !Litter and Soil!respectively
+    else
+       hr = 0.0_r4               !Temperature above/below respiration windown
+    endif
+  
+  end subroutine carbon2
+  
+  !====================================================================
+  !====================================================================
+  
+  SUBROUTINE PFT_AREA_FRAC(CLEAF, CFROOT, CAWOOD, OCP_COEFFS, OCP_WOOD)
+    use global_pars
+    implicit none
+    
+    integer(kind=i4),parameter :: npft = npls ! plss futuramente serao
+    
+    REAL(kind=r4),dimension(npft),intent( in) :: CLEAF, CFROOT, CAWOOD
+    REAL(kind=r4),dimension(npft),intent(out) :: OCP_COEFFS
+    logical,dimension(npft),intent(out) :: OCP_WOOD
+    REAL(kind=r4),dimension(npft) :: TOTAL_BIOMASS_PFT,TOTAL_W_PFT
+    INTEGER(kind=i4) :: P,I
+    INTEGER(kind=i4),dimension(1) :: MAX_INDEX
+    REAL(kind=r4) :: TOTAL_BIOMASS, TOTAL_WOOD
+    
+    TOTAL_BIOMASS = 0.0
+    TOTAL_WOOD = 0.0
+    
+    do p = 1,npft
+       TOTAL_W_PFT(P) = 0.0
+       TOTAL_BIOMASS_PFT(P) = 0.0
+       OCP_COEFFS(P) = 0.0
+       OCP_WOOD(P) = .FALSE.
+    enddo
+    
+    DO P = 1,NPFT
+       TOTAL_BIOMASS_PFT(P) = CLEAF(P) + CFROOT(P) + CAWOOD(P) ! only sapwood
+       TOTAL_BIOMASS = TOTAL_BIOMASS + TOTAL_BIOMASS_PFT(P)
+       TOTAL_WOOD = TOTAL_WOOD + CAWOOD(P)
+       TOTAL_W_PFT(P) = CAWOOD(P)
+    ENDDO
+    
+    !     GRID CELL OCCUPATION COEFFICIENTS
+    IF(TOTAL_BIOMASS .GT. 0.0) THEN
+       DO P = 1,NPFT   
+          OCP_COEFFS(P) = TOTAL_BIOMASS_PFT(P) / TOTAL_BIOMASS
+          IF(OCP_COEFFS(P) .LT. 0.0) OCP_COEFFS(P) = 0.0
+       ENDDO
+    ELSE
+       DO P = 1,NPFT
+          OCP_COEFFS(P) = 0.0
+       ENDDO
+    ENDIF
+    
+    !     GRIDCELL PFT LIGTH LIMITATION BY WOOD CONTENT 
+    IF(TOTAL_WOOD .GT. 0.0) THEN
+       MAX_INDEX = MAXLOC(TOTAL_W_PFT)
+       I = MAX_INDEX(1)
+       OCP_WOOD(I) = .TRUE.
+    ENDIF
+    
+  END SUBROUTINE PFT_AREA_FRAC
+  
+  !====================================================================
+  !====================================================================
+
+  subroutine pft_par(par, dt)
+    use global_pars
+    implicit none
+    
+    
+    integer(kind=i4),intent(in) :: par            ! parameter number 
+    real(kind=r4), dimension(npls),intent(out) :: dt
+    
+    ! ['g1','vcmax','tleaf','twood','troot','aleaf','awood','aroot']
+    !     dt1 = g1
+    !     dt2 = vcmax
+    !     dt3 = tleaf
+    !     dt4 = twood
+    !     dt5 = tfroot
+    !     dt6 = aleaf
+    !     dt7 = awood
+    !     dt8 = aroot
+    
+    open(30,file='./pls.bin',status='old',&
+         &form='unformatted',access='direct',recl=4*npls)
+    
+    if(par .gt. 0 .and. par .lt. 10) then
+       read(30,rec=par) dt
+    else
+       print*, 'search failed'
+    endif
+    close(30)
+    return
+  end subroutine pft_par
+  
+  !====================================================================
+  !====================================================================
+  
+  !====================================================================
+  !====================================================================
+  
+  !====================================================================
+  !====================================================================
+
+
   
 end module photo
