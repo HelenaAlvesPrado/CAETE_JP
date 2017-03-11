@@ -4,7 +4,7 @@ module global_pars
   integer,parameter :: i4 = kind(0)
   integer,parameter :: r4 = kind(0.0)
   integer,parameter :: r8 = kind(0.0D0)
-  !  integer,parameter :: rbig = selected_real_kind(16,300)
+  integer,parameter :: rbig = selected_real_kind(16,300)
 
   real(kind=r4),parameter :: H = 1.0                         ! soil layer thickness (meters)
   real(kind=r4),parameter :: DIFFU = 4.e7 * (30.0 * 86400.0) ! soil thermal diffusivity (m2/mes)

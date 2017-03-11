@@ -8,7 +8,7 @@ module water
   
   public ::              &
        soil_temp        ,&
-       soil_temp_sub        ,&
+       soil_temp_sub    ,&
        penman           ,&
        evpot2           ,&
        available_energy ,&

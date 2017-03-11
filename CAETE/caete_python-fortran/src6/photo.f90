@@ -19,9 +19,10 @@ module photo
        g_resp                 ,& ! growth Respiration (kg m-2 yr-1)
        carbon2                ,& ! soil + litter + heterothrophic respiration
        pft_area_frac          ,& ! area fraction by biomass
-       pft_par                   ! aux subroutine to read pls data
+       pft_par                ,& ! aux subroutine to read pls data
+       spinup                 ,&
+       ascii2bin              
 contains
-
 
   !=================================================================
   !=================================================================
@@ -618,12 +619,134 @@ contains
   !====================================================================
   !====================================================================
   
-  !====================================================================
-  !====================================================================
+  subroutine spinup(nppot,cleafini,cfrootini,cawoodini)
+    use global_pars
+    implicit none
+    
+    integer(kind=i4),parameter :: npfts = npls
+    integer(kind=i4),parameter :: ntl=30000
+    
+    !   c     inputs
+    integer(kind=i4) :: i6, kk, k
+    
+    real(kind=r4),intent(in) :: nppot
+    real(kind=r4) :: sensitivity
+    
+    !c     outputs
+    real(kind=r4),intent(out) :: cleafini(npfts)
+    real(kind=r4),intent(out) :: cawoodini(npfts)
+    real(kind=r4),intent(out) :: cfrootini(npfts)
+    real(kind=r8) :: cleafi_aux(ntl)
+    real(kind=r8) :: cfrooti_aux(ntl)
+    real(kind=r8) :: cawoodi_aux(ntl)
+    
+    
+    real(kind=r4) :: aleaf(npfts)             !npp percentage alocated to leaf compartment
+    real(kind=r4) :: aawood (npfts)           !npp percentage alocated to aboveground woody biomass compartment
+    real(kind=r4) :: afroot(npfts)            !npp percentage alocated to fine roots compartmentc 
+    real(kind=r4) :: tleaf(npfts)             !turnover time of the leaf compartment (yr)
+    real(kind=r4) :: tawood (npfts)           !turnover time of the aboveground woody biomass compartment (yr)
+    real(kind=r4) :: tfroot(npfts)            !turnover time of the fine roots compartment
+    
+    
+    call pft_par(6, aleaf)
+    call pft_par(7, aawood)
+    call pft_par(8, afroot)
+    call pft_par(3, tleaf)
+    call pft_par(4, tawood)
+    call pft_par(5, tfroot)
+    
+    
+    sensitivity = 1.01
+    if(nppot .lt. 0.0) goto 200
+    ! nppot = nppot/real(npfts,kind=r4)
+    do i6=1,npfts
+       do k=1,ntl
+          if (k.eq.1) then
+             cleafi_aux (k) =  aleaf(i6)*(nppot)
+             cawoodi_aux(k) = aawood(i6)*(nppot)
+             cfrooti_aux(k) = afroot(i6)*(nppot)
+             
+          else
+             if(aawood(i6) .gt. 0.0) then
+                cleafi_aux(k) = ((aleaf(i6)*(nppot))-(cleafi_aux(k-1)&
+                     &/(tleaf(i6)))) + cleafi_aux(k-1)
+                cawoodi_aux(k) = ((aawood(i6)*(nppot))-(cawoodi_aux(k&
+                     &-1)/(tawood(i6)))) + cawoodi_aux(k-1)
+                cfrooti_aux(k) = ((afroot(i6)*(nppot))-(cfrooti_aux(k&
+                     &-1)/(tfroot(i6)))) + cfrooti_aux(k-1)
+             else
+                cleafi_aux(k) = ((aleaf(i6)*(nppot))-(cleafi_aux(k-1)&
+                     &/(tleaf(i6)))) + cleafi_aux(k-1)
+                cawoodi_aux(k) = 0.0
+                cfrooti_aux(k) = ((afroot(i6)*(nppot))-(cfrooti_aux(k&
+                     &-1)/(tfroot(i6)))) + cfrooti_aux(k-1)
+             endif
+             
+             kk =  nint(k*0.66)
+             if(cawoodi_aux(kk) .gt. 0.0) then
+                if((cfrooti_aux(k)/cfrooti_aux(kk).lt.sensitivity).and.&
+                     &(cleafi_aux(k)/cleafi_aux(kk).lt.sensitivity).and.&
+                     &(cawoodi_aux(k)/cawoodi_aux(kk).lt.sensitivity)) then
+                   
+                   cleafini(i6) = real(cleafi_aux(k),4) ! carbon content (kg m-2)
+                   cfrootini(i6) = real(cfrooti_aux(k),4)
+                   cawoodini(i6) = real(cawoodi_aux(k),4)
+                   exit
+                ENDIF
+             else
+                if((cfrooti_aux(k)&
+                     &/cfrooti_aux(kk).lt.sensitivity).and.&
+                     &(cleafi_aux(k)/cleafi_aux(kk).lt.sensitivity)) then
+                   
+                   cleafini(i6) = real(cleafi_aux(k),4) ! carbon content (kg m-2)
+                   cfrootini(i6) = real(cfrooti_aux(k),4)
+                   cawoodini(i6) = 0.0
+                   exit
+                endif
+             endif
+          endif
+       enddo                  !nt
+    enddo                     ! npfts 
+200 continue
+  end subroutine spinup
   
+ !=================================================================
+ !=================================================================
+ 
+  subroutine ascii2bin(file_in, file_out, nx1, ny1)
+    use global_pars
+    implicit none
+    
+    character*30, intent(in) :: file_in, file_out
+    integer(kind=i4),intent(in) :: nx1, ny1
+    
+    integer(kind=i4) :: i, j
+    
+    real(kind=r4),allocatable,dimension(:,:) :: arr_in
+    
+    allocate(arr_in(nx1,ny1))
+    
+    open (unit=11,file=file_in,status='old',form='formatted',access='sequential',&
+         action='read')
+    
+    
+    open (unit=21,file=file_out,status='unknown',&
+         form='unformatted',access='direct',recl=nx1*ny1*4)
+    
+    
+    do j = 1, ny1 ! for each line do
+       read(11,*) (arr_in(i,j), i=1,nx1) ! read all elements in line j (implicit looping)
+       !write(*,*) arr_in(:,j) 
+    end do
+    
+    write(21,rec=1) arr_in   
+    close(11)
+    close(21)
+    
+  end subroutine ascii2bin
   !====================================================================
   !====================================================================
-
 
   
 end module photo
