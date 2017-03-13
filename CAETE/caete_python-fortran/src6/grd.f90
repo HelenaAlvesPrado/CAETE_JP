@@ -12,7 +12,7 @@ contains
   type, public :: gridcell
      sequence
 
-     
+     ! id vars
      logical(kind=l1) :: in_data = .false.
      logical(kind=l1) :: completed = .false.
      integer(kind=i4) :: xpos
@@ -26,8 +26,15 @@ contains
      real(kind=r4),dimension(ntimes) :: ipar
      real(kind=r4),dimension(ntimes) :: rh
      real(kind=r4),dimension(ntimes) :: prec
-     real(kind=r4),dimension(ntimes) :: ipar
      real(kind=r4) :: ca
+
+     real(kind=r4),dimension(ntimes,npls) :: water 
+     real(kind=r4),dimension(ntimes,npls) :: ice
+     real(kind=r4),dimension(ntimes,npls) :: snow
+     real(kind=r4),dimension(ntimes,npls) :: leaf_carbon
+     real(kind=r4),dimension(ntimes,npls) :: froot_carbon
+     real(kind=r4),dimension(ntimes,npls) :: awood_carbon
+     real(kind=r4),dimension(ntimes,npls) :: 
 
      ! 
      real(kind=r8),dimension(npls,ntimes) :: photo_rate ! (micromolCO2/m2/s) [leaf_level]
@@ -36,26 +43,3 @@ contains
   
 end module grdcell
 
-
-
-module model
-  use global_pars
-  implicit none
-  private
-
-!  
-contains
-
-  subroutine wbm()
-    !---
-  end subroutine wbm
-
-
-  
-  subroutine budget
-    !=---
-  end subroutine budget
-
-
-  
-end module model
