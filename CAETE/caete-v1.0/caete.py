@@ -8,7 +8,7 @@ import glob
 
 import numpy as np
 
-import caete as C
+import caete_module as C
 import plsgen as pls
 
 def catch_nt(input_file, nx, ny, pixel_depht):

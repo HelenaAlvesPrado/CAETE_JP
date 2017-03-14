@@ -124,7 +124,6 @@ contains
     !     -------------------------------------------     
     if ((temp.ge.-10.0).and.(temp.le.50.0)) then
        ar = rm + rg
-       ar = ar * ocp_pft
     else
        ar = 0.0               !Temperature above/below respiration windown
     endif
