@@ -200,7 +200,7 @@ contains
     real(kind=r8) :: aa
     
     f1b = f1_in * 1e6        ! mol 2 µmol : conversion factor = 1e6
-    aa = f1b / (ca/9.901)              
+    aa = f1b / ca              
     g0 = 0.00003           
     
     if(f1_in .le. 0.0) then 
