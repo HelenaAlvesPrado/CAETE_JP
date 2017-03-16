@@ -1,6 +1,7 @@
 module global_pars
   implicit none
   integer,parameter :: l1 = kind(.TRUE.)
+  integer,parameter :: i1 = selected_int_kind(2)
   integer,parameter :: i4 = kind(0)
   integer,parameter :: r4 = kind(0.0)
   integer,parameter :: r8 = kind(0.0D0)
@@ -28,6 +29,8 @@ module global_pars
   integer(kind=i4),parameter :: npls = 20
   integer(kind=i4),parameter :: ntimes = 12
   integer(kind=i4),parameter :: ntraits = 8
+
+  integer(kind=i4),parameter :: nx = 720, ny = 360
   
 end module global_pars
 
