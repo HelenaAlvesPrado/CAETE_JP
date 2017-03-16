@@ -4,344 +4,344 @@
 python module caete_module ! in 
     interface  ! in :caete_module
         module global_pars ! in :caete_module:global.f90
-            real(kind=8), parameter,optional :: alfm=1.391
-            real(kind=4), parameter,optional,depend(diffu,h) :: tau=4.822530864197531e-15
-            integer, parameter,optional :: l1=kind(.true.)
-            real(kind=8), parameter,optional :: csru=0.5
-            real(kind=8), parameter,optional :: gm=3.26
-            integer, parameter,optional :: i4=kind(0)
-            integer(kind=kind(0)), parameter,optional :: npls=20
+            real(kind=), parameter,optional :: h=1.0
+            integer(kind=), parameter,optional :: ntraits=8
             integer, parameter,optional :: r8=kind(0.0d0)
-            real(kind=8), parameter,optional :: ncl=0.034482758620689655
-            real(kind=8), parameter,optional :: ncf=0.034482758620689655
+            integer(kind=), optional,dimension(12) :: ndmonth=31
+            integer, parameter,optional :: l1=kind(.true.)
+            real(kind=), parameter,optional :: gm=3.26
+            integer(kind=), parameter,optional :: ntimes=12
+            real(kind=), parameter,optional :: alfm=1.391
+            real(kind=), parameter,optional :: diffu=103680000000000.0
+            real(kind=), parameter,optional,depend(h,diffu) :: tau=(h**2)/(2.0*diffu)
+            real(kind=), parameter,optional :: ca=363.0
+            real(kind=), parameter,optional :: rcmin=110.0
+            real(kind=), parameter,optional :: ncf=0.034482758620689655
+            real(kind=), parameter,optional :: csru=0.5
             integer, parameter,optional :: rbig=selected_real_kind(16,300)
-            real(kind=4), parameter,optional :: wmax=500.0
-            real(kind=4), parameter,optional :: diffu=103680000000000.0
-            integer(kind=kind(0)), parameter,optional :: ntimes=12
-            integer(kind=kind(0)), optional,dimension(12) :: ndmonth=31
-            real(kind=4), parameter,optional :: rcmax=2000.0
-            integer(kind=kind(0)), parameter,optional :: ntraits=8
+            real(kind=), parameter,optional :: rcmax=2000.0
             integer, parameter,optional :: r4=kind(0.0)
-            real(kind=4), parameter,optional :: rcmin=110.0
-            real(kind=4), parameter,optional :: ca=363.0
-            real(kind=8), parameter,optional :: ncs=0.0030303030303030303
-            real(kind=4), parameter,optional :: h=1.0
+            real(kind=), parameter,optional :: wmax=500.0
+            real(kind=), parameter,optional :: ncl=0.034482758620689655
+            integer, parameter,optional :: i4=kind(0)
+            integer(kind=), parameter,optional :: npls=20
+            real(kind=), parameter,optional :: ncs=0.0030303030303030303
         end module global_pars
         module photo_par ! in :caete_module:global.f90
             use global_pars, only: r8
-            real(kind=8), parameter,optional :: p11=25.0
-            real(kind=8), parameter,optional :: p5=0.15
-            real(kind=8), parameter,optional :: a=0.83
-            real(kind=8), parameter,optional :: p19=0.9
-            real(kind=8), parameter,optional :: p7=0.5
-            real(kind=8), parameter,optional :: p33=0.1
-            real(kind=8), parameter,optional :: p12=30.0
-            real(kind=8), parameter,optional :: p13=2.1
-            real(kind=8), parameter,optional :: p36=0.25
-            real(kind=8), parameter,optional :: p23=0.3
-            real(kind=8), parameter,optional :: p24=36.0
-            real(kind=8), parameter,optional :: p10=0.1
-            real(kind=8), parameter,optional :: p6=2.0
-            real(kind=8), parameter,optional :: p28=0.5
-            real(kind=8), parameter,optional :: p35=0.05
-            real(kind=8), parameter,optional :: p4=0.08
-            real(kind=8), parameter,optional :: p9=0.57
-            real(kind=8), parameter,optional :: p30=0.015
-            real(kind=8), parameter,optional :: p26=0.5
-            real(kind=8), parameter,optional :: p32=2.0
-            real(kind=8), parameter,optional :: p22=2.0
-            real(kind=8), parameter,optional :: p15=1.2
-            real(kind=8), parameter,optional :: p3=21200.0
-            real(kind=8), parameter,optional :: p14=30000.0
-            real(kind=8), parameter,optional :: p31=3.85
-            real(kind=8), parameter,optional :: p27=1.5
-            real(kind=8), parameter,optional :: p29=0.205
-            real(kind=8), parameter,optional :: a2=0.93
-            real(kind=8), parameter,optional :: p25=8e-06
-            real(kind=8), parameter,optional :: p34=0.3
-            real(kind=8), parameter,optional :: p20=0.1
-            real(kind=8), parameter,optional :: p8=5200.0
+            real(kind=), parameter,optional :: p20=0.1
+            real(kind=), parameter,optional :: p10=0.1
+            real(kind=), parameter,optional :: p24=36.0
+            real(kind=), parameter,optional :: p29=0.205
+            real(kind=), parameter,optional :: p14=30000.0
+            real(kind=), parameter,optional :: p31=3.85
+            real(kind=), parameter,optional :: p34=0.3
+            real(kind=), parameter,optional :: p28=0.5
+            real(kind=), parameter,optional :: p15=1.2
+            real(kind=), parameter,optional :: p8=5200.0
+            real(kind=), parameter,optional :: p9=0.57
+            real(kind=), parameter,optional :: p19=0.9
+            real(kind=), parameter,optional :: p4=0.08
+            real(kind=), parameter,optional :: p36=0.25
+            real(kind=), parameter,optional :: p5=0.15
+            real(kind=), parameter,optional :: p3=21200.0
+            real(kind=), parameter,optional :: p25=8e-06
+            real(kind=), parameter,optional :: p32=2.0
+            real(kind=), parameter,optional :: p12=30.0
+            real(kind=), parameter,optional :: p27=1.5
+            real(kind=), parameter,optional :: p6=2.0
+            real(kind=), parameter,optional :: a2=0.93
+            real(kind=), parameter,optional :: p13=2.1
+            real(kind=), parameter,optional :: p22=2.0
+            real(kind=), parameter,optional :: a=0.83
+            real(kind=), parameter,optional :: p11=25.0
+            real(kind=), parameter,optional :: p33=0.1
+            real(kind=), parameter,optional :: p35=0.05
+            real(kind=), parameter,optional :: p30=0.015
+            real(kind=), parameter,optional :: p23=0.3
+            real(kind=), parameter,optional :: p7=0.5
+            real(kind=), parameter,optional :: p26=0.5
         end module photo_par
         module photo ! in :caete_module:funcs.f90
             function gross_ph(f1,cleaf,sla) result (ph) ! in :caete_module:funcs.f90:photo
                 use global_pars, only: r4
-                real(kind=4) intent(in) :: f1
-                real(kind=4) intent(in) :: cleaf
-                real(kind=4) intent(in) :: sla
-                real(kind=4) :: ph
+                real(kind=) intent(in) :: f1
+                real(kind=) intent(in) :: cleaf
+                real(kind=) intent(in) :: sla
+                real(kind=) :: ph
             end function gross_ph
             function leaf_area_index(cleaf,sla) result (lai) ! in :caete_module:funcs.f90:photo
                 use global_pars, only: r4
-                real(kind=4) intent(in) :: cleaf
-                real(kind=4) intent(in) :: sla
-                real(kind=4) :: lai
+                real(kind=) intent(in) :: cleaf
+                real(kind=) intent(in) :: sla
+                real(kind=) :: lai
             end function leaf_area_index
             function f_four(fs,cleaf,sla) result (lai_ss) ! in :caete_module:funcs.f90:photo
-                use global_pars, only: r4,i4,r8
+                use global_pars, only: r8,i4,r4
                 use photo_par, only: p26,p27
-                integer(kind=kind(0)) intent(in) :: fs
-                real(kind=4) intent(in) :: cleaf
-                real(kind=4) intent(in) :: sla
-                real(kind=4) :: lai_ss
+                integer(kind=) intent(in) :: fs
+                real(kind=) intent(in) :: cleaf
+                real(kind=) intent(in) :: sla
+                real(kind=) :: lai_ss
             end function f_four
             function spec_leaf_area(tau_leaf) result (sla) ! in :caete_module:funcs.f90:photo
                 use global_pars, only: r4
-                real(kind=4) intent(in) :: tau_leaf
-                real(kind=4) :: sla
+                real(kind=) intent(in) :: tau_leaf
+                real(kind=) :: sla
             end function spec_leaf_area
             function water_stress_modifier(w,cfroot,rc,ep) result (f5) ! in :caete_module:funcs.f90:photo
-                use global_pars, only: alfm,r4,rcmin,csru,wmax,gm,r8
-                real(kind=4) intent(in) :: w
-                real(kind=4) intent(in) :: cfroot
-                real(kind=4) intent(in) :: rc
-                real(kind=4) intent(in) :: ep
-                real(kind=4) :: f5
+                use global_pars, only: gm,csru,r4,wmax,r8,rcmin,alfm
+                real(kind=) intent(in) :: w
+                real(kind=) intent(in) :: cfroot
+                real(kind=) intent(in) :: rc
+                real(kind=) intent(in) :: ep
+                real(kind=) :: f5
             end function water_stress_modifier
             function canopy_resistence(vpd_in,f1_in,g1) result (rc2_in) ! in :caete_module:funcs.f90:photo
-                use global_pars, only: rcmax,ca,r4,rcmin,r8
-                real(kind=4) intent(in) :: vpd_in
-                real(kind=4) intent(in) :: f1_in
-                real(kind=4) intent(in) :: g1
-                real(kind=4) :: rc2_in
+                use global_pars, only: r8,ca,rcmax,r4,rcmin
+                real(kind=) intent(in) :: vpd_in
+                real(kind=) intent(in) :: f1_in
+                real(kind=) intent(in) :: g1
+                real(kind=) :: rc2_in
             end function canopy_resistence
             function vapor_p_defcit(t,rh) result (vpd_0) ! in :caete_module:funcs.f90:photo
                 use global_pars, only: r4
-                real(kind=4) intent(in) :: t
-                real(kind=4) intent(in) :: rh
-                real(kind=4) :: vpd_0
+                real(kind=) intent(in) :: t
+                real(kind=) intent(in) :: rh
+                real(kind=) :: vpd_0
             end function vapor_p_defcit
             function photosynthesis_rate(vm,temp,p0,ipar,ll) result (f1ab) ! in :caete_module:funcs.f90:photo
                 use global_pars
                 use photo_par
-                real(kind=4) intent(in) :: vm
-                real(kind=4) intent(in) :: temp
-                real(kind=4) intent(in) :: p0
-                real(kind=4) intent(in) :: ipar
-                logical(kind=kind(.true.)) intent(in) :: ll
-                real(kind=4) :: f1ab
+                real(kind=) intent(in) :: vm
+                real(kind=) intent(in) :: temp
+                real(kind=) intent(in) :: p0
+                real(kind=) intent(in) :: ipar
+                logical(kind=) intent(in) :: ll
+                real(kind=) :: f1ab
             end function photosynthesis_rate
             function tetens(t) result (es) ! in :caete_module:funcs.f90:photo
                 use global_pars
-                real(kind=4) intent(in) :: t
-                real(kind=4) :: es
+                real(kind=) intent(in) :: t
+                real(kind=) :: es
             end function tetens
             function m_resp(temp,cl1,cf1,ca1,ocp_coeff) result (rm) ! in :caete_module:funcs.f90:photo
-                use global_pars, only: ncl,r4,ncs,ncf,r8
-                real(kind=4) intent(in) :: temp
-                real(kind=4) intent(in) :: cl1
-                real(kind=4) intent(in) :: cf1
-                real(kind=4) intent(in) :: ca1
-                real(kind=4) intent(in) :: ocp_coeff
-                real(kind=4) :: rm
+                use global_pars, only: ncl,r8,ncf,r4,ncs
+                real(kind=) intent(in) :: temp
+                real(kind=) intent(in) :: cl1
+                real(kind=) intent(in) :: cf1
+                real(kind=) intent(in) :: ca1
+                real(kind=) intent(in) :: ocp_coeff
+                real(kind=) :: rm
             end function m_resp
             function g_resp(beta_leaf,beta_awood,beta_froot,ocp_coeff) result (rg) ! in :caete_module:funcs.f90:photo
-                use global_pars, only: r4,r8
-                real(kind=4) intent(in) :: beta_leaf
-                real(kind=4) intent(in) :: beta_awood
-                real(kind=4) intent(in) :: beta_froot
-                real(kind=4) intent(in) :: ocp_coeff
-                real(kind=4) :: rg
+                use global_pars, only: r8,r4
+                real(kind=) intent(in) :: beta_leaf
+                real(kind=) intent(in) :: beta_awood
+                real(kind=) intent(in) :: beta_froot
+                real(kind=) intent(in) :: ocp_coeff
+                real(kind=) :: rg
             end function g_resp
             subroutine carbon2(tsoil,f5c,evap,laia,d_litter,cl,cs,hr) ! in :caete_module:funcs.f90:photo
                 use global_pars
                 use photo_par
-                real(kind=4) intent(in) :: tsoil
-                real(kind=4) intent(in) :: f5c
-                real(kind=4) intent(in) :: evap
-                real(kind=4) intent(in) :: laia
-                real(kind=4) intent(in) :: d_litter
-                real(kind=4) intent(out) :: cl
-                real(kind=4) intent(out) :: cs
-                real(kind=4) intent(out) :: hr
+                real(kind=) intent(in) :: tsoil
+                real(kind=) intent(in) :: f5c
+                real(kind=) intent(in) :: evap
+                real(kind=) intent(in) :: laia
+                real(kind=) intent(in) :: d_litter
+                real(kind=) intent(out) :: cl
+                real(kind=) intent(out) :: cs
+                real(kind=) intent(out) :: hr
             end subroutine carbon2
             subroutine pft_area_frac(cleaf,cfroot,cawood,ocp_coeffs,ocp_wood) ! in :caete_module:funcs.f90:photo
                 use global_pars
-                real(kind=4) dimension(20),intent(in) :: cleaf
-                real(kind=4) dimension(20),intent(in) :: cfroot
-                real(kind=4) dimension(20),intent(in) :: cawood
-                real(kind=4) dimension(20),intent(out) :: ocp_coeffs
-                logical dimension(20),intent(out) :: ocp_wood
+                real(kind=) dimension(),intent(in) :: cleaf
+                real(kind=) dimension(),intent(in) :: cfroot
+                real(kind=) dimension(),intent(in) :: cawood
+                real(kind=) dimension(),intent(out) :: ocp_coeffs
+                logical dimension(),intent(out) :: ocp_wood
             end subroutine pft_area_frac
             subroutine pft_par(par,dt) ! in :caete_module:funcs.f90:photo
                 use global_pars
-                integer(kind=kind(0)) intent(in) :: par
-                real(kind=4) dimension(20),intent(out) :: dt
+                integer(kind=) intent(in) :: par
+                real(kind=) dimension(),intent(out) :: dt
             end subroutine pft_par
             subroutine spinup(nppot,cleafini,cfrootini,cawoodini) ! in :caete_module:funcs.f90:photo
                 use global_pars
-                real(kind=4) intent(in) :: nppot
-                real(kind=4) dimension(20),intent(out) :: cleafini
-                real(kind=4) dimension(20),intent(out) :: cfrootini
-                real(kind=4) dimension(20),intent(out) :: cawoodini
+                real(kind=) intent(in) :: nppot
+                real(kind=) dimension(),intent(out) :: cleafini
+                real(kind=) dimension(),intent(out) :: cfrootini
+                real(kind=) dimension(),intent(out) :: cawoodini
             end subroutine spinup
             subroutine ascii2bin(file_in,file_out,nx1,ny1) ! in :caete_module:funcs.f90:photo
                 use global_pars
                 character*30 intent(in) :: file_in
                 character*30 intent(in) :: file_out
-                integer(kind=kind(0)) intent(in) :: nx1
-                integer(kind=kind(0)) intent(in) :: ny1
+                integer(kind=) intent(in) :: nx1
+                integer(kind=) intent(in) :: ny1
             end subroutine ascii2bin
             subroutine allocation(pft,npp,scl1,sca1,scf1,scl2,sca2,scf2,bio_litter) ! in :caete_module:funcs.f90:photo
                 use global_pars
-                integer(kind=kind(0)) intent(in) :: pft
-                real(kind=4) intent(in) :: npp
-                real(kind=4) intent(in) :: scl1
-                real(kind=4) intent(in) :: sca1
-                real(kind=4) intent(in) :: scf1
-                real(kind=4) intent(out) :: scl2
-                real(kind=4) intent(out) :: sca2
-                real(kind=4) intent(out) :: scf2
-                real(kind=4) intent(out) :: bio_litter
+                integer(kind=) intent(in) :: pft
+                real(kind=) intent(in) :: npp
+                real(kind=) intent(in) :: scl1
+                real(kind=) intent(in) :: sca1
+                real(kind=) intent(in) :: scf1
+                real(kind=) intent(out) :: scl2
+                real(kind=) intent(out) :: sca2
+                real(kind=) intent(out) :: scf2
+                real(kind=) intent(out) :: bio_litter
             end subroutine allocation
         end module photo
         module water ! in :caete_module:funcs.f90
             subroutine soil_temp_sub(temp,tsoil) ! in :caete_module:funcs.f90:water
                 use global_pars
-                real(kind=4) dimension(12),intent(in) :: temp
-                real(kind=4) dimension(12),intent(out) :: tsoil
+                real(kind=) dimension(),intent(in) :: temp
+                real(kind=) dimension(),intent(out) :: tsoil
             end subroutine soil_temp_sub
             function soil_temp(t0,temp) result (tsoil) ! in :caete_module:funcs.f90:water
-                use global_pars, only: diffu,r4,tau,i4,h
-                real(kind=4) intent(in) :: t0
-                real(kind=4) intent(in) :: temp
-                real(kind=4) :: tsoil
+                use global_pars, only: tau,h,i4,r4,diffu
+                real(kind=) intent(in) :: t0
+                real(kind=) intent(in) :: temp
+                real(kind=) :: tsoil
             end function soil_temp
             function penman(spre,temp,ur,rn,rc2) result (evap) ! in :caete_module:funcs.f90:water
-                use photo, only: tetens
                 use global_pars, only: rcmax,r4,rcmin
-                real(kind=4) intent(in) :: spre
-                real(kind=4) intent(in) :: temp
-                real(kind=4) intent(in) :: ur
-                real(kind=4) intent(in) :: rn
-                real(kind=4) intent(in) :: rc2
-                real(kind=4) :: evap
+                use photo, only: tetens
+                real(kind=) intent(in) :: spre
+                real(kind=) intent(in) :: temp
+                real(kind=) intent(in) :: ur
+                real(kind=) intent(in) :: rn
+                real(kind=) intent(in) :: rc2
+                real(kind=) :: evap
             end function penman
             function available_energy(temp) result (ae) ! in :caete_module:funcs.f90:water
                 use global_pars, only: r4
-                real(kind=4) intent(in) :: temp
-                real(kind=4) :: ae
+                real(kind=) intent(in) :: temp
+                real(kind=) :: ae
             end function available_energy
             function runoff(wa) result (roff) ! in :caete_module:funcs.f90:water
                 use global_pars, only: r4
-                real(kind=4) intent(in) :: wa
-                real(kind=4) :: roff
+                real(kind=) intent(in) :: wa
+                real(kind=) :: roff
             end function runoff
             function evpot2(spre,temp,ur,rn) result (evap) ! in :caete_module:funcs.f90:water
-                use photo, only: tetens
                 use global_pars, only: rcmax,r4,rcmin
-                real(kind=4) intent(in) :: spre
-                real(kind=4) intent(in) :: temp
-                real(kind=4) intent(in) :: ur
-                real(kind=4) intent(in) :: rn
-                real(kind=4) :: evap
+                use photo, only: tetens
+                real(kind=) intent(in) :: spre
+                real(kind=) intent(in) :: temp
+                real(kind=) intent(in) :: ur
+                real(kind=) intent(in) :: rn
+                real(kind=) :: evap
             end function evpot2
         end module water
         module productivity ! in :caete_module:productivity.f90
             subroutine prod(pft,ocp_pft,light_limit,temp,p0,w,ipar,rh,emax,cl1,ca1,cf1,beta_leaf,beta_awood,beta_froot,ph,ar,nppa,laia,f5,f1,vpd,rm,rg,rc) ! in :caete_module:productivity.f90:productivity
-                use water
-                use photo
                 use global_pars
-                integer(kind=kind(0)) intent(in) :: pft
-                real(kind=4) intent(in) :: ocp_pft
+                use photo
+                use water
+                integer(kind=) intent(in) :: pft
+                real(kind=) intent(in) :: ocp_pft
                 logical intent(in) :: light_limit
-                real(kind=4) intent(in) :: temp
-                real(kind=4) intent(in) :: p0
-                real(kind=4) intent(in) :: w
-                real(kind=4) intent(in) :: ipar
-                real(kind=4) intent(in) :: rh
-                real(kind=4) intent(in) :: emax
-                real(kind=4) intent(in) :: cl1
-                real(kind=4) intent(in) :: ca1
-                real(kind=4) intent(in) :: cf1
-                real(kind=4) intent(in) :: beta_leaf
-                real(kind=4) intent(in) :: beta_awood
-                real(kind=4) intent(in) :: beta_froot
-                real(kind=4) intent(out) :: ph
-                real(kind=4) intent(out) :: ar
-                real(kind=4) intent(out) :: nppa
-                real(kind=4) intent(out) :: laia
-                real(kind=4) intent(out) :: f5
-                real(kind=4) :: f1
-                real(kind=4) intent(out) :: vpd
-                real(kind=4) intent(out) :: rm
-                real(kind=4) intent(out) :: rg
-                real(kind=4) intent(out) :: rc
+                real(kind=) intent(in) :: temp
+                real(kind=) intent(in) :: p0
+                real(kind=) intent(in) :: w
+                real(kind=) intent(in) :: ipar
+                real(kind=) intent(in) :: rh
+                real(kind=) intent(in) :: emax
+                real(kind=) intent(in) :: cl1
+                real(kind=) intent(in) :: ca1
+                real(kind=) intent(in) :: cf1
+                real(kind=) intent(in) :: beta_leaf
+                real(kind=) intent(in) :: beta_awood
+                real(kind=) intent(in) :: beta_froot
+                real(kind=) intent(out) :: ph
+                real(kind=) intent(out) :: ar
+                real(kind=) intent(out) :: nppa
+                real(kind=) intent(out) :: laia
+                real(kind=) intent(out) :: f5
+                real(kind=) :: f1
+                real(kind=) intent(out) :: vpd
+                real(kind=) intent(out) :: rm
+                real(kind=) intent(out) :: rg
+                real(kind=) intent(out) :: rc
             end subroutine prod
         end module productivity
         module budget_caete ! in :caete_module:budget.f90
             subroutine budget(month,w1,g1,s1,ts,temp,prec,p0,ipar,rh,cl1_pft,ca1_pft,cf1_pft,w2,g2,s2,smavg,ruavg,evavg,epavg,phavg,aravg,nppavg,laiavg,clavg,csavg,hravg,rcavg,rmavg,rgavg,cleafavg_pft,cawoodavg_pft,cfrootavg_pft,ocpavg) ! in :caete_module:budget.f90:budget_caete
-                use water
-                use productivity
-                use photo
                 use global_pars
-                integer(kind=kind(0)) intent(in) :: month
-                real(kind=4) dimension(20),intent(in) :: w1
-                real(kind=4) dimension(20),intent(in) :: g1
-                real(kind=4) dimension(20),intent(in) :: s1
-                real(kind=4) intent(in) :: ts
-                real(kind=4) intent(in) :: temp
-                real(kind=4) intent(in) :: prec
-                real(kind=4) intent(in) :: p0
-                real(kind=4) intent(in) :: ipar
-                real(kind=4) intent(in) :: rh
-                real(kind=4) dimension(20),intent(inout) :: cl1_pft
-                real(kind=4) dimension(20),intent(inout) :: ca1_pft
-                real(kind=4) dimension(20),intent(inout) :: cf1_pft
-                real(kind=4) dimension(20),intent(out) :: w2
-                real(kind=4) dimension(20),intent(out) :: g2
-                real(kind=4) dimension(20),intent(out) :: s2
-                real(kind=4) dimension(20),intent(out) :: smavg
-                real(kind=4) dimension(20),intent(out) :: ruavg
-                real(kind=4) dimension(20),intent(out) :: evavg
-                real(kind=4) intent(out) :: epavg
-                real(kind=4) dimension(20),intent(out) :: phavg
-                real(kind=4) dimension(20),intent(out) :: aravg
-                real(kind=4) dimension(20),intent(out) :: nppavg
-                real(kind=4) dimension(20),intent(out) :: laiavg
-                real(kind=4) dimension(20),intent(out) :: clavg
-                real(kind=4) dimension(20),intent(out) :: csavg
-                real(kind=4) dimension(20),intent(out) :: hravg
-                real(kind=4) dimension(20),intent(out) :: rcavg
-                real(kind=4) dimension(20),intent(out) :: rmavg
-                real(kind=4) dimension(20),intent(out) :: rgavg
-                real(kind=4) dimension(20),intent(out) :: cleafavg_pft
-                real(kind=4) dimension(20),intent(out) :: cawoodavg_pft
-                real(kind=4) dimension(20),intent(out) :: cfrootavg_pft
-                real(kind=4) dimension(20),intent(out) :: ocpavg
+                use photo
+                use productivity
+                use water
+                integer(kind=) intent(in) :: month
+                real(kind=) dimension(),intent(in) :: w1
+                real(kind=) dimension(),intent(in) :: g1
+                real(kind=) dimension(),intent(in) :: s1
+                real(kind=) intent(in) :: ts
+                real(kind=) intent(in) :: temp
+                real(kind=) intent(in) :: prec
+                real(kind=) intent(in) :: p0
+                real(kind=) intent(in) :: ipar
+                real(kind=) intent(in) :: rh
+                real(kind=) dimension(),intent(inout) :: cl1_pft
+                real(kind=) dimension(),intent(inout) :: ca1_pft
+                real(kind=) dimension(),intent(inout) :: cf1_pft
+                real(kind=) dimension(),intent(out) :: w2
+                real(kind=) dimension(),intent(out) :: g2
+                real(kind=) dimension(),intent(out) :: s2
+                real(kind=) dimension(),intent(out) :: smavg
+                real(kind=) dimension(),intent(out) :: ruavg
+                real(kind=) dimension(),intent(out) :: evavg
+                real(kind=) intent(out) :: epavg
+                real(kind=) dimension(),intent(out) :: phavg
+                real(kind=) dimension(),intent(out) :: aravg
+                real(kind=) dimension(),intent(out) :: nppavg
+                real(kind=) dimension(),intent(out) :: laiavg
+                real(kind=) dimension(),intent(out) :: clavg
+                real(kind=) dimension(),intent(out) :: csavg
+                real(kind=) dimension(),intent(out) :: hravg
+                real(kind=) dimension(),intent(out) :: rcavg
+                real(kind=) dimension(),intent(out) :: rmavg
+                real(kind=) dimension(),intent(out) :: rgavg
+                real(kind=) dimension(),intent(out) :: cleafavg_pft
+                real(kind=) dimension(),intent(out) :: cawoodavg_pft
+                real(kind=) dimension(),intent(out) :: cfrootavg_pft
+                real(kind=) dimension(),intent(out) :: ocpavg
             end subroutine budget
         end module budget_caete
         module water_balance ! in :caete_module:water_balance.f90
             subroutine wbm(prec,temp,p0,par,rhs,cleaf_ini,cawood_ini,cfroot_ini,emaxm,tsoil,photo_pft,aresp_pft,npp_pft,lai_pft,clit_pft,csoil_pft,hresp_pft,rcm_pft,runom_pft,evapm_pft,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft,grid_area) ! in :caete_module:water_balance.f90:water_balance
-                use water, only: soil_temp_sub
-                use budget_caete
                 use global_pars
-                real(kind=4) dimension(12),intent(in) :: prec
-                real(kind=4) dimension(12),intent(in) :: temp
-                real(kind=4) dimension(12),intent(in) :: p0
-                real(kind=4) dimension(12),intent(in) :: par
-                real(kind=4) dimension(12),intent(in) :: rhs
-                real(kind=4) dimension(20),intent(in) :: cleaf_ini
-                real(kind=4) dimension(20),intent(in) :: cawood_ini
-                real(kind=4) dimension(20),intent(in) :: cfroot_ini
-                real(kind=4) dimension(12),intent(out) :: emaxm
-                real(kind=4) dimension(12),intent(out) :: tsoil
-                real(kind=4) dimension(12,20),intent(out) :: photo_pft
-                real(kind=4) dimension(12,20),intent(out) :: aresp_pft
-                real(kind=4) dimension(12,20),intent(out) :: npp_pft
-                real(kind=4) dimension(12,20),intent(out) :: lai_pft
-                real(kind=4) dimension(12,20),intent(out) :: clit_pft
-                real(kind=4) dimension(12,20),intent(out) :: csoil_pft
-                real(kind=4) dimension(12,20),intent(out) :: hresp_pft
-                real(kind=4) dimension(12,20),intent(out) :: rcm_pft
-                real(kind=4) dimension(12,20),intent(out) :: runom_pft
-                real(kind=4) dimension(12,20),intent(out) :: evapm_pft
-                real(kind=4) dimension(12,20),intent(out) :: wsoil_pft
-                real(kind=4) dimension(12,20),intent(out) :: rm_pft
-                real(kind=4) dimension(12,20),intent(out) :: rg_pft
-                real(kind=4) dimension(20),intent(out) :: cleaf_pft
-                real(kind=4) dimension(20),intent(out) :: cawood_pft
-                real(kind=4) dimension(20),intent(out) :: cfroot_pft
-                real(kind=4) dimension(20),intent(out) :: grid_area
+                use budget_caete
+                use water, only: soil_temp_sub
+                real(kind=) dimension(),intent(in) :: prec
+                real(kind=) dimension(),intent(in) :: temp
+                real(kind=) dimension(),intent(in) :: p0
+                real(kind=) dimension(),intent(in) :: par
+                real(kind=) dimension(),intent(in) :: rhs
+                real(kind=) dimension(),intent(in) :: cleaf_ini
+                real(kind=) dimension(),intent(in) :: cawood_ini
+                real(kind=) dimension(),intent(in) :: cfroot_ini
+                real(kind=) dimension(),intent(out) :: emaxm
+                real(kind=) dimension(),intent(out) :: tsoil
+                real(kind=) dimension(,),intent(out) :: photo_pft
+                real(kind=) dimension(,),intent(out) :: aresp_pft
+                real(kind=) dimension(,),intent(out) :: npp_pft
+                real(kind=) dimension(,),intent(out) :: lai_pft
+                real(kind=) dimension(,),intent(out) :: clit_pft
+                real(kind=) dimension(,),intent(out) :: csoil_pft
+                real(kind=) dimension(,),intent(out) :: hresp_pft
+                real(kind=) dimension(,),intent(out) :: rcm_pft
+                real(kind=) dimension(,),intent(out) :: runom_pft
+                real(kind=) dimension(,),intent(out) :: evapm_pft
+                real(kind=) dimension(,),intent(out) :: wsoil_pft
+                real(kind=) dimension(,),intent(out) :: rm_pft
+                real(kind=) dimension(,),intent(out) :: rg_pft
+                real(kind=) dimension(),intent(out) :: cleaf_pft
+                real(kind=) dimension(),intent(out) :: cawood_pft
+                real(kind=) dimension(),intent(out) :: cfroot_pft
+                real(kind=) dimension(),intent(out) :: grid_area
             end subroutine wbm
         end module water_balance
     end interface 
