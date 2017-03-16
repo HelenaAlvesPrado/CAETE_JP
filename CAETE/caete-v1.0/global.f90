@@ -7,7 +7,7 @@ module global_pars
   integer,parameter :: rbig = selected_real_kind(16,300)
 
   real(kind=r4),parameter :: H = 1.0                         ! soil layer thickness (meters)
-  real(kind=r4),parameter :: DIFFU = 4.e7 * (30.0 * 86400.0) ! soil thermal diffusivity (m2/mes)
+  real(kind=r4),parameter :: DIFFU = 4.0e7 * (30.0 * 86400.0) ! soil thermal diffusivity (m2/mes)
   real(kind=r4),parameter :: TAU = (H ** 2) / (2.0 * DIFFU)  ! e-folding times (months) 
   real(kind=r4),parameter :: rcmax = 2000.0
   real(kind=r4),parameter :: rcmin = 110.0
