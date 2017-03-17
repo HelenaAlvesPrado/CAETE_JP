@@ -15,13 +15,13 @@ module global_pars
   real(kind=r4),parameter :: ca = 363.0 ! ppmv - atm[CO2]
   real(kind=r4),parameter :: wmax = 500.0
   
-  real(kind=r8),parameter :: csru = 0.5
-  real(kind=r8),parameter :: alfm = 1.391
-  real(kind=r8),parameter :: gm = 3.26  !(*86400 transform s/mm to dia/mm)
+  real(kind=r8),parameter :: csru = 0.5_r8
+  real(kind=r8),parameter :: alfm = 1.391_r8
+  real(kind=r8),parameter :: gm = 3.26_r8  !(*86400 transform s/mm to dia/mm)
 
-  real(kind=r8),parameter :: ncl = 1./29.              !(gN/KgC) from lpj3 
-  real(kind=r8),parameter :: ncf = 1./29.              !(gN/KgC)
-  real(kind=r8),parameter :: ncs = 1./330.             !(gN/KgC)
+  real(kind=r8),parameter :: ncl = 1.0_r8/29.0_r8              !(gN/KgC) from lpj3 
+  real(kind=r8),parameter :: ncf = 1.0_r8/29.0_r8              !(gN/KgC)
+  real(kind=r8),parameter :: ncs = 1.0_r8/330.0_r8             !(gN/KgC)
 
   integer(kind=i4) :: ndmonth(12)       !Number of months
   data ndmonth /31,28,31,30,31,30,31,31,30,31,30,31/ !Number of days for each month
@@ -39,37 +39,37 @@ module photo_par
   implicit none
   ! setting some parameter values
   real(kind=r8), parameter ::       &
-       a   = 0.8300    ,&          !Photosynthesis co-limitation coefficient
-       a2  = 0.930     ,&          !Photosynthesis co-limitation coefficient
-       p3  = 21200.0   ,&          !Atmospheric oxygen concentration (Pa)
-       p4  = 0.080     ,&          !Quantum efficiency (mol electrons/Ein)
-       p5  = 0.150     ,&          !Light scattering rate
-       p6  = 2.0       ,&          !Parameter for jl
-       p7  = 0.50      ,&          !Ratio of light limited photosynthesis to Rubisco carboxylation
-       p8  = 5200.0    ,&          !Photo-respiration compensation point
-       p9  = 0.570     ,&          !Photosynthesis co-limitation coefficient
-       p10 = 0.100     ,&          !Q10 function
-       p11 = 25.0      ,&          !Q10 function reference temperature (oC)
-       p12 = 30.0      ,&          !Michaelis-Menten constant for CO2 (Pa)
-       p13 = 2.100     ,&          !Michaelis-Menten constant for CO2
-       p14 = 30000.0   ,&          !Michaelis-Menten constant for O2 (Pa)
-       p15 = 1.20      ,&          !Michaelis-Menten constant for O2
-       p19 = 0.90      ,&          !Maximum ratio of internal to external CO2
-       p20 = 0.10      ,&          !Critical humidity deficit (kg/kg)
-       p22 = 2.0       ,&          !Rubisco carboxylation rate
-       p23 = 0.30      ,&          !Rubisco carboxylation rate
-       p24 = 36.0      ,&          !Rubisco carboxylation rate (oC)
-       p25 = 0.000008  ,&          !Maximum gross photosynthesis rate (molCO2/m2/s)
-       p26 = 0.50      ,&          !light extinction coefficient for IPAR/sun (0.5/sen90)
-       p27 = 1.50      ,&          !light extinction coefficient for IPAR/shade (0.5/sen20)
-       p28 = 0.500     ,&          !Soil moisture at field capacity
-       p29 = 0.205     ,&          !Soil moisture at wilting point
-       p30 = 0.015     ,&          !Ratio of respiration to Rubisco carboxylation rates
-       p31 = 3.850     ,&            !Whole plant to leaf respiration ratio
-       p32 = 2.00      ,&
-       p33 = 0.10      ,&
-       p34 = 0.30      ,&
-       p35 = 0.05      ,&
-       p36 = 0.25
+       a   = 0.8300_r8    ,&          !Photosynthesis co-limitation coefficient
+       a2  = 0.930_r8     ,&          !Photosynthesis co-limitation coefficient
+       p3  = 21200.0_r8   ,&          !Atmospheric oxygen concentration (Pa)
+       p4  = 0.080_r8     ,&          !Quantum efficiency (mol electrons/Ein)
+       p5  = 0.150_r8     ,&          !Light scattering rate
+       p6  = 2.0_r8       ,&          !Parameter for jl
+       p7  = 0.50_r8      ,&          !Ratio of light limited photosynthesis to Rubisco carboxylation
+       p8  = 5200.0_r8    ,&          !Photo-respiration compensation point
+       p9  = 0.570_r8     ,&          !Photosynthesis co-limitation coefficient
+       p10 = 0.100_r8     ,&          !Q10 function
+       p11 = 25.0_r8      ,&          !Q10 function reference temperature (oC)
+       p12 = 30.0_r8      ,&          !Michaelis-Menten constant for CO2 (Pa)
+       p13 = 2.100_r8     ,&          !Michaelis-Menten constant for CO2
+       p14 = 30000.0_r8   ,&          !Michaelis-Menten constant for O2 (Pa)
+       p15 = 1.20_r8      ,&          !Michaelis-Menten constant for O2
+       p19 = 0.90_r8      ,&          !Maximum ratio of internal to external CO2
+       p20 = 0.10_r8      ,&          !Critical humidity deficit (kg/kg)
+       p22 = 2.0_r8       ,&          !Rubisco carboxylation rate
+       p23 = 0.30_r8      ,&          !Rubisco carboxylation rate
+       p24 = 36.0_r8      ,&          !Rubisco carboxylation rate (oC)
+       p25 = 0.000008_r8  ,&          !Maximum gross photosynthesis rate (molCO2/m2/s)
+       p26 = 0.50_r8      ,&          !light extinction coefficient for IPAR/sun (0.5/sen90)
+       p27 = 1.50_r8      ,&          !light extinction coefficient for IPAR/shade (0.5/sen20)
+       p28 = 0.500_r8     ,&          !Soil moisture at field capacity
+       p29 = 0.205_r8     ,&          !Soil moisture at wilting point
+       p30 = 0.015_r8     ,&          !Ratio of respiration to Rubisco carboxylation rates
+       p31 = 3.850_r8     ,&            !Whole plant to leaf respiration ratio
+       p32 = 2.00_r8      ,&
+       p33 = 0.10_r8      ,&
+       p34 = 0.30_r8      ,&
+       p35 = 0.05_r8      ,&
+       p36 = 0.25_r8
     
 end module photo_par

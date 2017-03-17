@@ -158,9 +158,9 @@ contains
     
     pt = csru*(cfroot*1000.)*wa  !(based in Pavlick et al. 2013; *1000. converts kgC/m2 to gC/m2)
     if(rc .gt. 0.0) then
-       gc = (1./rc)  ! s/m
+       gc = (1.0_r8/rc)  ! s/m
     else
-       gc =  1.0/rcmin ! BIANCA E HELENA - Mudei este esquema..   
+       gc =  1.0_r8/rcmin ! BIANCA E HELENA - Mudei este esquema..   
     endif                     ! tentem entender o algoritmo
     
     d =(ep * alfm) / (1. + gm/gc) !(based in Gerten et al. 2004)
