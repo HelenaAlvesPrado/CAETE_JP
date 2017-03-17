@@ -63,6 +63,7 @@ contains
         
     !getting pft parameters
     
+
     call pft_par(2, p21)
     call pft_par(3, tleaf)
     call pft_par(1, g1)
