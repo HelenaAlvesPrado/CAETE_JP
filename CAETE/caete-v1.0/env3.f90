@@ -248,8 +248,9 @@ program env
      enddo
   enddo
 
-!$omp parallel do
+!$omp parallel do ordered
   do i=1,nx
+     print*, 'running column', i
      do j=1,ny
         if (nint(lsmk(i,j)) .eq. 1) then
            ! run spinup

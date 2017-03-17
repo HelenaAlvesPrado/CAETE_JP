@@ -609,15 +609,15 @@ contains
     !     dt7 = awood
     !     dt8 = aroot
     
-    open(30,file='./pls.bin',status='old',&
+    open(45,file='./pls.bin',status='old',&
          &form='unformatted',access='direct',recl=4*npls)
     
     if(par .gt. 0 .and. par .lt. 10) then
-       read(30,rec=par) dt
+       read(45,rec=par) dt
     else
        print*, 'search failed'
     endif
-    close(30)
+    close(45)
     return
   end subroutine pft_par
   
