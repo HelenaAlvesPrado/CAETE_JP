@@ -215,7 +215,7 @@ class gridcell:
         
         def nan_remove(arr):
             np.place(arr,np.isnan(arr),(0.0,0.0))
-            return None
+            return arr
         
         if self.complete:
            self.output_data = { 'clin' : nan_remove(self.clin),#(npls)
