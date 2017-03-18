@@ -636,7 +636,7 @@ contains
     
     real(kind=r4),intent(in) :: nppot
     real(kind=r4) :: sensitivity
-    
+    real(kind=r4) :: nppot2
     !c     outputs
     real(kind=r4),intent(out) :: cleafini(npfts)
     real(kind=r4),intent(out) :: cawoodini(npfts)
@@ -664,27 +664,27 @@ contains
     
     sensitivity = 1.01
     if(nppot .lt. 0.0) goto 200
-    ! nppot = nppot/real(npfts,kind=r4)
+    nppot2 = nppot/real(npfts,kind=r4)
     do i6=1,npfts
        do k=1,ntl
           if (k.eq.1) then
-             cleafi_aux (k) =  aleaf(i6)*(nppot)
-             cawoodi_aux(k) = aawood(i6)*(nppot)
-             cfrooti_aux(k) = afroot(i6)*(nppot)
+             cleafi_aux (k) =  aleaf(i6)*(nppot2)
+             cawoodi_aux(k) = aawood(i6)*(nppot2)
+             cfrooti_aux(k) = afroot(i6)*(nppot2)
              
           else
              if(aawood(i6) .gt. 0.0) then
-                cleafi_aux(k) = ((aleaf(i6)*(nppot))-(cleafi_aux(k-1)&
+                cleafi_aux(k) = ((aleaf(i6)*(nppot2))-(cleafi_aux(k-1)&
                      &/(tleaf(i6)))) + cleafi_aux(k-1)
-                cawoodi_aux(k) = ((aawood(i6)*(nppot))-(cawoodi_aux(k&
+                cawoodi_aux(k) = ((aawood(i6)*(nppot2))-(cawoodi_aux(k&
                      &-1)/(tawood(i6)))) + cawoodi_aux(k-1)
-                cfrooti_aux(k) = ((afroot(i6)*(nppot))-(cfrooti_aux(k&
+                cfrooti_aux(k) = ((afroot(i6)*(nppot2))-(cfrooti_aux(k&
                      &-1)/(tfroot(i6)))) + cfrooti_aux(k-1)
              else
-                cleafi_aux(k) = ((aleaf(i6)*(nppot))-(cleafi_aux(k-1)&
+                cleafi_aux(k) = ((aleaf(i6)*(nppot2))-(cleafi_aux(k-1)&
                      &/(tleaf(i6)))) + cleafi_aux(k-1)
                 cawoodi_aux(k) = 0.0
-                cfrooti_aux(k) = ((afroot(i6)*(nppot))-(cfrooti_aux(k&
+                cfrooti_aux(k) = ((afroot(i6)*(nppot2))-(cfrooti_aux(k&
                      &-1)/(tfroot(i6)))) + cfrooti_aux(k-1)
              endif
              

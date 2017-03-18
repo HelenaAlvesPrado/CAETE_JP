@@ -211,15 +211,15 @@ class gridcell:
 
 # FUNCS
 
-def rm_appy(gridcell_obj):
-    
-    if gridcell_obj.filled and not gridcell_obj.complete:
-        gridcell_obj.run_model()
-    elif not gridcell_obj.filled and not gridcell_obj.complete:
-        gridcell_obj.init_caete()
-        gridcell_obj.run_model()
-    else:
-        pass
+#def rm_apply(gridcell_obj):
+#    
+#    if gridcell_obj.filled and not gridcell_obj.complete:
+#        gridcell_obj.run_model()
+#    elif not gridcell_obj.filled and not gridcell_obj.complete:
+#        gridcell_obj.init_caete()
+#        gridcell_obj.run_model()
+#    else:
+#        pass
 
 ## GLOBAL VARS
 
