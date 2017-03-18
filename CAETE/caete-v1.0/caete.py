@@ -1,7 +1,9 @@
-# "CAETE module"
 #-*-coding:utf-8-*-
+# "CAETE module"
+
 
 __author__ = "https://github.com/jpdarela/"
+
 
 import os
 import glob
@@ -108,6 +110,7 @@ class gridcell:
         self.cell_id = cell_id
         self.pos = (self.x, self.y)
         self.name = '%s' % str(cell_id)
+        self.output_data = None
         self.filled = False
         self.complete = False
         
@@ -207,29 +210,55 @@ class gridcell:
         else:
             print('Gridcell %s is either not filled or already completed' % self.name)
 
-# UTIL functions and global variables definition
 
-# FUNCS
+    def grd_dict(self):
+        
+        def nan_remove(arr):
+            np.place(arr,np.isnan(arr),(0.0,0.0))
+            return None
+        
+        if self.complete:
+           self.output_data = { 'clin' : nan_remove(self.clin),#(npls)
+                                'cfin' : nan_remove(self.cfin),
+                                'cwin' : nan_remove(self.cwin),
+                                
+                                # Water balance attributes
+                                'runom' : nan_remove(self.runom.sum(axis=0,)),
+                                'wsoil' : nan_remove(self.wsoil.sum(axis=0,)),
+                                'evapm' : nan_remove(self.evapm.sum(axis=0,)),
+                                'emaxm' : nan_remove(self.emaxm),
+                                'tsoil' : nan_remove(self.tsoil),
+                                
+                                # Carbon balance attributes
+                                'photo' : nan_remove(self.photo.sum(axis=0,)),
+                                'aresp' : nan_remove(self.aresp.sum(axis=0,)),
+                                'hresp' : nan_remove(self.hresp.sum(axis=0,)),
+                                'npp'   : nan_remove(self.npp.sum(axis=0,)),
+                                'rcm'   : nan_remove(self.rcm.sum(axis=0,)),
+                                'lai'   : nan_remove(self.lai.sum(axis=0,)),
+                                'clit'  : nan_remove(self.clit.sum(axis=0,)),
+                                'csoil' : nan_remove(self.csoil.sum(axis=0,)),
+                                
+                                # new outputs,
+                                'rm'     : nan_remove(self.rm.sum(axis=0,)),
+                                'rg'     : nan_remove(self.rg.sum(axis=0,)),                        
+                                'cleaf'  : nan_remove(self.cleaf),
+                                'cawood' : nan_remove(self.cawood),
+                                'cfroot' : nan_remove(self.cfroot), 
+                                'area'   : nan_remove(self.area)}
+        else:
+            self.output_data = None
+        #return self.output_data
 
-#def rm_apply(gridcell_obj):
-#    
-#    if gridcell_obj.filled and not gridcell_obj.complete:
-#        gridcell_obj.run_model()
-#    elif not gridcell_obj.filled and not gridcell_obj.complete:
-#        gridcell_obj.init_caete()
-#        gridcell_obj.run_model()
-#    else:
-#        pass
-
+                            
 ## GLOBAL VARS
-
-#npp for spinup
-
+                            
+    
 lr  = catch_nt('./inputs/npp.bin',720,360,32)
 npp_init = catch_data('./inputs/npp.bin',lr,720,360)
 mask = np.load('mask.npy')
 npp_init = np.mean(npp_init,axis=0,)
-npp_init = np.ma.masked_array(npp_init)
+npp_init = np.ma.masked_array(npp_init,mask)
 
 std_shape = (12, 360, 720)
 
