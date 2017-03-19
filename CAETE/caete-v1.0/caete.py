@@ -249,7 +249,6 @@ class gridcell:
         else:
             self.output_data = None
         #return self.output_data
-
                             
 ## GLOBAL VARS
                             

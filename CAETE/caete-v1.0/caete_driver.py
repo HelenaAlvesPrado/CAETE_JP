@@ -7,14 +7,41 @@ __author__ = "https://github.com/jpdarela/"
 #import sys
 import time
 import multiprocessing as mp
+import write_output as wo
+from caete_module import global_pars as gp
 from caete import gridcell
 from caete import np
 
-nx = 720
-ny = 360
+# GLOBAIS
+nx = gp.nx
+ny = gp.ny
+nz = gp.ntimes
+npls = gp.npls
 
-def assemble(data_countainer, var, x, y, z):
-    pass
+varlist = wo.monthly_out + wo.npls_out
+ 
+def assemble(land_data_list, var, x=nx, y=ny):
+
+    flt_attrs = wo.file_attrs_dict
+    
+    if var in wo.monthly_out:
+        z = nz
+    elif var in wo.npls_out:
+        z = npls
+    else:
+        print('assemble failed')
+        return None
+        
+    out_arr = np.zeros(shape=(z,y,x), dtype=np.float32)
+
+    for grdcell in land_data_list:
+        data = grdcell.output_data[var][:]
+        px,py = grdcell.pos
+        out_arr[:,py,px] = data
+
+    # write netcdf file    
+    wo.write_CAETE_output('./outputs_nc/' + var + '.nc',out_arr, var)
+    return True
 
 
 def rm_apply(gridcell_obj):
@@ -48,9 +75,14 @@ for Y in range(ny):
             id_n += 1
 
 if __name__ == "__main__":
-    with mp.Pool(15) as p:
+    with mp.Pool(20) as p:
         p.map(rm_apply, land_data)
     
     print('\nModelo aplicado a %d localidades' % id_n)
+    print('\nSalvando resultados')
+
+    for v in varlist:
+        assemble(land_data, v)
+        
     print('terminado', end='---: ')
     print(time.ctime())
