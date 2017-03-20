@@ -22,6 +22,7 @@ ny = gp.ny
 nz = gp.ntimes
 npls = gp.npls
 mask = np.load('mask.npy')
+varlist = wo.monthly_out + wo.npls_out
 
 def assemble(land_data_list, var, x=nx, y=ny):
 
@@ -347,7 +348,7 @@ for Y in range(169,172):
             id_n += 1
 
 if __name__ == "__main__":
-    with mp.Pool(7) as p:
+    with mp.Pool(6) as p:
         #p.map_async(rm_apply,land_data)
         p.map(rm_apply, land_data)
     
