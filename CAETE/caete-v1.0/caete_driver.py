@@ -22,7 +22,7 @@ varlist = wo.monthly_out + wo.npls_out
  
 def assemble(land_data_list, var, x=nx, y=ny):
 
-    flt_attrs = wo.file_attrs_dict
+    flt_attrs = wo.flt_attrs
     
     if var in wo.monthly_out:
         z = nz
@@ -35,7 +35,7 @@ def assemble(land_data_list, var, x=nx, y=ny):
     out_arr = np.zeros(shape=(z,y,x), dtype=np.float32)
 
     for grdcell in land_data_list:
-        data = grdcell.output_data[var][:]
+        data = grdcell.output_data[var]
         px,py = grdcell.pos
         out_arr[:,py,px] = data
 
@@ -47,6 +47,7 @@ def assemble(land_data_list, var, x=nx, y=ny):
 def rm_apply(gridcell_obj):
 
     if gridcell_obj.filled and not gridcell_obj.complete:
+        print('running_model')
         gridcell_obj.run_model()
         gridcell_obj.grd_dict()
     elif not gridcell_obj.filled and not gridcell_obj.complete:
@@ -66,8 +67,8 @@ land_data = []
 id_n = 1
 print('init caete', end='---> ')
 print(time.ctime())
-for Y in range(ny):
-    for X in range(nx):
+for Y in range(169,172):
+    for X in range(238,240):
         if not mask[Y][X]:
             grd_cell = gridcell(X, Y, str(id_n))
             grd_cell.init_caete()
@@ -75,14 +76,19 @@ for Y in range(ny):
             id_n += 1
 
 if __name__ == "__main__":
-    with mp.Pool(20) as p:
-        p.map(rm_apply, land_data)
+    with mp.Pool(7) as p:
+        land_data_f = p.map_async(rm_apply,land_data)
+        #p.map(rm_apply, land_data)
     
-    print('\nModelo aplicado a %d localidades' % id_n)
+    print('\nModelo aplicado a %d localidades' % (id_n-1))
     print('\nSalvando resultados')
 
     for v in varlist:
-        assemble(land_data, v)
+        print(v)
+        #assemble(land_data, v)
+    print(land_data[0].tas)
+    print(land_data[0].npp)
         
     print('terminado', end='---: ')
     print(time.ctime())
+
