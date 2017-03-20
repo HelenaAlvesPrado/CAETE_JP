@@ -4,16 +4,27 @@ import numpy as np
 from netCDF4 import Dataset as dt
 
 
+
 mask_fpath = './mask12.npy'
 NO_DATA = [-9999.0, -9999.0]
 lsmk = np.load(mask_fpath)
 
+
+def mask_gen(nlayers):
+    mask1 = lsmk[0]
+    z = np.zeros(shape=(nlayers, mask1.shape[0],mask1.shape[1]),dtype=np.bool)
+    for i in range(nlayers):
+        z[i,:,:] = mask1
+    return z
+
 def flt_attrs():
     return {'header'  : ['long_name',                 'unit',           'standart_name'],
+            
             'rsds'    : ['short_wav_rad_down',        'W m-2',                   'rsds'], 
             'wind'    : ['wind_velocity',             'm s-1',                   'wind'],
             'ps'      : ['sur_pressure',              'Pa',                        'ps'],
-            'tas'     : ['sur_temperature_2m',        'celcius',                  'tas'],  
+            'tas'     : ['sur_temperature_2m',        'celcius',                  'tas'],
+            'tsoil'   : ['soil_temperature',          'celcius',            'soil_temp'],
             'pr'      : ['precipitation',             'Kg m-2 month-1',            'pr'],      
             'wsoil'   : ['soil_water_content-wsoil',  'kg m-2',                  'mrso'],
             'evapm'   : ['evapotranpiration',         'kg m-2 day-1',              'et'],
@@ -33,16 +44,16 @@ def flt_attrs():
             'cfroot'  : ['C in fine roots',           'kg m-2',                'cfroot'],
             'cleaf'   : ['C in leaves',               'kg m-2',                 'cleaf'],
             'area'    : ['occupation coefficient',    '%',                       'area'],
-            'clin'    : ['init C in abovewgrownd wood','kg m-2',               'cawood'],
+            'cwin'    : ['init C in abovewgrownd wood','kg m-2',               'cawood'],
             'cfin'    : ['init C in fine roots',       'kg m-2',               'cfroot'],
             'clin'    : ['init C in leaves',           'kg m-2 ',               'cleaf']}
 
 
-def write_CAETE_output(nc_filename, arr, var):
+def write_CAETE_output(nc_filename, arr, var, mask):
 
     t, la, lo,  = arr.shape
     nlayers = t
-    lsmk_internal = lsmk[0:nlayers,:,:]
+    lsmk_internal = mask
     # create netcdf file
     rootgrp = dt(nc_filename, mode='w', format='NETCDF3_CLASSIC')
 
@@ -100,9 +111,6 @@ def write_CAETE_output(nc_filename, arr, var):
 file_attrs_dict = flt_attrs()
 
 monthly_out = ['aresp',
-               'cawood',
-               'cfroot',
-               'cleaf',
                'clit',
                'csoil',
                'emaxm',
